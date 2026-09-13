@@ -1,38 +1,758 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --foreground-rgb: 17, 24, 39;
-  --background-start-rgb: 255, 255, 255;
-  --background-end-rgb: 249, 250, 251;
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* =========================================================
+     TYPOGRAPHY
+     ========================================================= */
+
+  --font-sans: var(--font-vazirmatn), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-vazirmatn), ui-sans-serif, system-ui, sans-serif;
+
+  /* =========================================================
+     BRAND / COLOR SYSTEM
+     ========================================================= */
+
+  --color-background: #fcfcfb;
+  --color-foreground: #0a1929;
+
+  --color-card: #ffffff;
+  --color-card-foreground: #0a1929;
+
+  --color-popover: #ffffff;
+  --color-popover-foreground: #0a1929;
+
+  /* Primary — Deep architectural navy */
+  --color-primary: #112f50;
+  --color-primary-light: #193f63;
+  --color-primary-dark: #0a1929;
+  --color-primary-foreground: #ffffff;
+
+  /* Secondary — Soft neutral */
+  --color-secondary: #e9ecef;
+  --color-secondary-foreground: #112f50;
+
+  /* Muted — Editorial neutral */
+  --color-muted: #e9ecef;
+  --color-muted-foreground: #667085;
+
+  /* Accent — Natural stone / brass */
+  --color-accent: #b79464;
+  --color-accent-light: #c6a87e;
+  --color-accent-dark: #9e7f50;
+  --color-accent-foreground: #ffffff;
+
+  /* Status */
+  --color-destructive: #dc3545;
+  --color-destructive-foreground: #ffffff;
+
+  /* Borders / Inputs */
+  --color-border: #e9ecef;
+  --color-input: #e9ecef;
+  --color-ring: #b79464;
+
+  /* Charts */
+  --color-chart-1: #112f50;
+  --color-chart-2: #b79464;
+  --color-chart-3: #667085;
+  --color-chart-4: #9ca3af;
+  --color-chart-5: #d8dde3;
+
+  /* =========================================================
+     RADIUS SYSTEM
+     ========================================================= */
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.125rem;
+  --radius-2xl: 1.375rem;
+  --radius-3xl: 1.75rem;
+  --radius-4xl: 2.25rem;
+
+  /* =========================================================
+     SIDEBAR
+     ========================================================= */
+
+  --color-sidebar: #fcfcfb;
+  --color-sidebar-foreground: #0a1929;
+  --color-sidebar-primary: #112f50;
+  --color-sidebar-primary-foreground: #ffffff;
+  --color-sidebar-accent: #b79464;
+  --color-sidebar-accent-foreground: #ffffff;
+  --color-sidebar-border: #e9ecef;
+  --color-sidebar-ring: #b79464;
 }
 
-html {
-  direction: rtl;
+/* =========================================================
+   DARK MODE
+   ========================================================= */
+
+.dark {
+  --color-background: #0a1929;
+  --color-foreground: #f8f9fa;
+
+  --color-card: #102236;
+  --color-card-foreground: #f8f9fa;
+
+  --color-popover: #102236;
+  --color-popover-foreground: #f8f9fa;
+
+  --color-primary: #c6a87e;
+  --color-primary-light: #d3b890;
+  --color-primary-dark: #b79464;
+  --color-primary-foreground: #0a1929;
+
+  --color-secondary: #172b40;
+  --color-secondary-foreground: #f8f9fa;
+
+  --color-muted: #172b40;
+  --color-muted-foreground: #a8b1bc;
+
+  --color-accent: #b79464;
+  --color-accent-light: #c6a87e;
+  --color-accent-dark: #9e7f50;
+  --color-accent-foreground: #0a1929;
+
+  --color-destructive: #ef6a76;
+  --color-destructive-foreground: #ffffff;
+
+  --color-border: rgba(233, 236, 239, 0.12);
+  --color-input: rgba(233, 236, 239, 0.16);
+  --color-ring: #c6a87e;
+
+  --color-sidebar: #0a1929;
+  --color-sidebar-foreground: #f8f9fa;
+  --color-sidebar-primary: #c6a87e;
+  --color-sidebar-primary-foreground: #0a1929;
+  --color-sidebar-accent: #b79464;
+  --color-sidebar-accent-foreground: #0a1929;
+  --color-sidebar-border: rgba(233, 236, 239, 0.12);
+  --color-sidebar-ring: #c6a87e;
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    rgb(var(--background-end-rgb))
-  ) rgb(var(--background-start-rgb));
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* =========================================================
+   BASE
+   ========================================================= */
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  .dark {
+    color-scheme: dark;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    background-color: var(--color-background);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    min-height: 100vh;
+    margin: 0;
+
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+
+    font-family: var(--font-sans);
+    line-height: 1.7;
+
+    overflow-x: hidden;
+
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  ::selection {
+    background-color: rgba(183, 148, 100, 0.22);
+    color: var(--color-primary-dark);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  img,
+  svg,
+  video,
+  canvas {
+    display: block;
+  }
+
+  img,
+  video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  ul,
+  ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: 0;
+    font-family: var(--font-heading);
+    text-wrap: balance;
+  }
+
+  p {
+    margin: 0;
+    text-wrap: pretty;
+  }
 }
 
-* {
-  box-sizing: border-box;
+/* =========================================================
+   GLOBAL UTILITIES
+   ========================================================= */
+
+@layer utilities {
+  /*
+   * Main site container
+   * Deliberately restrained width for an editorial / architectural feel.
+   */
+  .container {
+    width: 100%;
+    max-width: 1360px;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .container {
+      padding-inline: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      padding-inline: 2rem;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .container {
+      padding-inline: 2.5rem;
+    }
+  }
+
+  @media (min-width: 1536px) {
+    .container {
+      padding-inline: 3rem;
+    }
+  }
+
+  /*
+   * Premium surface helpers
+   */
+  .surface {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+  }
+
+  .surface-soft {
+    background-color: var(--color-background);
+    border: 1px solid var(--color-border);
+  }
+
+  .surface-navy {
+    background-color: var(--color-primary);
+    color: var(--color-primary-foreground);
+  }
+
+  .surface-gold {
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+  }
+
+  /*
+   * Subtle architectural divider
+   */
+  .brand-divider {
+    height: 1px;
+    width: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(183, 148, 100, 0.24) 20%,
+      rgba(183, 148, 100, 0.24) 80%,
+      transparent 100%
+    );
+  }
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
+/* =========================================================
+   WORDPRESS CONTENT
+   ========================================================= */
 
-/* برای بهبود خوانایی متن فارسی */
-h1, h2, h3, h4, h5, h6 {
-  font-weight: 700;
+@layer components {
+  .wordpress-content {
+    direction: rtl;
+
+    padding: 1.25rem;
+
+    color: #344054;
+    font-size: 0.9375rem;
+    line-height: 2;
+
+    overflow-wrap: anywhere;
+  }
+
+  /* -------------------------
+     Paragraphs
+     ------------------------- */
+
+  .wordpress-content p {
+    margin: 0 0 1.2rem;
+  }
+
+  .wordpress-content p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* -------------------------
+     Headings
+     ------------------------- */
+
+  .wordpress-content h2,
+  .wordpress-content h3,
+  .wordpress-content h4,
+  .wordpress-content h5,
+  .wordpress-content h6 {
+    color: #112f50;
+    font-weight: 800;
+    line-height: 1.7;
+    letter-spacing: -0.015em;
+  }
+
+  .wordpress-content h2 {
+    margin: 2.5rem 0 1rem;
+    font-size: 1.45rem;
+  }
+
+  .wordpress-content h3 {
+    margin: 2.1rem 0 0.9rem;
+    font-size: 1.22rem;
+  }
+
+  .wordpress-content h4 {
+    margin: 1.8rem 0 0.75rem;
+    font-size: 1.06rem;
+  }
+
+  .wordpress-content h5,
+  .wordpress-content h6 {
+    margin: 1.55rem 0 0.7rem;
+    font-size: 1rem;
+  }
+
+  .wordpress-content h2:first-child,
+  .wordpress-content h3:first-child,
+  .wordpress-content h4:first-child {
+    margin-top: 0;
+  }
+
+  /* -------------------------
+     Strong / Bold
+     ------------------------- */
+
+  .wordpress-content strong,
+  .wordpress-content b {
+    color: #112f50;
+    font-weight: 800;
+  }
+
+  /* -------------------------
+     Italic
+     ------------------------- */
+
+  .wordpress-content em,
+  .wordpress-content i {
+    font-style: italic;
+  }
+
+  /* -------------------------
+     Links
+     ------------------------- */
+
+  .wordpress-content a {
+    color: #9e7f50;
+    font-weight: 700;
+
+    text-decoration-line: underline;
+    text-decoration-color: rgba(183, 148, 100, 0.45);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+
+    transition:
+      color 180ms ease,
+      text-decoration-color 180ms ease;
+  }
+
+  .wordpress-content a:hover {
+    color: #112f50;
+    text-decoration-color: #112f50;
+  }
+
+  /* -------------------------
+     Lists
+     ------------------------- */
+
+  .wordpress-content ul,
+  .wordpress-content ol {
+    margin: 1.3rem 0;
+    padding-right: 1.5rem;
+  }
+
+  .wordpress-content ul {
+    list-style: disc;
+  }
+
+  .wordpress-content ol {
+    list-style: decimal;
+  }
+
+  .wordpress-content li {
+    margin-bottom: 0.5rem;
+    padding-right: 0.3rem;
+    line-height: 2;
+  }
+
+  .wordpress-content li:last-child {
+    margin-bottom: 0;
+  }
+
+  .wordpress-content ul li::marker,
+  .wordpress-content ol li::marker {
+    color: #b79464;
+    font-weight: 800;
+  }
+
+  .wordpress-content ul ul,
+  .wordpress-content ol ol,
+  .wordpress-content ul ol,
+  .wordpress-content ol ul {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* -------------------------
+     Blockquote
+     ------------------------- */
+
+  .wordpress-content blockquote {
+    margin: 1.8rem 0;
+    padding: 1.05rem 1.2rem;
+
+    border-right: 3px solid #b79464;
+    border-radius: 0.9rem;
+
+    background:
+      linear-gradient(
+        135deg,
+        rgba(183, 148, 100, 0.1),
+        rgba(183, 148, 100, 0.03)
+      );
+
+    color: #112f50;
+    font-weight: 600;
+  }
+
+  .wordpress-content blockquote p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* -------------------------
+     Horizontal Rule
+     ------------------------- */
+
+  .wordpress-content hr {
+    margin: 2.1rem 0;
+    border: 0;
+    border-top: 1px solid #e9ecef;
+  }
+
+  /* -------------------------
+     Images
+     ------------------------- */
+
+  .wordpress-content img {
+    display: block;
+
+    width: 100%;
+    height: auto;
+
+    margin: 1.8rem auto;
+
+    border-radius: 1.1rem;
+
+    object-fit: cover;
+  }
+
+  .wordpress-content figure {
+    margin: 1.8rem 0;
+  }
+
+  .wordpress-content figure img {
+    margin: 0;
+  }
+
+  .wordpress-content figcaption {
+    margin-top: 0.65rem;
+
+    color: #667085;
+
+    font-size: 0.8rem;
+    line-height: 1.8;
+
+    text-align: center;
+  }
+
+  /* -------------------------
+     Tables
+     ------------------------- */
+
+  .wordpress-content table {
+    width: 100%;
+
+    margin: 1.8rem 0;
+
+    border-collapse: collapse;
+
+    font-size: 0.875rem;
+
+    text-align: right;
+
+    overflow: hidden;
+    border-radius: 0.9rem;
+  }
+
+  .wordpress-content thead {
+    background: #112f50;
+    color: #ffffff;
+  }
+
+  .wordpress-content th,
+  .wordpress-content td {
+    padding: 0.8rem 0.9rem;
+
+    border: 1px solid #e9ecef;
+
+    vertical-align: middle;
+  }
+
+  .wordpress-content th {
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .wordpress-content td {
+    background: #ffffff;
+  }
+
+  .wordpress-content tbody tr:nth-child(even) td {
+    background: #fcfcfb;
+  }
+
+  /* -------------------------
+     Code
+     ------------------------- */
+
+  .wordpress-content code {
+    padding: 0.15rem 0.42rem;
+
+    border-radius: 0.4rem;
+
+    background: #e9ecef;
+
+    color: #112f50;
+
+    font-size: 0.85em;
+  }
+
+  .wordpress-content pre {
+    margin: 1.55rem 0;
+
+    padding: 1rem;
+
+    overflow-x: auto;
+
+    border-radius: 1rem;
+
+    background: #0a1929;
+
+    color: #f8fafc;
+
+    font-size: 0.8rem;
+    line-height: 1.8;
+  }
+
+  .wordpress-content pre code {
+    padding: 0;
+    background: transparent;
+    color: inherit;
+  }
+
+  /* -------------------------
+     WordPress alignment
+     ------------------------- */
+
+  .wordpress-content .aligncenter {
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .wordpress-content .alignleft {
+    margin-left: auto;
+  }
+
+  .wordpress-content .alignright {
+    margin-right: auto;
+  }
+
+  /* -------------------------
+     WordPress captions
+     ------------------------- */
+
+  .wordpress-content .wp-caption {
+    max-width: 100%;
+    margin: 1.8rem 0;
+  }
+
+  .wordpress-content .wp-caption-text {
+    margin-top: 0.5rem;
+
+    color: #667085;
+
+    font-size: 0.8rem;
+
+    text-align: center;
+  }
+
+  /* -------------------------
+     WordPress embedded media
+     ------------------------- */
+
+  .wordpress-content iframe,
+  .wordpress-content video {
+    display: block;
+
+    width: 100%;
+    max-width: 100%;
+
+    margin: 1.8rem auto;
+
+    border: 0;
+
+    border-radius: 1.1rem;
+  }
+
+  /* -------------------------
+     Mobile
+     ------------------------- */
+
+  @media (max-width: 767px) {
+    .wordpress-content {
+      padding: 1rem;
+
+      font-size: 0.9375rem;
+      line-height: 2;
+    }
+
+    .wordpress-content h2 {
+      margin-top: 1.8rem;
+      font-size: 1.22rem;
+    }
+
+    .wordpress-content h3 {
+      margin-top: 1.55rem;
+      font-size: 1.06rem;
+    }
+
+    .wordpress-content table {
+      display: block;
+
+      width: max-content;
+      min-width: 100%;
+
+      overflow-x: auto;
+
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .wordpress-content th,
+    .wordpress-content td {
+      min-width: 130px;
+
+      padding: 0.65rem 0.75rem;
+    }
+
+    .wordpress-content blockquote {
+      padding: 0.9rem 1rem;
+    }
+  }
+
+  /* -------------------------
+     Tablet / Desktop
+     ------------------------- */
+
+  @media (min-width: 768px) {
+    .wordpress-content {
+      padding: 2rem;
+
+      font-size: 1rem;
+      line-height: 2.1;
+    }
+
+    .wordpress-content h2 {
+      font-size: 1.55rem;
+    }
+
+    .wordpress-content h3 {
+      font-size: 1.28rem;
+    }
+
+    .wordpress-content blockquote {
+      padding: 1.25rem 1.5rem;
+    }
+  }
 }

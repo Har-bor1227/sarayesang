@@ -1,16 +1,63 @@
-import Link from 'next/link';
+import type { Metadata } from 'next'
+import Link from 'next/link'
+
+import Container from '@/components/ui/container'
+import { Button } from '@/components/ui/button'
+
+import {
+  SITE_NAME,
+} from '@/lib/constants'
+
+export const metadata: Metadata = {
+  title: `صفحه یافت نشد | ${SITE_NAME}`,
+
+  description:
+    'صفحه مورد نظر شما پیدا نشد. لطفاً به صفحه اصلی یا دسته‌بندی‌ها مراجعه کنید.',
+
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4">
-      <h1 className="text-4xl font-bold text-stone-gray-900">۴۰۴</h1>
-      <p className="mt-2 text-lg text-stone-gray-600">صفحه مورد نظر یافت نشد.</p>
-      <Link
-        href="/"
-        className="mt-6 rounded-md bg-stone-accent px-6 py-3 text-base font-medium text-stone-accent-contrast hover:bg-stone-accent-dark"
-      >
-        بازگشت به صفحه اصلی
-      </Link>
-    </div>
-  );
+    <Container className="py-16 md:py-24 text-center">
+      <div className="max-w-md mx-auto">
+        <div className="text-7xl font-extrabold text-primary mb-4">
+          ۴۰۴
+        </div>
+
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-3">
+          صفحه مورد نظر پیدا نشد
+        </h1>
+
+        <p className="text-gray-600 mb-8">
+          متأسفانه صفحه‌ای که به دنبال آن بودید وجود ندارد یا منتقل شده است.
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Button
+            asChild
+            size="lg"
+            variant="primary"
+          >
+            <Link href="/">
+              بازگشت به خانه
+            </Link>
+          </Button>
+
+          <Button
+            asChild
+            size="lg"
+            variant="outline"
+          >
+            <Link href="/categories">
+              مشاهده دسته‌بندی‌ها
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </Container>
+  )
 }
