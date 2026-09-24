@@ -47,6 +47,38 @@ export default function BottomNav() {
     return pathname.startsWith(href)
   }
 
+  /*
+   * خانه همیشه در مرکز قرار می‌گیرد،
+   * بدون اینکه ترتیب اصلی BOTTOM_NAV_ITEMS را تغییر دهیم.
+   */
+  const homeItemIndex = BOTTOM_NAV_ITEMS.findIndex(
+    (item) =>
+      item.href === '/' ||
+      item.icon === 'home',
+  )
+
+  const navigationItems =
+    homeItemIndex >= 0
+      ? [
+          ...BOTTOM_NAV_ITEMS.filter(
+            (_, index) => index !== homeItemIndex,
+          ).slice(
+            0,
+            Math.floor(
+              (BOTTOM_NAV_ITEMS.length - 1) / 2,
+            ),
+          ),
+          BOTTOM_NAV_ITEMS[homeItemIndex],
+          ...BOTTOM_NAV_ITEMS.filter(
+            (_, index) => index !== homeItemIndex,
+          ).slice(
+            Math.floor(
+              (BOTTOM_NAV_ITEMS.length - 1) / 2,
+            ),
+          ),
+        ]
+      : BOTTOM_NAV_ITEMS
+
   return (
     <nav
       className="
@@ -56,7 +88,7 @@ export default function BottomNav() {
         bottom-0
         z-50
         px-3
-        pb-[calc(9px+env(safe-area-inset-bottom))]
+        pb-[calc(8px+env(safe-area-inset-bottom))]
         pt-2
         md:hidden
       "
@@ -65,33 +97,52 @@ export default function BottomNav() {
       <div
         className="
           pointer-events-auto
+          relative
           mx-auto
           flex
-          h-[70px]
+          h-[72px]
           w-full
           max-w-[430px]
           items-center
           rounded-[24px]
           border
-          border-[#e4e5e4]/90
-          bg-[#fcfcfb]/[0.92]
+          border-[#E4E5E4]/90
+          bg-[#FCFCFB]/[0.94]
           px-2
-          shadow-[0_16px_45px_rgba(10,25,41,0.13),0_3px_12px_rgba(10,25,41,0.045)]
+          shadow-[0_14px_42px_rgba(10,25,41,0.12),0_3px_12px_rgba(10,25,41,0.04)]
           backdrop-blur-2xl
-          supports-[backdrop-filter]:bg-[#fcfcfb]/[0.76]
+          supports-[backdrop-filter]:bg-[#FCFCFB]/[0.78]
         "
       >
+        {/* Very subtle inner highlight */}
+        <div
+          aria-hidden="true"
+          className="
+            pointer-events-none
+            absolute
+            inset-x-5
+            top-0
+            h-px
+            bg-gradient-to-r
+            from-transparent
+            via-[#B79464]/30
+            to-transparent
+          "
+        />
+
         <div
           className="
             flex
             h-full
             w-full
-            items-stretch
-            gap-1
+            items-center
           "
         >
-          {BOTTOM_NAV_ITEMS.map((item) => {
+          {navigationItems.map((item) => {
             const active = isActive(item.href)
+            const isHome =
+              item.href === '/' ||
+              item.icon === 'home'
 
             /*
              * SEARCH
@@ -115,9 +166,9 @@ export default function BottomNav() {
                         justify-center
                         rounded-[18px]
                         px-1
-                        text-[10px]
-                        font-semibold
-                        text-[#7b838d]
+                        text-[9px]
+                        font-bold
+                        text-[#667085]
                         transition-all
                         duration-200
                         active:scale-[0.94]
@@ -125,26 +176,24 @@ export default function BottomNav() {
                       aria-label="جستجوی محصولات"
                     >
                       <span
+                        aria-hidden="true"
                         className="
                           mb-0.5
                           flex
-                          h-9
-                          w-9
+                          h-10
+                          w-10
                           items-center
                           justify-center
                           rounded-[13px]
-                          text-[#657180]
                           transition-all
                           duration-200
-                          group-hover:bg-[#f3f0e9]
+                          group-hover:bg-[#F3F0E9]
                           group-hover:text-primary
-                          group-active:scale-95
                         "
                       >
                         <Icon
-                          className="h-[20px] w-[20px]"
-                          strokeWidth={1.85}
-                          aria-hidden="true"
+                          className="h-[19px] w-[19px]"
+                          strokeWidth={1.8}
                         />
                       </span>
 
@@ -158,9 +207,9 @@ export default function BottomNav() {
                     side="bottom"
                     className="
                       h-[82vh]
-                      rounded-t-[32px]
+                      rounded-t-[30px]
                       border-0
-                      bg-[#fcfcfb]
+                      bg-[#FCFCFB]
                       p-4
                       shadow-[0_-14px_55px_rgba(10,25,41,0.14)]
                       sm:p-6
@@ -169,27 +218,29 @@ export default function BottomNav() {
                     <div className="mx-auto w-full max-w-xl">
                       <div className="mb-5">
                         <div
+                          aria-hidden="true"
                           className="
                             mx-auto
                             mb-5
                             h-1.5
-                            w-12
+                            w-11
                             rounded-full
-                            bg-[#dfe2e3]
+                            bg-[#D1D5DB]
                           "
                         />
 
                         <div className="mb-2 flex items-center gap-2">
                           <span
+                            aria-hidden="true"
                             className="
                               flex
-                              h-8
-                              w-8
+                              h-9
+                              w-9
                               items-center
                               justify-center
                               rounded-full
                               bg-accent/[0.10]
-                              text-accent-dark
+                              text-[#76582F]
                             "
                           >
                             <Search
@@ -198,7 +249,7 @@ export default function BottomNav() {
                             />
                           </span>
 
-                          <span className="text-[10px] font-bold text-accent-dark">
+                          <span className="text-[10px] font-bold text-[#76582F]">
                             جستجوی سرای سنگ
                           </span>
                         </div>
@@ -214,7 +265,7 @@ export default function BottomNav() {
                           جستجوی محصولات
                         </h2>
 
-                        <p className="mt-1 text-sm leading-6 text-[#727b85]">
+                        <p className="mt-1 text-sm leading-6 text-[#475467]">
                           نام محصول، سنگ یا مقاله مورد نظر را وارد کنید.
                         </p>
                       </div>
@@ -247,9 +298,9 @@ export default function BottomNav() {
                     justify-center
                     rounded-[18px]
                     px-1
-                    text-[10px]
-                    font-semibold
-                    text-[#7b838d]
+                    text-[9px]
+                    font-bold
+                    text-[#667085]
                     transition-all
                     duration-200
                     active:scale-[0.94]
@@ -257,24 +308,24 @@ export default function BottomNav() {
                   aria-label={item.title}
                 >
                   <span
+                    aria-hidden="true"
                     className="
                       mb-0.5
                       flex
-                      h-9
-                      w-9
+                      h-10
+                      w-10
                       items-center
                       justify-center
                       rounded-[13px]
                       transition-all
                       duration-200
                       group-hover:bg-accent/[0.09]
-                      group-hover:text-accent-dark
+                      group-hover:text-[#76582F]
                     "
                   >
                     <Icon
-                      className="h-[20px] w-[20px]"
-                      strokeWidth={1.85}
-                      aria-hidden="true"
+                      className="h-[19px] w-[19px]"
+                      strokeWidth={1.8}
                     />
                   </span>
 
@@ -284,6 +335,147 @@ export default function BottomNav() {
                 </a>
               )
             }
+/*
+ * HOME
+ */
+if (isHome) {
+  const Icon = icons.home
+
+  return (
+    <Link
+      key={item.href}
+      href="/"
+      aria-current={active ? 'page' : undefined}
+      aria-label="صفحه اصلی"
+      className="
+        group
+        relative
+        flex
+        min-w-0
+        flex-1
+        self-stretch
+        items-center
+        justify-center
+        px-1
+        outline-none
+      "
+    >
+      {/* Floating home button */}
+      <span
+        className={[
+          `
+            absolute
+            bottom-[20px]
+            flex
+            h-[56px]
+            w-[56px]
+            items-center
+            justify-center
+            rounded-full
+            border
+            transition-all
+            duration-300
+            ease-[cubic-bezier(.22,1,.36,1)]
+            group-hover:-translate-y-1
+            group-active:scale-95
+            group-focus-visible:ring-2
+            group-focus-visible:ring-[#B79464]/60
+            group-focus-visible:ring-offset-2
+            group-focus-visible:ring-offset-[#FCFCFB]
+          `,
+          active
+            ? `
+              border-white/60
+              bg-gradient-to-br
+              from-[#D8BC8D]
+              via-[#B79464]
+              to-[#9E7B4F]
+              text-[#112F50]
+              shadow-[0_9px_24px_rgba(17,47,80,0.18),0_3px_10px_rgba(183,148,100,0.20)]
+              group-hover:shadow-[0_12px_28px_rgba(17,47,80,0.22),0_4px_14px_rgba(183,148,100,0.24)]
+            `
+            : `
+              border-[#DCE2E7]
+              bg-white
+              text-[#112F50]
+              shadow-[0_7px_18px_rgba(17,47,80,0.10)]
+              group-hover:border-[#C8D0D7]
+              group-hover:bg-[#F9FAFA]
+              group-hover:shadow-[0_10px_22px_rgba(17,47,80,0.14)]
+            `,
+        ].join(' ')}
+      >
+        {/* Active inner shine */}
+        {active && (
+          <span
+            aria-hidden="true"
+            className="
+              absolute
+              inset-[3px]
+              rounded-full
+              border
+              border-white/20
+              bg-gradient-to-br
+              from-white/15
+              via-transparent
+              to-[#112F50]/[0.08]
+            "
+          />
+        )}
+
+        <Icon
+          className="
+            relative
+            z-10
+            h-[23px]
+            w-[23px]
+            transition-transform
+            duration-300
+            group-hover:scale-105
+          "
+          strokeWidth={active ? 2.35 : 2}
+        />
+      </span>
+
+      {/* Home label */}
+      <span
+        className={[
+          `
+            absolute
+            bottom-[6px]
+            text-[9px]
+            font-black
+            leading-none
+            transition-colors
+            duration-200
+          `,
+          active
+            ? 'text-[#112F50]'
+            : 'text-[#667085] group-hover:text-[#112F50]',
+        ].join(' ')}
+      >
+        خانه
+      </span>
+
+      {/* Active indicator */}
+      {active && (
+        <span
+          aria-hidden="true"
+          className="
+            absolute
+            bottom-[1px]
+            left-1/2
+            h-[3px]
+            w-5
+            -translate-x-1/2
+            rounded-full
+            bg-[#B79464]
+          "
+        />
+      )}
+    </Link>
+  )
+}
 
             /*
              * NORMAL ITEMS
@@ -304,51 +496,31 @@ export default function BottomNav() {
                   'group relative flex min-w-0 flex-1',
                   'flex-col items-center justify-center',
                   'rounded-[18px] px-1',
-                  'text-[10px] font-semibold',
+                  'text-[9px] font-bold',
                   'transition-all duration-200',
                   'active:scale-[0.94]',
                   active
                     ? 'text-primary'
-                    : 'text-[#7b838d] hover:text-primary',
+                    : 'text-[#667085] hover:text-primary',
                 ].join(' ')}
               >
                 <span
+                  aria-hidden="true"
                   className={[
-                    'relative mb-0.5 flex h-9 w-9',
+                    'relative mb-0.5 flex h-10 w-10',
                     'items-center justify-center rounded-[13px]',
                     'transition-all duration-200',
                     active
-                      ? 'bg-accent/[0.10] text-accent-dark'
-                      : 'group-hover:bg-[#f3f0e9]',
+                      ? 'bg-accent/[0.10] text-[#76582F]'
+                      : 'group-hover:bg-[#F3F0E9]',
                   ].join(' ')}
                 >
                   <Icon
-                    className={[
-                      'h-[20px] w-[20px]',
-                      'transition-all duration-200',
-                      active
-                        ? 'scale-[1.05]'
-                        : 'scale-100',
-                    ].join(' ')}
-                    strokeWidth={active ? 2.1 : 1.85}
-                    aria-hidden="true"
+                    className="h-[19px] w-[19px]"
+                    strokeWidth={
+                      active ? 2.05 : 1.8
+                    }
                   />
-
-                  {active && (
-                    <span
-                      className="
-                        absolute
-                        -bottom-1
-                        left-1/2
-                        h-1
-                        w-1
-                        -translate-x-1/2
-                        rounded-full
-                        bg-accent
-                        shadow-[0_0_8px_rgba(183,148,100,0.6)]
-                      "
-                    />
-                  )}
                 </span>
 
                 <span

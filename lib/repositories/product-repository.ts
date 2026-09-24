@@ -4,6 +4,7 @@ import {
   getProductBySlugFromWooCommerce,
   getProductsFromWooCommerce,
   getAllProductSlugsFromWooCommerce,
+  getAllProductSitemapEntriesFromWooCommerce,
   searchWooCommerceProducts,
 } from '@/lib/woocommerce'
 
@@ -138,6 +139,10 @@ export async function searchProducts(
     search,
     first,
   )
+}
+
+export async function getAllProductSitemapEntries() {
+  return getAllProductSitemapEntriesFromWooCommerce()
 }
 
 export async function getAllProductSlugs(): Promise<

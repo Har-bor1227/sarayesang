@@ -279,6 +279,7 @@ export const GET_ALL_POST_SLUGS = `
 
       nodes {
         slug
+        modified
       }
     }
   }
@@ -342,6 +343,61 @@ export const GET_HOME_PAGE_DATA = `
         image {
           sourceUrl
           altText
+        }
+      }
+    }
+  }
+`
+export const GET_STONE_FINDER_PRODUCTS = `
+  query GetStoneFinderProducts(
+    $first: Int!
+    $after: String
+  ) {
+    products(
+      first: $first
+      after: $after
+      where: {
+        orderby: {
+          field: DATE
+          order: DESC
+        }
+      }
+    ) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+
+      nodes {
+        id
+        name
+        slug
+
+        price
+        regularPrice
+        salePrice
+        onSale
+
+        image {
+          sourceUrl
+          altText
+        }
+
+        productCategories {
+          nodes {
+            id
+            name
+            slug
+          }
+        }
+
+        acf {
+          application
+          stoneType
+          dimensions
+          weight
+          surfaceFinish
+          colorFamily
         }
       }
     }

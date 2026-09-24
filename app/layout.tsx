@@ -82,6 +82,15 @@ export const metadata: Metadata = {
 
     description:
       SITE_DESCRIPTION,
+
+    images: [
+      {
+        url: '/images/home/banner-desktop-1.png',
+        width: 1920,
+        height: 758,
+        alt: SITE_NAME,
+      },
+    ],
   },
 
   twitter: {
@@ -92,6 +101,10 @@ export const metadata: Metadata = {
 
     description:
       SITE_DESCRIPTION,
+
+    images: [
+      '/images/home/banner-desktop-1.png',
+    ],
   },
 
   robots: {

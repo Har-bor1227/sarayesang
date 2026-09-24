@@ -152,6 +152,7 @@ export interface Post {
   content?: string
   excerpt?: string
   date?: string
+  modified?: string
 
   featuredImage?: {
     node?: Image | null

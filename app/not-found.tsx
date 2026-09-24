@@ -9,7 +9,7 @@ import {
 } from '@/lib/constants'
 
 export const metadata: Metadata = {
-  title: `صفحه یافت نشد | ${SITE_NAME}`,
+  title: 'صفحه یافت نشد',
 
   description:
     'صفحه مورد نظر شما پیدا نشد. لطفاً به صفحه اصلی یا دسته‌بندی‌ها مراجعه کنید.',

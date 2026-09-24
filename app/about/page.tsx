@@ -1,11 +1,6 @@
 import type { Metadata } from 'next'
 
 import {
-  generateOrganizationSchema,
-  JsonLd,
-} from '@/lib/seo'
-
-import {
   SITE_NAME,
   SITE_URL,
 } from '@/lib/constants'
@@ -18,8 +13,15 @@ import {
   WhyUsSection,
 } from '@/components/about/AboutSections'
 
+import { DEFAULT_SOCIAL_IMAGE } from '@/lib/constants'
+
+import {
+  generateAboutPageSchema,
+  JsonLd,
+} from '@/lib/seo'
+
 export const metadata: Metadata = {
-  title: `درباره ما | ${SITE_NAME}`,
+  title: 'درباره ما',
 
   description:
     'سرای سنگ، مرجع تخصصی سنگ‌های ساختمانی با سال‌ها تجربه در تأمین و عرضه سنگ‌های با کیفیت.',
@@ -37,21 +39,32 @@ export const metadata: Metadata = {
       'سرای سنگ، مرجع تخصصی سنگ‌های ساختمانی با سال‌ها تجربه.',
 
     type: 'website',
+    url: `${SITE_URL}/about`,
+    siteName: SITE_NAME,
+    locale: 'fa_IR',
+    images: [{ url: DEFAULT_SOCIAL_IMAGE, width: 1920, height: 758, alt: SITE_NAME }],
+  },
+
+  twitter: {
+    card: 'summary_large_image',
+    images: [DEFAULT_SOCIAL_IMAGE],
+    title: `درباره ما | ${SITE_NAME}`,
+    description:
+      'سرای سنگ، مرجع تخصصی سنگ‌های ساختمانی با سال‌ها تجربه.',
   },
 }
 
-export default function AboutPage() {
-  const organizationSchema =
-    generateOrganizationSchema()
+const aboutPageSchema =
+  generateAboutPageSchema()
 
+
+export default function AboutPage() {
   return (
     <div
       dir="rtl"
       className="w-full overflow-x-clip bg-white"
     >
-      <JsonLd
-        data={organizationSchema}
-      />
+      <JsonLd data={aboutPageSchema} />
 
       <AboutHero />
 

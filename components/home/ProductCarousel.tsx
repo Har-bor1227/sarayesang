@@ -1,13 +1,13 @@
+
 import Link from 'next/link'
 import {
   ArrowLeft,
-  Gem,
-  Phone,
 } from 'lucide-react'
 
 import type { ProductSummary } from '@/types/wordpress'
 
 import ProductShowcaseCard from './ProductShowcaseCard'
+import ProductCarouselControls from './ProductCarouselControls'
 
 export default function ProductCarousel({
   products,
@@ -27,219 +27,307 @@ export default function ProductCarousel({
     : 'تازه‌ترین محصولات'
 
   const description = isNavy
-    ? 'چند انتخاب محبوب از میان محصولات سرای سنگ'
+    ? 'چند انتخاب محبوب از میان محصولات سرای‌سنگ'
     : 'تازه‌ترین سنگ‌های اضافه‌شده به مجموعه'
+
+  const carouselId = isNavy
+    ? 'product-carousel-navy'
+    : 'product-carousel-gold'
 
   return (
     <section
-      className={[
-        'w-full overflow-hidden rounded-[30px]',
-        'p-3 sm:p-4 md:p-5 lg:p-6',
-        isNavy
-          ? 'bg-[#112f50]'
-          : 'bg-[#b79464]',
-      ].join(' ')}
+      dir="rtl"
+      className="
+        relative
+        isolate
+        w-full
+        overflow-hidden
+        rounded-[24px]
+        border
+        border-white/[0.08]
+        bg-[#091827]
+        p-1.5
+        shadow-[0_14px_38px_rgba(10,25,41,0.12)]
+        sm:rounded-[28px]
+        sm:p-2
+        lg:rounded-[32px]
+      "
     >
+      {/* Ambient background */}
       <div
+        aria-hidden="true"
         className="
-          grid
-          min-w-0
-          items-stretch
-          gap-5
-          lg:grid-cols-[250px_minmax(0,1fr)]
-          xl:grid-cols-[275px_minmax(0,1fr)]
-          lg:gap-6
+          pointer-events-none
+          absolute
+          inset-0
+          -z-10
+          overflow-hidden
+          rounded-[inherit]
         "
       >
-        {/* Feature panel */}
-        <aside
+        <div
           className="
-            flex
-            min-w-0
-            flex-col
-            justify-between
-            px-1
-            py-1
-            sm:px-2
-            sm:py-2
-            lg:px-2
-            lg:py-2
+            absolute
+            -right-24
+            -top-24
+            h-64
+            w-64
+            rounded-full
+            bg-[#B79464]/[0.09]
+            blur-3xl
           "
-          dir="rtl"
+        />
+
+        <div
+          className="
+            absolute
+            -bottom-28
+            -left-24
+            h-72
+            w-72
+            rounded-full
+            bg-[#31567D]/[0.08]
+            blur-3xl
+          "
+        />
+
+        <div
+          className="
+            absolute
+            inset-0
+            bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.035),transparent_30%)]
+          "
+        />
+      </div>
+
+      {/* Main surface */}
+      <div
+        className="
+          relative
+          overflow-hidden
+          rounded-[21px]
+          border
+          border-white/[0.07]
+          bg-white/[0.035]
+          px-3
+          py-3
+          shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]
+          backdrop-blur-xl
+          sm:rounded-[24px]
+          sm:px-4
+          sm:py-4
+          md:px-5
+          md:py-4.5
+          lg:rounded-[27px]
+          lg:px-6
+          lg:py-5
+        "
+      >
+        {/* Top gloss */}
+        <div
+          aria-hidden="true"
+          className="
+            pointer-events-none
+            absolute
+            inset-x-[8%]
+            top-0
+            h-px
+            bg-gradient-to-r
+            from-transparent
+            via-white/20
+            to-transparent
+          "
+        />
+
+        {/* Gold accent */}
+        <div
+          aria-hidden="true"
+          className="
+            pointer-events-none
+            absolute
+            right-6
+            top-0
+            h-[2px]
+            w-14
+            rounded-b-full
+            bg-gradient-to-r
+            from-[#8E6F45]
+            via-[#D8BD90]
+            to-transparent
+            sm:right-8
+            sm:w-20
+          "
+        />
+
+        {/* Header */}
+        <header
+          className="
+            mb-3
+            flex
+            items-center
+            justify-between
+            gap-3
+            sm:mb-4
+            md:mb-5
+          "
         >
-          <div>
-            <div
-              className="
-                mb-4
-                flex
-                items-center
-                justify-between
-                gap-3
-              "
-            >
-              <span
-                className={[
-                  'inline-flex items-center gap-2',
-                  'rounded-full px-3 py-1.5',
-                  'text-[10px] font-bold',
-                  isNavy
-                    ? 'bg-white/[0.07] text-white/65'
-                    : 'bg-white/20 text-[#112f50]/70',
-                ].join(' ')}
-              >
-                <Gem
-                  className={[
-                    'h-3.5 w-3.5',
-                    isNavy
-                      ? 'text-[#c6a87e]'
-                      : 'text-[#112f50]',
-                  ].join(' ')}
-                  strokeWidth={1.7}
-                />
-
-                {isNavy
-                  ? 'پرفروش‌ترین‌ها'
-                  : 'تازه اضافه شده'}
-              </span>
-            </div>
-
+          {/* Title */}
+          <div className="min-w-0">
             <h2
               className="
-                text-[28px]
+                truncate
+                text-[22px]
                 font-black
-                leading-[1.3]
-                tracking-[-0.035em]
-                sm:text-[34px]
-                lg:text-[38px]
-                xl:text-[40px]
+                leading-none
+                tracking-[-0.04em]
+                text-white
+                sm:text-[26px]
+                md:text-[30px]
+                lg:text-[32px]
               "
             >
-              <span
-                className={[
-                  'block',
-                  isNavy
-                    ? 'text-[#c6a87e]'
-                    : 'text-[#112f50]',
-                ].join(' ')}
-              >
+              <span className="text-[#D8BC8D]">
                 {title.split(' ')[0]}
               </span>
 
-              <span className="mt-1 block text-white">
-                {title.split(' ').slice(1).join(' ')}
+              <span className="mr-1.5">
+                {title
+                  .split(' ')
+                  .slice(1)
+                  .join(' ')}
               </span>
             </h2>
 
             <p
-              className={[
-                'mt-4 max-w-[230px]',
-                'text-[12px] leading-7',
-                isNavy
-                  ? 'text-white/60'
-                  : 'text-[#112f50]/65',
-              ].join(' ')}
+              className="
+                mt-1.5
+                hidden
+                text-[9px]
+                font-medium
+                leading-5
+                text-white/45
+                sm:block
+                sm:text-[10px]
+                md:text-[11px]
+              "
             >
               {description}
             </p>
           </div>
 
-          <div className="mt-7 hidden lg:block">
-            <div
-              className={[
-                'mb-4 h-px w-full',
-                isNavy
-                  ? 'bg-white/10'
-                  : 'bg-[#112f50]/10',
-              ].join(' ')}
-            />
-
-            <Link
-              href="/products"
-              className={[
-                'group inline-flex items-center gap-2',
-                'text-xs font-bold',
-                isNavy
-                  ? 'text-[#c6a87e]'
-                  : 'text-[#112f50]',
-              ].join(' ')}
-            >
-              مشاهده همه محصولات
-
-              <ArrowLeft
-                className="
-                  h-4
-                  w-4
-                  transition-transform
-                  duration-200
-                  group-hover:-translate-x-1
-                "
-                strokeWidth={1.8}
-              />
-            </Link>
-          </div>
-        </aside>
-
-        {/* Products */}
-        <div className="min-w-0">
+          {/* Actions */}
           <div
             className="
               flex
-              min-w-0
+              shrink-0
+              items-center
+              gap-1.5
+            "
+          >
+            <ProductCarouselControls
+              carouselId={carouselId}
+            />
+
+            {/* Single CTA */}
+            <Link
+              href="/products"
+              className="
+                group
+                inline-flex
+                min-h-9
+                items-center
+                gap-1.5
+                rounded-full
+                border
+                border-[#B79464]/25
+                bg-[#B79464]/[0.09]
+                px-3
+                text-[9px]
+                font-black
+                text-[#E1CAA5]
+                transition-all
+                duration-200
+                hover:border-[#B79464]/45
+                hover:bg-[#B79464]/[0.15]
+                hover:text-white
+                sm:min-h-10
+                sm:px-3.5
+                sm:text-[10px]
+              "
+            >
+              <span>مشاهده همه</span>
+
+              <ArrowLeft
+                aria-hidden="true"
+                className="
+                  h-3
+                  w-3
+                  transition-transform
+                  duration-200
+                  group-hover:-translate-x-0.5
+                "
+                strokeWidth={1.9}
+              />
+            </Link>
+          </div>
+        </header>
+
+        {/* Products */}
+        <div className="relative">
+          <div
+            id={carouselId}
+            className="
+              flex
               w-full
               snap-x
               snap-mandatory
-              gap-3
+              gap-2.5
               overflow-x-auto
-              overscroll-x-contain
+              overflow-y-hidden
               px-0.5
-              pb-1
+              pb-0.5
+              pt-0
+              scroll-smooth
+              overscroll-x-contain
               [scrollbar-width:none]
+              [-ms-overflow-style:none]
               [&::-webkit-scrollbar]:hidden
-              sm:gap-4
+              sm:gap-3
+              md:gap-4
+              lg:gap-4
             "
-            dir="rtl"
           >
-            {products.map((product, index) => (
-              <ProductShowcaseCard
-                key={
-                  product.id ||
-                  product.slug ||
-                  index
-                }
-                product={product}
-                index={index}
-              />
-            ))}
+            {products.map(
+              (product, index) => (
+                <div
+                  key={
+                    product.id ||
+                    product.slug ||
+                    index
+                  }
+                  className="
+                    min-w-0
+                    shrink-0
+                    snap-start
+                    basis-[79%]
+                    xs:basis-[64%]
+                    sm:basis-[46%]
+                    md:basis-[31%]
+                    lg:basis-[30%]
+                    xl:basis-[23.5%]
+                  "
+                >
+                  <ProductShowcaseCard
+                    product={product}
+                    index={index}
+                  />
+                </div>
+              ),
+            )}
           </div>
         </div>
-      </div>
-
-      {/* Mobile all products CTA */}
-      <div className="mt-4 lg:hidden">
-        <Link
-          href="/products"
-          className={[
-            'group flex h-10 items-center justify-center gap-2',
-            'rounded-full border text-xs font-bold',
-            isNavy
-              ? 'border-white/12 bg-white/[0.05] text-white/80'
-              : 'border-[#112f50]/10 bg-white/10 text-[#112f50]',
-          ].join(' ')}
-        >
-          مشاهده همه محصولات
-
-          <ArrowLeft
-            className="
-              h-3.5
-              w-3.5
-              transition-transform
-              duration-200
-              group-hover:-translate-x-1
-            "
-            strokeWidth={1.8}
-          />
-        </Link>
       </div>
     </section>
   )
 }
+

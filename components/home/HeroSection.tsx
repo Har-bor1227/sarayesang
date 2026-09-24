@@ -1,289 +1,151 @@
-import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowLeft } from 'lucide-react'
 
-const heroImage = '/images/home/hero-banner.webp'
+import HeroSlider from './HeroSlider'
+
+const banners = [
+  {
+    src: '/images/home/banner-desktop-1.png',
+    alt: 'سرای سنگ - بنر اول',
+  },
+  {
+    src: '/images/home/banner-desktop-2-1.png',
+    alt: 'سرای سنگ - بنر دوم',
+  },
+  {
+    src: '/images/home/banner-desktop-3-1-1.png',
+    alt: 'سرای سنگ - بنر سوم',
+  },
+]
 
 export default function HeroSection() {
   return (
-    <section className="w-full bg-[#fcfcfb]">
+    <section
+      dir="rtl"
+      className="
+        w-full
+        bg-[#fcfcfb]
+        py-1
+        sm:py-1.5
+        lg:py-2
+      "
+    >
       <div
         className="
-          relative
-          min-h-[570px]
+          mx-auto
           w-full
-          overflow-hidden
-          bg-[#0a1929]
-          sm:min-h-[620px]
-          md:min-h-[680px]
-          lg:min-h-[720px]
-          xl:min-h-[760px]
+          max-w-[1360px]
+          px-3
+          sm:px-5
+          lg:px-8
+          xl:px-10
         "
       >
-        {/* Hero image */}
-        <Image
-          src={heroImage}
-          alt="فضای معماری لوکس با سنگ طبیعی"
-          fill
-          preload
-          sizes="100vw"
-          className="
-            object-cover
-            object-center
-            transition-transform
-            duration-[1400ms]
-            ease-out
-          "
-        />
+        <div className="relative isolate">
+          {/* Soft shadow */}
+          <div
+            aria-hidden="true"
+            className="
+              pointer-events-none
+              absolute
+              inset-x-[6%]
+              bottom-[-10px]
+              h-[18px]
+              rounded-[50%]
+              bg-black/20
+              blur-[14px]
+              sm:bottom-[-11px]
+              sm:h-[20px]
+              sm:blur-[15px]
+              lg:bottom-[-12px]
+              lg:h-[22px]
+              lg:blur-[17px]
+            "
+          />
 
-        {/* Dark architectural overlay */}
-        <div
-          aria-hidden="true"
-          className="
-            absolute
-            inset-0
-            bg-gradient-to-l
-            from-[#0a1929]/65
-            via-[#0a1929]/22
-            to-[#0a1929]/0
-          "
-        />
-
-        {/* Bottom depth */}
-        <div
-          aria-hidden="true"
-          className="
-            absolute
-            inset-x-0
-            bottom-0
-            h-1/2
-            bg-gradient-to-t
-            from-[#0a1929]/35
-            via-[#0a1929]/5
-            to-transparent
-          "
-        />
-
-        {/* Subtle warm atmosphere */}
-        <div
-          aria-hidden="true"
-          className="
-            pointer-events-none
-            absolute
-            -right-24
-            top-1/4
-            h-64
-            w-64
-            rounded-full
-            bg-accent/[0.08]
-            blur-3xl
-            sm:h-80
-            sm:w-80
-          "
-        />
-
-        {/* Content */}
-        <div
-          className="
-            relative
-            z-10
-            mx-auto
-            flex
-            min-h-[570px]
-            w-full
-            max-w-[1360px]
-            items-end
-            px-4
-            pb-16
-            sm:min-h-[620px]
-            sm:px-6
-            sm:pb-20
-            md:min-h-[680px]
-            md:items-center
-            md:pb-0
-            md:px-8
-            lg:min-h-[720px]
-            lg:px-10
-            xl:min-h-[760px]
-            xl:px-12
-          "
-        >
-        <div
-          className="
-            w-full
-            max-w-[720px]
-            text-right
-            md:ml-auto
-            md:mr-0
-            lg:-translate-x-8
-            xl:-translate-x-14
-            2xl:-translate-x-20
-          "
-        >
-            {/* Eyebrow */}
-            <div className="mb-5 flex items-center justify-end gap-3">
-              <span
-                aria-hidden="true"
-                className="
-                  h-px
-                  w-10
-                  bg-accent
-                  sm:w-14
-                "
-              />
-
-              <span
-                className="
-                  text-[10px]
-                  font-bold
-                  tracking-[0.08em]
-                  text-accent-light
-                  sm:text-[11px]
-                "
-              >
-                SARAYE SANG
-              </span>
-            </div>
-
-            {/* Heading */}
-            <h1
-              className="
-                max-w-[680px]
-                text-[34px]
-                font-black
-                leading-[1.35]
-                tracking-[-0.035em]
-                text-white
-                sm:text-[42px]
-                md:text-[50px]
-                lg:text-[58px]
-                xl:text-[64px]
-              "
-            >
-              زیبایی ماندگار،
-              <br />
-              از دل سنگ
-            </h1>
-
-            {/* Description */}
-            <p
-              className="
-                mt-5
-                max-w-[590px]
-                text-sm
-                font-medium
-                leading-8
-                text-white/72
-                sm:text-[15px]
-                sm:leading-8
-                md:text-base
-              "
-            >
-              مجموعه‌ای منتخب از سنگ‌های ساختمانی برای
-              معماری، طراحی داخلی و پروژه‌های ماندگار.
-            </p>
-
-            {/* Actions */}
-            <div
-              className="
-                mt-7
-                flex
-                flex-wrap
-                items-center
-                justify-start
-                gap-2.5
-                sm:mt-8
-                sm:gap-3
-              "
-            >
-              <Link
-                href="/products"
-                className="
-                  group
-                  inline-flex
-                  h-12
-                  items-center
-                  gap-2.5
-                  rounded-full
-                  bg-white
-                  px-5
-                  text-sm
-                  font-bold
-                  text-primary
-                  shadow-[0_8px_24px_rgba(10,25,41,0.14)]
-                  transition-all
-                  duration-250
-                  hover:-translate-y-0.5
-                  hover:bg-[#fcfcfb]
-                  hover:shadow-[0_12px_30px_rgba(10,25,41,0.18)]
-                  active:translate-y-0
-                  sm:px-6
-                "
-              >
-                مشاهده محصولات
-
-                <ArrowLeft
+          {/* Main card */}
+          <div
+            className="
+              relative
+              overflow-hidden
+              rounded-[16px]
+              border
+              border-black/[0.045]
+              bg-[#0a1929]
+              shadow-[0_14px_34px_-14px_rgba(0,0,0,0.22)]
+              select-none
+              sm:rounded-[19px]
+              sm:shadow-[0_18px_42px_-16px_rgba(0,0,0,0.24)]
+              lg:rounded-[22px]
+              lg:shadow-[0_22px_50px_-18px_rgba(0,0,0,0.25)]
+            "
+          >
+            <HeroSlider>
+              {banners.map((banner) => (
+                <div
+                  key={banner.src}
                   className="
-                    h-4
-                    w-4
-                    transition-transform
-                    duration-200
-                    group-hover:-translate-x-0.5
+                    absolute
+                    inset-0
                   "
-                  strokeWidth={1.8}
-                />
-              </Link>
+                >
+                  <div
+                    className="
+                      absolute
+                      inset-0
+                      overflow-hidden
+                      rounded-[inherit]
+                      bg-[#0a1929]
+                    "
+                  >
+                    <Image
+                      src={banner.src}
+                      alt={banner.alt}
+                      fill
+                      preload={
+                        banner.src ===
+                        banners[0].src
+                      }
+                      sizes="(max-width: 639px) calc(100vw - 24px), (max-width: 1023px) calc(100vw - 40px), (max-width: 1279px) calc(100vw - 64px), (max-width: 1535px) calc(100vw - 80px), 1280px"
+                      draggable={false}
+                      className="
+                        object-cover
+                        object-center
+                      "
+                    />
 
-              <Link
-                href="/contact"
-                className="
-                  inline-flex
-                  h-12
-                  items-center
-                  rounded-full
-                  border
-                  border-white/25
-                  bg-white/[0.07]
-                  px-5
-                  text-sm
-                  font-bold
-                  text-white
-                  backdrop-blur-md
-                  transition-all
-                  duration-250
-                  hover:border-accent/50
-                  hover:bg-accent/[0.12]
-                  sm:px-6
-                "
-              >
-                استعلام قیمت
-              </Link>
-            </div>
+                    {/* Surface highlight */}
+                    <div
+                      aria-hidden="true"
+                      className="
+                        pointer-events-none
+                        absolute
+                        inset-0
+                        bg-gradient-to-br
+                        from-white/[0.035]
+                        via-transparent
+                        to-black/[0.08]
+                      "
+                    />
+
+                    {/* Bottom depth */}
+                    <div
+                      aria-hidden="true"
+                      className="
+                        pointer-events-none
+                        absolute
+                        inset-x-0
+                        bottom-0
+                        h-[18%]
+                        bg-gradient-to-t
+                        from-black/[0.10]
+                        to-transparent
+                      "
+                    />
+                  </div>
+                </div>
+              ))}
+            </HeroSlider>
           </div>
-        </div>
-
-        {/* Scroll cue */}
-        <div
-          aria-hidden="true"
-          className="
-            pointer-events-none
-            absolute
-            bottom-7
-            left-1/2
-            hidden
-            -translate-x-1/2
-            items-center
-            gap-2
-            text-[9px]
-            font-semibold
-            tracking-[0.08em]
-            text-white/45
-            md:flex
-          "
-        >
-          <span className="h-px w-8 bg-white/20" />
-          SCROLL
-          <span className="h-px w-8 bg-white/20" />
         </div>
       </div>
     </section>

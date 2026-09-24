@@ -68,12 +68,9 @@ export default function ProductCard({
           hover:shadow-[0_18px_48px_rgba(10,25,41,0.10)]
         "
       >
-        {/* =========================================================
-            IMAGE
-        ========================================================== */}
         <Link
           href={`/products/${product.slug}`}
-          className="block"
+          className="block outline-none"
           aria-label={`مشاهده ${product.name}`}
         >
           <div className="relative aspect-[1.08] w-full overflow-hidden bg-[#F0EFEC]">
@@ -85,7 +82,7 @@ export default function ProductCard({
                   product.name
                 }
                 fill
-                priority={priority}
+                preload={priority}
                 sizes="(max-width: 640px) 47vw, (max-width: 1024px) 31vw, (max-width: 1280px) 23vw, 20vw"
                 quality={80}
                 className="
@@ -104,14 +101,12 @@ export default function ProductCard({
 
             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(10,25,41,0.02)_0%,transparent_62%,rgba(10,25,41,0.18)_100%)]" />
 
-            {/* COLLECTION */}
             <div className="absolute right-3 top-3">
               <span className="inline-flex rounded-full border border-white/20 bg-[#0A1929]/30 px-2.5 py-1.5 text-[7px] font-black uppercase tracking-[0.16em] text-white backdrop-blur-md sm:text-[8px]">
                 Saraye Sang
               </span>
             </div>
 
-            {/* SALE */}
             {product.onSale && (
               <div className="absolute left-3 top-3">
                 <span className="inline-flex rounded-full bg-[#B79464] px-2.5 py-1.5 text-[8px] font-black text-white shadow-[0_7px_20px_rgba(183,148,100,0.22)] sm:text-[9px]">
@@ -120,35 +115,54 @@ export default function ProductCard({
               </div>
             )}
 
-            {/* IMAGE ARROW */}
-            <span className="absolute bottom-3 left-3 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-[#0A1929]/25 text-white opacity-0 backdrop-blur-md transition-all duration-400 group-hover:opacity-100">
-              <ArrowLeft className="h-3.5 w-3.5" />
+            <span
+              aria-hidden="true"
+              className="
+                absolute
+                bottom-3
+                left-3
+                flex
+                h-9
+                w-9
+                items-center
+                justify-center
+                rounded-full
+                border
+                border-white/20
+                bg-[#0A1929]/25
+                text-white
+                opacity-0
+                backdrop-blur-md
+                transition-all
+                duration-400
+                group-hover:opacity-100
+              "
+            >
+              <ArrowLeft
+                className="h-3.5 w-3.5"
+                aria-hidden="true"
+              />
             </span>
           </div>
         </Link>
 
-        {/* =========================================================
-            CONTENT
-        ========================================================== */}
         <CardContent className="flex-1 p-4 sm:p-5">
-          {/* CATEGORY */}
           {category && (
             <Link
               href={`/categories/${category.slug}`}
-              className="group/category mb-2.5 inline-flex max-w-full items-center gap-2"
+              className="group/category mb-2.5 inline-flex min-h-11 max-w-full items-center gap-2"
             >
               <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#B79464]" />
 
-              <span className="truncate text-[8px] font-black text-[#667085] transition-colors duration-200 group-hover/category:text-[#B79464] sm:text-[9px]">
+              <span className="truncate text-[9px] font-black text-[#5f6977] transition-colors duration-200 group-hover/category:text-[#76582f] sm:text-[9px]">
                 {category.name}
               </span>
             </Link>
           )}
 
-          {/* TITLE */}
           <Link
             href={`/products/${product.slug}`}
-            className="block"
+            className="block outline-none"
           >
             <h2
               className="
@@ -161,7 +175,7 @@ export default function ProductCard({
                 text-[#112F50]
                 transition-colors
                 duration-300
-                group-hover:text-[#B79464]
+                group-hover:text-[#76582f]
                 sm:text-[15px]
                 sm:leading-[1.7]
               "
@@ -170,19 +184,14 @@ export default function ProductCard({
             </h2>
           </Link>
 
-          {/* DIVIDER */}
           <div className="mt-4 h-px w-full bg-[#112F50]/[0.06]" />
         </CardContent>
 
-        {/* =========================================================
-            FOOTER
-        ========================================================== */}
         <CardFooter className="mt-auto flex min-w-0 items-end justify-between gap-3 px-4 pb-4 pt-0 sm:px-5 sm:pb-5">
-          {/* PRICE */}
           <div className="min-w-0">
             {displayPrice ? (
               <>
-                <span className="block text-[8px] font-semibold text-[#667085] sm:text-[9px]">
+                <span className="block text-[8px] font-semibold text-[#5f6977] sm:text-[9px]">
                   قیمت
                 </span>
 
@@ -194,7 +203,7 @@ export default function ProductCard({
                   </span>
 
                   {hasSalePrice && (
-                    <span className="block shrink-0 pb-0.5 text-[9px] font-semibold text-[#667085]/55 line-through sm:text-[10px]">
+                    <span className="block shrink-0 pb-0.5 text-[9px] font-semibold text-[#667085] line-through sm:text-[10px]">
                       {formatPrice(
                         product.regularPrice,
                       )}
@@ -204,7 +213,7 @@ export default function ProductCard({
               </>
             ) : (
               <>
-                <span className="block text-[8px] font-semibold text-[#667085] sm:text-[9px]">
+                <span className="block text-[8px] font-semibold text-[#5f6977] sm:text-[9px]">
                   قیمت
                 </span>
 
@@ -215,35 +224,40 @@ export default function ProductCard({
             )}
           </div>
 
-          {/* CONSULTATION */}
           <a
             href={`tel:${TEL_PHONE}`}
             aria-label={`تماس برای مشاوره درباره ${product.name}`}
             className="
               group/cta
               inline-flex
+              min-h-11
+              min-w-[94px]
               shrink-0
               items-center
+              justify-center
               gap-1.5
               rounded-full
               border
-              border-[#B79464]/20
+              border-[#B79464]/55
               bg-[#FBF8F2]
               px-3
               py-2
-              text-[8px]
+              text-[9px]
               font-black
-              text-[#9E7F50]
+              text-[#76582f]
               transition-all
               duration-300
-              hover:border-[#B79464]
+              hover:border-[#8E6F45]
               hover:bg-[#B79464]
               hover:text-white
               sm:px-3.5
               sm:text-[9px]
             "
           >
-            <Phone className="h-3 w-3" />
+            <Phone
+              className="h-3.5 w-3.5"
+              aria-hidden="true"
+            />
 
             <span>مشاوره</span>
           </a>

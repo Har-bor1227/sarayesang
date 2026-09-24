@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+
 import Link from 'next/link'
 
 import Container from '@/components/ui/container'
@@ -10,6 +11,12 @@ import {
 } from '@/lib/repositories/product-repository'
 
 import {
+  generateBreadcrumbSchema,
+  JsonLd,
+} from '@/lib/seo'
+
+import {
+  DEFAULT_SOCIAL_IMAGE,
   SITE_NAME,
   SITE_URL,
 } from '@/lib/constants'
@@ -25,37 +32,108 @@ interface ProductsPageProps {
   }>
 }
 
+function getProductsCanonicalUrl(
+  after?: string,
+): string {
+  const baseUrl =
+    `${SITE_URL.replace(
+      /\/+$/,
+      '',
+    )}/products`
+
+  if (!after) {
+    return baseUrl
+  }
+
+  return `${baseUrl}?after=${encodeURIComponent(
+    after,
+  )}`
+}
+
 export async function generateMetadata({
   searchParams,
 }: ProductsPageProps): Promise<Metadata> {
   const resolvedSearchParams =
     await searchParams
 
-  const hasPagination =
+  const after =
     typeof resolvedSearchParams?.after === 'string' &&
     resolvedSearchParams.after.length > 0
+      ? resolvedSearchParams.after
+      : undefined
+
+  const hasPagination =
+    Boolean(after)
+
+  const canonicalUrl =
+    getProductsCanonicalUrl(after)
 
   return {
-    title: `محصولات | ${SITE_NAME}`,
+    title: 'محصولات',
 
     description:
       'مشاهده مجموعه سنگ‌های ساختمانی سرای سنگ شامل سنگ نما، کف، پله و انواع سنگ‌های ساختمانی.',
 
     alternates: {
-      canonical: `${SITE_URL}/products`,
+      canonical:
+        canonicalUrl,
     },
 
     robots: {
-      index: !hasPagination,
+      index:
+        !hasPagination,
       follow: true,
     },
 
     openGraph: {
-      title: `محصولات | ${SITE_NAME}`,
+      title:
+        `محصولات | ${SITE_NAME}`,
+
       description:
         'مشاهده مجموعه سنگ‌های ساختمانی سرای سنگ.',
-      type: 'website',
-      url: `${SITE_URL}/products`,
+
+      type:
+        'website',
+
+      url:
+        canonicalUrl,
+
+      siteName:
+        SITE_NAME,
+
+      locale:
+        'fa_IR',
+
+      images: [
+        {
+          url:
+            DEFAULT_SOCIAL_IMAGE,
+
+          width:
+            1920,
+
+          height:
+            758,
+
+          alt:
+            SITE_NAME,
+        },
+      ],
+    },
+
+    twitter: {
+      card:
+        'summary_large_image',
+
+      images: [
+        DEFAULT_SOCIAL_IMAGE,
+      ],
+
+      title:
+        `محصولات | ${SITE_NAME}`,
+
+      description:
+        'مشاهده مجموعه سنگ‌های ساختمانی سرای سنگ.',
     },
   }
 }
@@ -67,7 +145,8 @@ export default async function ProductsPage({
     await searchParams
 
   const after =
-    typeof resolvedSearchParams?.after === 'string'
+    typeof resolvedSearchParams?.after ===
+      'string'
       ? resolvedSearchParams.after
       : undefined
 
@@ -86,12 +165,31 @@ export default async function ProductsPage({
   const hasProducts =
     products.length > 0
 
+  const breadcrumbSchema =
+    generateBreadcrumbSchema([
+      {
+        name: 'خانه',
+        path: '/',
+      },
+      {
+        name: 'محصولات',
+        path: '/products',
+      },
+    ])
+
   return (
-    <main
+    <div
       className="w-full bg-[#FCFCFB]"
       dir="rtl"
     >
       <Container className="pb-16 pt-5 sm:pb-20 sm:pt-7 lg:pb-24">
+        {/* =========================================================
+            SEO / STRUCTURED DATA
+        ========================================================== */}
+        <JsonLd
+          data={breadcrumbSchema}
+        />
+
         {/* =========================================================
             BREADCRUMB
         ========================================================== */}
@@ -116,7 +214,10 @@ export default async function ProductsPage({
               /
             </li>
 
-            <li className="shrink-0 font-black text-[#112F50]">
+            <li
+              aria-current="page"
+              className="shrink-0 font-black text-[#112F50]"
+            >
               محصولات
             </li>
           </ol>
@@ -221,6 +322,6 @@ export default async function ProductsPage({
             </div>
           )}
       </Container>
-    </main>
+    </div>
   )
 }

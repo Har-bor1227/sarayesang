@@ -17,6 +17,12 @@ import {
 import { formatDate } from '@/lib/format'
 
 import {
+  generateBreadcrumbSchema,
+  JsonLd,
+} from '@/lib/seo'
+
+import {
+  DEFAULT_SOCIAL_IMAGE,
   SITE_NAME,
   SITE_URL,
 } from '@/lib/constants'
@@ -32,63 +38,155 @@ interface BlogPageProps {
   }>
 }
 
+function getBlogCanonicalUrl(
+  after?: string,
+): string {
+  const baseUrl =
+    `${SITE_URL.replace(
+      /\/+$/,
+      '',
+    )}/blog`
+
+  if (!after) {
+    return baseUrl
+  }
+
+  return `${baseUrl}?after=${encodeURIComponent(
+    after,
+  )}`
+}
+
 export async function generateMetadata({
   searchParams,
 }: BlogPageProps): Promise<Metadata> {
   const resolvedSearchParams =
     await searchParams
 
-  const hasPagination =
+  const after =
     typeof resolvedSearchParams?.after === 'string' &&
     resolvedSearchParams.after.length > 0
+      ? resolvedSearchParams.after
+      : undefined
+
+  const hasPagination =
+    Boolean(after)
+
+  const canonicalUrl =
+    getBlogCanonicalUrl(after)
 
   return {
-    title: `مقالات و اخبار | ${SITE_NAME}`,
+    title:
+      'مقالات و اخبار',
 
     description:
       'مقالات تخصصی در زمینه سنگ‌های ساختمانی، راهنمای انتخاب و نگهداری سنگ، اخبار و مطالب آموزشی.',
 
     alternates: {
-      canonical: `${SITE_URL}/blog`,
+      canonical:
+        canonicalUrl,
     },
 
-    robots: hasPagination
-      ? {
-          index: false,
-          follow: true,
-        }
-      : {
-          index: true,
-          follow: true,
-        },
+    robots: {
+      index:
+        !hasPagination,
+
+      follow:
+        true,
+    },
 
     openGraph: {
-      title: `مقالات و اخبار | ${SITE_NAME}`,
+      title:
+        `مقالات و اخبار | ${SITE_NAME}`,
 
       description:
         'مقالات تخصصی در زمینه سنگ‌های ساختمانی، راهنمای انتخاب و نگهداری سنگ، اخبار و مطالب آموزشی.',
 
-      type: 'website',
+      type:
+        'website',
 
-      url: `${SITE_URL}/blog`,
+      url:
+        canonicalUrl,
+
+      siteName:
+        SITE_NAME,
+
+      locale:
+        'fa_IR',
+
+      images: [
+        {
+          url:
+            DEFAULT_SOCIAL_IMAGE,
+
+          width:
+            1920,
+
+          height:
+            758,
+
+          alt:
+            SITE_NAME,
+        },
+      ],
+    },
+
+    twitter: {
+      card:
+        'summary_large_image',
+
+      images: [
+        DEFAULT_SOCIAL_IMAGE,
+      ],
+
+      title:
+        `مقالات و اخبار | ${SITE_NAME}`,
+
+      description:
+        'مقالات تخصصی در زمینه سنگ‌های ساختمانی، راهنمای انتخاب و نگهداری سنگ، اخبار و مطالب آموزشی.',
     },
   }
 }
 
 function stripHtml(
   value?: string | null,
-) {
-  if (!value) return ''
+): string {
+  if (!value) {
+    return ''
+  }
 
   return value
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/&lt;/gi, '<')
-    .replace(/&gt;/gi, '>')
-    .replace(/&#39;/gi, "'")
-    .replace(/&quot;/gi, '"')
-    .replace(/\s+/g, ' ')
+    .replace(
+      /<[^>]*>/g,
+      ' ',
+    )
+    .replace(
+      /&nbsp;/gi,
+      ' ',
+    )
+    .replace(
+      /&amp;/gi,
+      '&',
+    )
+    .replace(
+      /&lt;/gi,
+      '<',
+    )
+    .replace(
+      /&gt;/gi,
+      '>',
+    )
+    .replace(
+      /&#39;/gi,
+      "'",
+    )
+    .replace(
+      /&quot;/gi,
+      '"',
+    )
+    .replace(
+      /\s+/g,
+      ' ',
+    )
     .trim()
 }
 
@@ -156,15 +254,37 @@ export default async function BlogPage({
   const pageInfo =
     postsConnection.pageInfo
 
-  const featuredPost = posts[0]
-  const secondaryPosts = posts.slice(1)
+  const featuredPost =
+    posts[0]
+
+  const secondaryPosts =
+    posts.slice(1)
+
+  const breadcrumbSchema =
+    generateBreadcrumbSchema([
+      {
+        name: 'خانه',
+        path: '/',
+      },
+      {
+        name: 'بلاگ',
+        path: '/blog',
+      },
+    ])
 
   return (
-    <main
+    <div
       className="w-full overflow-hidden bg-[#FCFCFB]"
       dir="rtl"
     >
       <Container className="pb-16 pt-5 sm:pb-20 sm:pt-7 lg:pb-24">
+        {/* =========================================================
+            SEO / STRUCTURED DATA
+        ========================================================== */}
+        <JsonLd
+          data={breadcrumbSchema}
+        />
+
         {/* =========================================================
             BREADCRUMB
         ========================================================== */}
@@ -190,7 +310,10 @@ export default async function BlogPage({
                 /
               </li>
 
-              <li className="shrink-0 font-bold text-primary">
+              <li
+                aria-current="page"
+                className="shrink-0 font-bold text-primary"
+              >
                 بلاگ
               </li>
             </ol>
@@ -312,7 +435,9 @@ export default async function BlogPage({
                 ) : null}
 
                 <div className="mt-5 flex items-center gap-2 text-[9px] font-black text-white sm:mt-7 sm:text-[10px]">
-                  <span>مطالعه مقاله</span>
+                  <span>
+                    مطالعه مقاله
+                  </span>
 
                   <ArrowLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />
                 </div>
@@ -443,7 +568,9 @@ export default async function BlogPage({
                 )}`}
                 className="group inline-flex h-11 items-center justify-center rounded-full border border-[#112F50]/[0.10] bg-white px-6 text-[10px] font-black text-[#112F50] shadow-[0_6px_20px_rgba(10,25,41,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#B79464]/40 hover:bg-[#FBF8F2] hover:text-[#9E7F50]"
               >
-                <span>مشاهده مقالات بیشتر</span>
+                <span>
+                  مشاهده مقالات بیشتر
+                </span>
 
                 <ArrowLeft className="mr-2 h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-x-1" />
               </Link>
@@ -465,6 +592,6 @@ export default async function BlogPage({
           </div>
         )}
       </Container>
-    </main>
+    </div>
   )
 }

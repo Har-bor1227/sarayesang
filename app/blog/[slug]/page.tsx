@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 
+import { DEFAULT_SOCIAL_IMAGE } from '@/lib/constants'
+
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -121,7 +123,7 @@ function getFallbackPostMetadata(
     post.title
 
   const image =
-    post.featuredImage?.node?.sourceUrl
+    post.featuredImage?.node?.sourceUrl || DEFAULT_SOCIAL_IMAGE
 
   return {
     title: post.title,
@@ -175,7 +177,7 @@ export async function generateMetadata({
   if (!post) {
     return {
       title:
-        `مقاله یافت نشد | ${SITE_NAME}`,
+        'مقاله یافت نشد',
 
       description:
         'مقاله مورد نظر پیدا نشد.',
@@ -248,7 +250,7 @@ export default async function PostPage({
     'مقالات'
 
   return (
-    <main
+    <div
       className="w-full overflow-hidden bg-[#FCFCFB]"
       dir="rtl"
     >
@@ -447,6 +449,6 @@ export default async function PostPage({
           <span className="h-px flex-1 bg-[#112F50]/[0.08]" />
         </div>
       </Container>
-    </main>
+    </div>
   )
 }

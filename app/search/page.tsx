@@ -23,7 +23,7 @@ import {
 export const revalidate = 60
 
 export const metadata: Metadata = {
-  title: `جستجو | ${SITE_NAME}`,
+  title: 'جستجو',
 
   description:
     'جستجوی سنگ‌های ساختمانی و محصولات سرای سنگ.',
@@ -72,7 +72,7 @@ export default async function SearchPage({
   const hasResults = products.length > 0
 
   return (
-    <main className="min-h-[70vh] bg-[#fcfcfb]">
+    <div className="min-h-[70vh] bg-[#fcfcfb]">
       <Container className="pb-16 pt-28 sm:pt-32 md:pb-20">
         {/* Breadcrumb */}
         <nav
@@ -484,6 +484,6 @@ export default async function SearchPage({
           </div>
         )}
       </Container>
-    </main>
+    </div>
   )
 }

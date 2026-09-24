@@ -1,12 +1,17 @@
+
 import { getHomePageData } from '@/lib/repositories/home-repository'
 import { getPosts } from '@/lib/repositories/post-repository'
 
 import Container from '@/components/ui/container'
 
 import HeroSection from '@/components/home/HeroSection'
+import SmartSearchSection from '@/components/home/SmartSearchSection'
 import StoneCategoryCarousel from '@/components/home/StoneCategoryCarousel'
+import StoneFinderSection from '@/components/home/StoneFinderSection'
 import ProductCarousel from '@/components/home/ProductCarousel'
+import StoryShowcase from '@/components/home/StoryShowcase'
 import PromoBanners from '@/components/home/PromoBanners'
+import FaqSection from '@/components/home/FaqSection'
 import ComparisonSection from '@/components/home/ComparisonSection'
 import StoneCategoryCollage from '@/components/home/StoneCategoryCollage'
 import PriceInquiryCTA from '@/components/home/PriceInquiryCTA'
@@ -16,13 +21,15 @@ import TrustStrip from '@/components/home/TrustStrip'
 export const revalidate = 3600
 
 export default async function HomePage() {
-  const [homeData, postsConnection] =
-    await Promise.all([
-      getHomePageData(),
-      getPosts({
-        first: 5,
-      }),
-    ])
+  const [
+    homeData,
+    postsConnection,
+  ] = await Promise.all([
+    getHomePageData(),
+    getPosts({
+      first: 5,
+    }),
+  ])
 
   const featuredProducts =
     homeData?.featuredProducts?.nodes ?? []
@@ -48,29 +55,41 @@ export default async function HomePage() {
 
   return (
     <div
-      className="w-full max-w-full overflow-x-clip bg-[#FCFCFB]"
       dir="rtl"
+      className="
+        w-full
+        max-w-full
+        overflow-x-clip
+        bg-[#FCFCFB]
+      "
     >
-      {/* =========================================================
-          HERO
-      ========================================================== */}
+      <h1 className="sr-only">
+        سرای سنگ؛ مرجع تخصصی سنگ‌های ساختمانی و
+        استعلام قیمت
+      </h1>
+
+      {/* Hero */}
       <HeroSection />
 
-      {/* =========================================================
-          STONE CATEGORIES
-      ========================================================== */}
-      <StoneCategoryCarousel
-        categories={
-          categories.length > 0
-            ? categories
-            : []
-        }
-      />
+<StoneFinderSection />
 
-      {/* =========================================================
-          FEATURED PRODUCTS
-      ========================================================== */}
-      <section className="w-full bg-white pb-10 pt-2 sm:pb-14 sm:pt-4">
+      {/* Stone Categories */}
+      <StoneCategoryCarousel
+        categories={categories}
+      />
+{/* Stories */}
+      <StoryShowcase />
+
+      {/* Featured Products */}
+      <section
+        aria-label="محصولات منتخب"
+        className="
+          w-full
+          py-4
+          sm:py-5
+          lg:py-6
+        "
+      >
         <Container>
           <ProductCarousel
             products={primaryProducts}
@@ -79,15 +98,19 @@ export default async function HomePage() {
         </Container>
       </section>
 
-      {/* =========================================================
-          PROMO BANNERS
-      ========================================================== */}
+      {/* Promotional Banners */}
       <PromoBanners />
 
-      {/* =========================================================
-          RECENT PRODUCTS
-      ========================================================== */}
-      <section className="w-full bg-white py-10 sm:py-14 lg:py-16">
+      {/* Recent Products */}
+      <section
+        aria-label="جدیدترین محصولات"
+        className="
+          w-full
+          py-4
+          sm:py-5
+          lg:py-6
+        "
+      >
         <Container>
           <ProductCarousel
             products={secondaryProducts}
@@ -96,33 +119,27 @@ export default async function HomePage() {
         </Container>
       </section>
 
-      {/* =========================================================
-          COMPARISON
-          Kept intact for future real product-comparison logic.
-      ========================================================== */}
+      {/* Comparison */}
       <ComparisonSection />
 
-      {/* =========================================================
-          STONE CATEGORY COLLAGE
-      ========================================================== */}
+      {/* Stone Categories Collage */}
       <StoneCategoryCollage />
-
-      {/* =========================================================
-          PRICE INQUIRY
-      ========================================================== */}
+      {/* Smart Search */}
+            <SmartSearchSection />
+      {/* Price Inquiry */}
       <PriceInquiryCTA />
 
-      {/* =========================================================
-          ARTICLES
-      ========================================================== */}
+      {/* Articles */}
       <ArticlesSection
         articles={articles}
       />
 
-      {/* =========================================================
-          FINAL TRUST STRIP
-      ========================================================== */}
+      {/* FAQ */}
+      <FaqSection />
+
+      {/* Trust */}
       <TrustStrip />
     </div>
   )
 }
+

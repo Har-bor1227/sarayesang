@@ -1,24 +1,27 @@
 'use client'
 
-import {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-} from 'react'
-import Link from 'next/link'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
-  Search,
-  Loader2,
-  PackageSearch,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type KeyboardEvent,
+} from 'react'
+import {
   AlertCircle,
   ArrowLeft,
+  Loader2,
+  PackageSearch,
+  Search,
 } from 'lucide-react'
 
 import { Input } from '@/components/ui/input'
 import { formatPrice } from '@/lib/format'
+
 import type { ProductSummary } from '@/types/wordpress'
 
 interface SearchApiResponse {
@@ -28,23 +31,29 @@ interface SearchApiResponse {
 
 const MIN_SEARCH_LENGTH = 2
 const DEBOUNCE_MS = 300
-
 const SEARCH_LISTBOX_ID = 'live-search-results'
 
 export default function LiveSearch() {
   const router = useRouter()
 
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState<ProductSummary[]>([])
+  const [results, setResults] = useState<
+    ProductSummary[]
+  >([])
   const [isLoading, setIsLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [activeIndex, setActiveIndex] = useState(-1)
+  const [error, setError] = useState<string | null>(
+    null,
+  )
+  const [activeIndex, setActiveIndex] =
+    useState(-1)
 
   const debounceRef =
-    useRef<ReturnType<typeof setTimeout> | null>(null)
+    useRef<ReturnType<typeof setTimeout> | null>(
+      null,
+    )
 
-  const requestControllerRef =
+  const requestRef =
     useRef<AbortController | null>(null)
 
   const containerRef =
@@ -54,43 +63,42 @@ export default function LiveSearch() {
     useRef<HTMLInputElement | null>(null)
 
   const performSearch = useCallback(
-    async (searchTerm: string): Promise<void> => {
-      const trimmedTerm = searchTerm.trim()
+    async (value: string) => {
+      const term = value.trim()
 
-      if (trimmedTerm.length < MIN_SEARCH_LENGTH) {
-        requestControllerRef.current?.abort()
+      requestRef.current?.abort()
 
+      if (term.length < MIN_SEARCH_LENGTH) {
         setResults([])
         setIsOpen(false)
         setIsLoading(false)
         setError(null)
         setActiveIndex(-1)
-
         return
       }
 
-      requestControllerRef.current?.abort()
-
       const controller = new AbortController()
-
-      requestControllerRef.current = controller
+      requestRef.current = controller
 
       setIsLoading(true)
+      setIsOpen(true)
       setError(null)
       setActiveIndex(-1)
 
       try {
         const response = await fetch(
-          `/api/search?q=${encodeURIComponent(trimmedTerm)}`,
+          `/api/search?q=${encodeURIComponent(term)}`,
           {
             method: 'GET',
-            signal: controller.signal,
             cache: 'no-store',
+            signal: controller.signal,
           },
         )
 
         if (!response.ok) {
-          throw new Error('خطا در جستجوی محصولات')
+          throw new Error(
+            'خطا در جستجوی محصولات',
+          )
         }
 
         const json: SearchApiResponse =
@@ -104,11 +112,8 @@ export default function LiveSearch() {
           throw new Error(json.error)
         }
 
-        const products = json.products ?? []
-
-        setResults(products)
+        setResults(json.products ?? [])
         setIsOpen(true)
-        setActiveIndex(-1)
       } catch (err) {
         if (
           err instanceof DOMException &&
@@ -123,8 +128,6 @@ export default function LiveSearch() {
 
         setResults([])
         setIsOpen(false)
-        setActiveIndex(-1)
-
         setError(
           err instanceof Error
             ? err.message
@@ -157,7 +160,7 @@ export default function LiveSearch() {
 
   useEffect(() => {
     return () => {
-      requestControllerRef.current?.abort()
+      requestRef.current?.abort()
 
       if (debounceRef.current) {
         clearTimeout(debounceRef.current)
@@ -166,7 +169,9 @@ export default function LiveSearch() {
   }, [])
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+    const handleOutside = (
+  event: globalThis.MouseEvent,
+) => {
       const target = event.target
 
       if (
@@ -181,24 +186,26 @@ export default function LiveSearch() {
 
     document.addEventListener(
       'mousedown',
-      handleClickOutside,
+      handleOutside,
     )
 
     return () => {
       document.removeEventListener(
         'mousedown',
-        handleClickOutside,
+        handleOutside,
       )
     }
   }, [])
 
   useEffect(() => {
-    function handleEscape(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        setIsOpen(false)
-        setActiveIndex(-1)
-        inputRef.current?.blur()
+    const handleEscape = (event: globalThis.KeyboardEvent) => {
+      if (event.key !== 'Escape') {
+        return
       }
+
+      setIsOpen(false)
+      setActiveIndex(-1)
+      inputRef.current?.blur()
     }
 
     document.addEventListener(
@@ -214,19 +221,17 @@ export default function LiveSearch() {
     }
   }, [])
 
-  const handleInputChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
+  const handleChange = (
+    event: ChangeEvent<HTMLInputElement>,
   ) => {
-    const value = event.target.value
-
-    setQuery(value)
+    setQuery(event.target.value)
     setActiveIndex(-1)
 
     if (
-      value.trim().length < MIN_SEARCH_LENGTH
+      event.target.value.trim().length <
+      MIN_SEARCH_LENGTH
     ) {
-      requestControllerRef.current?.abort()
-
+      requestRef.current?.abort()
       setResults([])
       setIsOpen(false)
       setError(null)
@@ -234,15 +239,16 @@ export default function LiveSearch() {
     }
   }
 
-  const handleInputKeyDown = (
-    event: React.KeyboardEvent<HTMLInputElement>,
+  const handleKeyDown = (
+    event: KeyboardEvent<HTMLInputElement>,
   ) => {
-    if (!isOpen || results.length === 0) {
-      if (event.key === 'Escape') {
-        setIsOpen(false)
-        setActiveIndex(-1)
-      }
+    if (event.key === 'Escape') {
+      setIsOpen(false)
+      setActiveIndex(-1)
+      return
+    }
 
+    if (!results.length || !isOpen) {
       return
     }
 
@@ -284,88 +290,98 @@ export default function LiveSearch() {
 
     if (event.key === 'Enter') {
       if (
-        activeIndex >= 0 &&
-        activeIndex < results.length
+        activeIndex < 0 ||
+        activeIndex >= results.length
       ) {
-        event.preventDefault()
-
-        const product = results[activeIndex]
-
-        setIsOpen(false)
-        setActiveIndex(-1)
-
-        router.push(
-          `/products/${product.slug}`,
-        )
+        return
       }
+
+      event.preventDefault()
+
+      setIsOpen(false)
+      setActiveIndex(-1)
+
+      router.push(
+        `/products/${results[activeIndex].slug}`,
+      )
     }
   }
 
-  const hasResults = results.length > 0
+  const showResults =
+    isOpen && results.length > 0
 
-  const isExpanded = isOpen && hasResults
-
-  const showEmptyState =
+  const showEmpty =
     isOpen &&
     !isLoading &&
+    !error &&
     query.trim().length >= MIN_SEARCH_LENGTH &&
-    !hasResults &&
-    !error
+    results.length === 0
+
+  const showPanel =
+    showResults ||
+    showEmpty ||
+    Boolean(error) ||
+    isLoading
 
   return (
     <div
       ref={containerRef}
       className="relative w-full"
+      dir="rtl"
     >
-      {/* Search field */}
+      {/* Input */}
       <div className="group relative">
         <Input
           ref={inputRef}
           type="search"
           value={query}
-          onChange={handleInputChange}
-          onKeyDown={handleInputKeyDown}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
           onFocus={() => {
             if (
-              hasResults ||
-              showEmptyState ||
-              error
+              results.length ||
+              showEmpty ||
+              error ||
+              isLoading
             ) {
               setIsOpen(true)
             }
           }}
-          placeholder="جستجوی سنگ، محصول یا..."
+          placeholder="جستجوی سنگ و محصول..."
           className="
             h-11
             w-full
             rounded-full
             border
-            border-[#e3ddd2]
-            bg-[#f5f2ec]/85
+            border-[#E1DDD4]
+            bg-[#F7F4EE]
             px-11
-            text-[13px]
-            font-medium
-            text-primary
+            text-[11px]
+            font-semibold
+            text-[#112F50]
             shadow-none
             outline-none
-            placeholder:text-[#98a0aa]
+            placeholder:text-[#9AA0A7]
             transition-all
-            duration-250
-            hover:border-[#d6c9b7]
+            duration-200
+            hover:border-[#D5CABB]
             hover:bg-white
-            focus:border-accent/60
+            focus:border-[#B79464]/55
             focus:bg-white
             focus-visible:ring-0
             focus-visible:ring-offset-0
-            focus-visible:shadow-[0_8px_28px_rgba(10,25,41,0.075)]
+            focus-visible:shadow-[0_7px_22px_rgba(10,25,41,0.06)]
             [&::-webkit-search-cancel-button]:appearance-none
+            sm:text-[12px]
           "
-          aria-label="جستجوی محصولات"
           role="combobox"
-          aria-expanded={isExpanded}
+          aria-label="جستجوی محصولات"
+          aria-expanded={
+            showResults
+          }
           aria-haspopup="listbox"
           aria-controls={
-            isExpanded
+            showResults
               ? SEARCH_LISTBOX_ID
               : undefined
           }
@@ -378,350 +394,252 @@ export default function LiveSearch() {
           autoComplete="off"
         />
 
-        {/* Search / loading icon */}
-        <div
+        <span
+          aria-hidden="true"
           className="
             pointer-events-none
             absolute
-            inset-y-0
-            right-3.5
+            right-3
+            top-1/2
             flex
+            h-7
+            w-7
+            -translate-y-1/2
             items-center
             justify-center
+            rounded-full
+            bg-white
+            text-[#8E7958]
+            shadow-[0_2px_7px_rgba(10,25,41,0.05)]
+            transition-all
+            duration-200
+            group-focus-within:bg-[#B79464]/[0.10]
+            group-focus-within:text-[#B79464]
           "
-          aria-hidden="true"
         >
-          <span
-            className="
-              flex
-              h-7
-              w-7
-              items-center
-              justify-center
-              rounded-full
-              bg-white/85
-              shadow-[0_2px_7px_rgba(10,25,41,0.05)]
-              transition-all
-              duration-200
-              group-focus-within:bg-accent/[0.10]
-            "
-          >
-            {isLoading ? (
-              <Loader2
-                className="
-                  h-[15px]
-                  w-[15px]
-                  animate-spin
-                  text-accent
-                "
-                strokeWidth={2}
-              />
-            ) : (
-              <Search
-                className="
-                  h-[15px]
-                  w-[15px]
-                  text-[#8f7b5b]
-                  transition-colors
-                  duration-200
-                  group-focus-within:text-accent
-                "
-                strokeWidth={1.9}
-              />
-            )}
-          </span>
-        </div>
-
-        {/* Keyboard hint */}
-        {!query && (
-          <div
-            className="
-              pointer-events-none
-              absolute
-              inset-y-0
-              left-3.5
-              hidden
-              items-center
-              xl:flex
-            "
-            aria-hidden="true"
-          >
-            <span
-              className="
-                rounded-full
-                border
-                border-[#e3ddd2]
-                bg-white/75
-                px-2
-                py-1
-                text-[9px]
-                font-semibold
-                text-[#a7a098]
-              "
-            >
-              جستجو
-            </span>
-          </div>
-        )}
+          {isLoading ? (
+            <Loader2
+              className="h-3.5 w-3.5 animate-spin"
+              strokeWidth={2}
+            />
+          ) : (
+            <Search
+              className="h-3.5 w-3.5"
+              strokeWidth={1.9}
+            />
+          )}
+        </span>
       </div>
 
       {/* Dropdown */}
-      {(isExpanded || showEmptyState || error) && (
+      {showPanel && (
         <div
           className="
             absolute
             right-0
-            top-[calc(100%+10px)]
+            top-[calc(100%+8px)]
             z-[80]
             w-full
             overflow-hidden
-            rounded-[20px]
+            rounded-[19px]
             border
-            border-[#e8e1d7]
-            bg-[#fcfcfb]/[0.97]
-            shadow-[0_20px_60px_rgba(10,25,41,0.13),0_3px_12px_rgba(10,25,41,0.04)]
+            border-[#E6E0D6]
+            bg-[#FCFCFB]
+            shadow-[0_22px_58px_rgba(10,25,41,0.14),0_4px_12px_rgba(10,25,41,0.04)]
             backdrop-blur-2xl
-            animate-in
-            fade-in-0
-            slide-in-from-top-1
-            duration-150
           "
         >
-          {/* Results header */}
-          {isExpanded && (
-            <div
-              className="
-                flex
-                items-center
-                justify-between
-                border-b
-                border-[#ece7df]
-                px-4
-                py-3
-              "
-            >
-              <span
-                className="
-                  text-[10px]
-                  font-bold
-                  uppercase
-                  tracking-wide
-                  text-[#8a8f97]
-                "
-              >
-                نتایج جستجو
-              </span>
+          {/* Loading */}
+          {isLoading && !results.length ? (
+            <div className="flex min-h-[150px] flex-col items-center justify-center">
+              <Loader2
+                className="h-5 w-5 animate-spin text-[#B79464]"
+                strokeWidth={1.8}
+              />
 
-              <span
-                className="
-                  rounded-full
-                  bg-accent/[0.10]
-                  px-2
-                  py-1
-                  text-[10px]
-                  font-bold
-                  text-accent-dark
-                "
-              >
-                {results.length} نتیجه
+              <span className="mt-3 text-[10px] font-bold text-[#667085]">
+                در حال جستجو...
               </span>
             </div>
-          )}
+          ) : null}
 
           {/* Results */}
-          {isExpanded && (
-            <ul
-              id={SEARCH_LISTBOX_ID}
-              role="listbox"
-              aria-label="نتایج جستجوی محصولات"
-              className="
-                max-h-[390px]
-                overflow-y-auto
-                overscroll-contain
-                py-1.5
-              "
-            >
-              {results.map((product, index) => {
-                const isActive =
-                  activeIndex === index
+          {showResults && (
+            <>
+              <div className="flex items-center justify-between border-b border-[#ECE8E1] px-3.5 py-2.5">
+                <span className="text-[9px] font-black text-[#667085]">
+                  نتایج جستجو
+                </span>
 
-                return (
-                  <li
-                    key={product.id}
-                    id={`live-search-option-${index}`}
-                    role="option"
-                    aria-selected={isActive}
-                  >
-                    <Link
-                      href={`/products/${product.slug}`}
-                      onClick={() => {
-                        setIsOpen(false)
-                        setActiveIndex(-1)
-                      }}
-                      onMouseEnter={() =>
-                        setActiveIndex(index)
-                      }
-                      className={[
-                        'group/item mx-1.5 flex',
-                        'min-h-[74px] items-center gap-3',
-                        'rounded-[15px] px-2.5 py-2',
-                        'transition-all duration-150',
-                        isActive
-                          ? 'bg-[#f3efe7]'
-                          : 'hover:bg-[#f7f4ee]',
-                      ].join(' ')}
-                    >
-                      {/* Product image */}
-                      {product.image?.sourceUrl ? (
-                        <div
-                          className="
-                            relative
-                            h-12
-                            w-12
-                            shrink-0
-                            overflow-hidden
-                            rounded-[12px]
-                            bg-[#f2eee7]
-                            ring-1
-                            ring-black/[0.045]
-                          "
-                        >
-                          <Image
-                            src={
-                              product.image.sourceUrl
-                            }
-                            alt={
-                              product.image.altText ||
-                              product.name
-                            }
-                            fill
-                            sizes="48px"
-                            className="
-                              object-cover
-                              transition-transform
-                              duration-400
-                              group-hover/item:scale-105
-                            "
-                          />
-                        </div>
-                      ) : (
-                        <div
-                          className="
-                            flex
-                            h-12
-                            w-12
-                            shrink-0
-                            items-center
-                            justify-center
-                            rounded-[12px]
-                            bg-[#f2eee7]
-                            text-[#a39786]
-                          "
-                          aria-hidden="true"
-                        >
-                          <PackageSearch
-                            className="h-5 w-5"
-                            strokeWidth={1.5}
-                          />
-                        </div>
-                      )}
+                <span className="rounded-full bg-[#B79464]/[0.10] px-2 py-1 text-[8px] font-black text-[#76582F]">
+                  {results.length} نتیجه
+                </span>
+              </div>
 
-                      {/* Product info */}
-                      <div className="min-w-0 flex-1">
-                        <p
-                          className="
-                            truncate
-                            text-[13px]
-                            font-bold
-                            leading-6
-                            text-[#21364d]
-                            transition-colors
-                            duration-150
-                            group-hover/item:text-primary
-                          "
-                        >
-                          {product.name}
-                        </p>
+              <ul
+                id={SEARCH_LISTBOX_ID}
+                role="listbox"
+                aria-label="نتایج جستجوی محصولات"
+                className="max-h-[360px] overflow-y-auto p-1.5"
+              >
+                {results.map(
+                  (product, index) => {
+                    const active =
+                      activeIndex === index
 
-                        <p
-                          className="
-                            mt-0.5
-                            text-[11px]
-                            font-bold
-                            text-accent-dark
-                          "
-                        >
-                          {formatPrice(product.price)}
-                        </p>
-                      </div>
-
-                      {/* Arrow */}
-                      <span
-                        className={[
-                          'hidden sm:flex',
-                          'h-7 w-7 shrink-0',
-                          'items-center justify-center',
-                          'rounded-full',
-                          'transition-all duration-200',
-                          isActive
-                            ? 'bg-white text-accent shadow-[0_2px_8px_rgba(10,25,41,0.06)]'
-                            : 'bg-transparent text-[#b6ac9e] group-hover/item:bg-white group-hover/item:text-accent',
-                        ].join(' ')}
-                        aria-hidden="true"
+                    return (
+                      <li
+                        key={product.id}
+                        id={`live-search-option-${index}`}
+                        role="option"
+                        aria-selected={active}
                       >
-                        <ArrowLeft
-                          className="h-3.5 w-3.5"
-                          strokeWidth={1.8}
-                        />
-                      </span>
-                    </Link>
-                  </li>
-                )
-              })}
-            </ul>
+                        <Link
+                          href={`/products/${product.slug}`}
+                          onClick={() => {
+                            setIsOpen(false)
+                            setActiveIndex(-1)
+                          }}
+                          onMouseEnter={() =>
+                            setActiveIndex(index)
+                          }
+                          className={[
+                            'group flex min-h-[68px] items-center gap-2.5 rounded-[14px] px-2 py-2',
+                            'transition-all duration-150',
+                            active
+                              ? 'bg-[#F5F1E9]'
+                              : 'hover:bg-[#F8F6F2]',
+                          ].join(' ')}
+                        >
+                          {product.image?.sourceUrl ? (
+                            <div
+                              className="
+                                relative
+                                h-11
+                                w-11
+                                shrink-0
+                                overflow-hidden
+                                rounded-[11px]
+                                bg-[#F1EEE7]
+                                ring-1
+                                ring-black/[0.04]
+                              "
+                            >
+                              <Image
+                                src={
+                                  product.image
+                                    .sourceUrl
+                                }
+                                alt={
+                                  product.image
+                                    .altText ||
+                                  product.name
+                                }
+                                fill
+                                sizes="44px"
+                                className="
+                                  object-cover
+                                  transition-transform
+                                  duration-300
+                                  group-hover:scale-105
+                                "
+                              />
+                            </div>
+                          ) : (
+                            <span
+                              aria-hidden="true"
+                              className="
+                                flex
+                                h-11
+                                w-11
+                                shrink-0
+                                items-center
+                                justify-center
+                                rounded-[11px]
+                                bg-[#F1EEE7]
+                                text-[#9A8D79]
+                              "
+                            >
+                              <PackageSearch
+                                className="h-4.5 w-4.5"
+                                strokeWidth={1.5}
+                              />
+                            </span>
+                          )}
+
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-[11px] font-black text-[#21364D]">
+                              {product.name}
+                            </span>
+
+                            <span className="mt-0.5 block text-[9px] font-bold text-[#9E7F50]">
+                              {formatPrice(
+                                product.price,
+                              )}
+                            </span>
+                          </span>
+
+                          <span
+                            className={[
+                              'flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-all duration-200',
+                              active
+                                ? 'bg-white text-[#B79464] shadow-[0_2px_7px_rgba(10,25,41,0.06)]'
+                                : 'text-[#B5AA9C] group-hover:bg-white group-hover:text-[#B79464]',
+                            ].join(' ')}
+                            aria-hidden="true"
+                          >
+                            <ArrowLeft
+                              className="h-3 w-3"
+                              strokeWidth={1.8}
+                            />
+                          </span>
+                        </Link>
+                      </li>
+                    )
+                  },
+                )}
+              </ul>
+            </>
           )}
 
-          {/* Empty state */}
-          {showEmptyState && (
+          {/* Empty */}
+          {showEmpty && (
             <div
               className="
                 flex
+                min-h-[155px]
                 flex-col
                 items-center
                 justify-center
                 px-5
-                py-9
                 text-center
               "
               role="status"
               aria-live="polite"
             >
-              <div
+              <span
                 className="
-                  mb-3
                   flex
-                  h-12
-                  w-12
+                  h-11
+                  w-11
                   items-center
                   justify-center
                   rounded-full
-                  border
-                  border-accent/10
-                  bg-accent/[0.08]
-                  text-accent-dark
+                  bg-[#B79464]/[0.09]
+                  text-[#9E7F50]
                 "
               >
                 <PackageSearch
                   className="h-5 w-5"
                   strokeWidth={1.5}
                 />
-              </div>
+              </span>
 
-              <p className="text-[13px] font-bold text-primary">
+              <p className="mt-3 text-[11px] font-black text-[#112F50]">
                 محصولی پیدا نشد
               </p>
 
-              <p className="mt-1 text-[11px] text-[#92979f]">
+              <p className="mt-1 text-[9px] font-medium text-[#98A0A8]">
                 عبارت دیگری را امتحان کنید
               </p>
             </div>
@@ -731,16 +649,9 @@ export default function LiveSearch() {
           {error && (
             <div
               role="alert"
-              className="
-                flex
-                items-center
-                gap-3
-                px-4
-                py-4
-                text-right
-              "
+              className="flex min-h-[105px] items-center gap-3 px-4"
             >
-              <div
+              <span
                 className="
                   flex
                   h-9
@@ -757,14 +668,14 @@ export default function LiveSearch() {
                   className="h-4 w-4"
                   strokeWidth={1.8}
                 />
-              </div>
+              </span>
 
               <div className="min-w-0">
-                <p className="text-[12px] font-bold text-red-700">
+                <p className="text-[10px] font-black text-red-700">
                   جستجو انجام نشد
                 </p>
 
-                <p className="mt-0.5 truncate text-[11px] text-red-500/80">
+                <p className="mt-1 truncate text-[9px] font-medium text-red-500/75">
                   {error}
                 </p>
               </div>

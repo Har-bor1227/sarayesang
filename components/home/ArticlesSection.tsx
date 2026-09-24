@@ -1,7 +1,11 @@
+
 import Image from 'next/image'
 import Link from 'next/link'
 
-import { ArrowLeft, ArrowUpLeft } from 'lucide-react'
+import {
+  ArrowLeft,
+  ArrowUpLeft,
+} from 'lucide-react'
 
 import Container from '@/components/ui/container'
 
@@ -11,25 +15,25 @@ interface ArticlesSectionProps {
   articles: PostSummary[]
 }
 
-function getArticleCategory(article: PostSummary) {
-  return article.categories?.nodes?.[0]?.name || 'مقالات'
-}
+const PLACEHOLDER =
+  '/images/home/product-placeholder.webp'
 
-function getArticleImage(article: PostSummary) {
-  return (
-    article.featuredImage?.node?.sourceUrl ||
-    '/images/home/product-placeholder.webp'
-  )
-}
-
-function getArticleImageAlt(article: PostSummary) {
-  return article.featuredImage?.node?.altText || article.title
-}
-
-function getArticleHref(article: PostSummary) {
-  return article.slug
-    ? `/blog/${encodeURIComponent(article.slug)}`
-    : '/blog'
+function articleData(article: PostSummary) {
+  return {
+    category:
+      article.categories?.nodes?.[0]?.name ||
+      'مقالات',
+    image:
+      article.featuredImage?.node?.sourceUrl ||
+      PLACEHOLDER,
+    alt:
+      article.featuredImage?.node?.altText ||
+      article.title,
+    href: article.slug
+      ? `/blog/${encodeURIComponent(article.slug)}`
+      : '/blog',
+    excerpt: stripHtml(article.excerpt),
+  }
 }
 
 function stripHtml(value?: string | null) {
@@ -37,12 +41,18 @@ function stripHtml(value?: string | null) {
 
   return value
     .replace(/<[^>]*>/g, ' ')
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/&lt;/gi, '<')
-    .replace(/&gt;/gi, '>')
-    .replace(/&#39;/gi, "'")
-    .replace(/&quot;/gi, '"')
+    .replace(
+      /&(nbsp|amp|lt|gt|#39|quot);/gi,
+      (match) =>
+        ({
+          '&nbsp;': ' ',
+          '&amp;': '&',
+          '&lt;': '<',
+          '&gt;': '>',
+          '&#39;': "'",
+          '&quot;': '"',
+        })[match.toLowerCase()] || '',
+    )
     .replace(/\s+/g, ' ')
     .trim()
 }
@@ -52,14 +62,27 @@ function FeaturedArticle({
 }: {
   article: PostSummary
 }) {
-  const category = getArticleCategory(article)
-  const image = getArticleImage(article)
-  const imageAlt = getArticleImageAlt(article)
-  const href = getArticleHref(article)
-  const excerpt = stripHtml(article.excerpt)
+  const {
+    category,
+    image,
+    alt,
+    href,
+    excerpt,
+  } = articleData(article)
 
   return (
-    <article className="group relative min-h-[430px] overflow-hidden rounded-[28px] bg-[#0A1929] sm:min-h-[500px] lg:min-h-[610px]">
+    <article
+      className="
+        group
+        relative
+        aspect-[1.4]
+        overflow-hidden
+        rounded-[22px]
+        bg-[#0A1929]
+        lg:aspect-[1.28]
+        lg:rounded-[26px]
+      "
+    >
       <Link
         href={href}
         aria-label={article.title}
@@ -67,56 +90,125 @@ function FeaturedArticle({
       >
         <Image
           src={image}
-          alt={imageAlt}
+          alt={alt}
           fill
-          sizes="(max-width: 1023px) 100vw, 58vw"
-          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.045]"
-          priority
+          sizes="(max-width: 1023px) 100vw, 62vw"
+          className="
+            object-cover
+            transition-transform
+            duration-700
+            ease-out
+            group-hover:scale-[1.04]
+          "
         />
 
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,25,41,0.03)_10%,rgba(10,25,41,0.10)_36%,rgba(10,25,41,0.88)_100%)]" />
-
-        <div className="absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,rgba(10,25,41,0.18),transparent)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,25,41,.02)_15%,rgba(10,25,41,.12)_42%,rgba(10,25,41,.9)_100%)]" />
       </Link>
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 p-5 sm:p-7 lg:p-9">
-        <div className="mb-4 flex items-center gap-3">
-          <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[9px] font-bold text-white backdrop-blur-md sm:text-[10px]">
+      <div
+        className="
+          absolute
+          inset-x-0
+          bottom-0
+          z-10
+          p-4
+          sm:p-5
+          lg:p-7
+        "
+      >
+        <div className="mb-2.5 flex items-center gap-2">
+          <span
+            className="
+              rounded-full
+              border
+              border-white/20
+              bg-white/10
+              px-2.5
+              py-1
+              text-[8px]
+              font-bold
+              text-white
+              backdrop-blur-md
+              sm:text-[9px]
+            "
+          >
             {category}
           </span>
 
-          <span className="h-px w-8 bg-[#B79464] sm:w-12" />
+          <span className="h-px w-7 bg-[#B79464]" />
 
-          <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/60 sm:text-[10px]">
-            Featured Insight
+          <span className="text-[7px] font-semibold uppercase tracking-[.16em] text-white/65 sm:text-[8px]">
+            Featured
           </span>
         </div>
 
-        <h3 className="max-w-[760px] text-right text-[25px] font-black leading-[1.55] tracking-[-0.025em] text-white sm:text-[32px] sm:leading-[1.5] lg:text-[42px] lg:leading-[1.45]">
+        <h3
+          className="
+            max-w-[700px]
+            text-right
+            text-[18px]
+            font-black
+            leading-[1.55]
+            tracking-[-.02em]
+            text-white
+            sm:text-[24px]
+            md:text-[28px]
+            lg:text-[34px]
+          "
+        >
           {article.title}
         </h3>
 
-        {excerpt ? (
-          <p className="mt-3 max-w-[680px] line-clamp-2 text-right text-[11px] font-medium leading-7 text-white/72 sm:mt-4 sm:text-[13px] sm:leading-8">
+        {excerpt && (
+          <p className="mt-2 line-clamp-2 max-w-[620px] text-[9px] font-medium leading-6 text-white/75 sm:text-[10px] sm:leading-7">
             {excerpt}
           </p>
-        ) : null}
+        )}
 
-        <div className="mt-5 flex items-center justify-between gap-4 sm:mt-7">
-          <span className="inline-flex items-center gap-2 text-[10px] font-black text-white sm:text-[11px]">
+        <div className="mt-3 flex items-center justify-between gap-3 sm:mt-4">
+          <span className="inline-flex items-center gap-1.5 text-[8px] font-black text-white sm:text-[9px]">
             مطالعه مقاله
-            <ArrowLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />
+            <ArrowLeft
+              className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-x-1"
+              aria-hidden="true"
+            />
           </span>
 
-          <span className="text-[9px] font-medium tracking-[0.16em] text-white/45">
+          <span className="text-[7px] tracking-[.14em] text-white/50 sm:text-[8px]">
             SARAYE SANG
           </span>
         </div>
       </div>
 
-      <div className="pointer-events-none absolute right-5 top-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white backdrop-blur-md transition-all duration-300 group-hover:border-[#B79464]/60 group-hover:bg-[#B79464] sm:right-7 sm:top-7">
-        <ArrowUpLeft className="h-4 w-4" />
-      </div>
+      <span
+        aria-hidden="true"
+        className="
+          absolute
+          right-3.5
+          top-3.5
+          z-10
+          flex
+          h-8
+          w-8
+          items-center
+          justify-center
+          rounded-full
+          border
+          border-white/15
+          bg-black/10
+          text-white
+          backdrop-blur-md
+          sm:right-4
+          sm:top-4
+          sm:h-9
+          sm:w-9
+        "
+      >
+        <ArrowUpLeft
+          className="h-3.5 w-3.5"
+          strokeWidth={1.8}
+        />
+      </span>
     </article>
   )
 }
@@ -126,71 +218,94 @@ function SecondaryArticle({
 }: {
   article: PostSummary
 }) {
-  const category = getArticleCategory(article)
-  const image = getArticleImage(article)
-  const imageAlt = getArticleImageAlt(article)
-  const href = getArticleHref(article)
-  const excerpt = stripHtml(article.excerpt)
+  const {
+    category,
+    image,
+    alt,
+    href,
+    excerpt,
+  } = articleData(article)
 
   return (
-    <article className="group flex min-h-[220px] overflow-hidden rounded-[22px] border border-[#112F50]/[0.07] bg-[#FCFCFB] transition-all duration-400 hover:-translate-y-1 hover:border-[#B79464]/25 hover:shadow-[0_18px_45px_rgba(10,25,41,0.08)] sm:min-h-[245px]">
+    <article
+      className="
+        group
+        flex
+        min-h-[150px]
+        overflow-hidden
+        rounded-[18px]
+        border
+        border-[#112F50]/[.07]
+        bg-[#FCFCFB]
+        transition-all
+        duration-300
+        hover:-translate-y-0.5
+        hover:border-[#B79464]/25
+        hover:shadow-[0_14px_32px_rgba(10,25,41,.07)]
+        sm:min-h-[160px]
+      "
+    >
       <Link
         href={href}
         aria-label={article.title}
-        className="relative block w-[38%] shrink-0 overflow-hidden sm:w-[41%]"
+        className="relative w-[37%] shrink-0 overflow-hidden sm:w-[39%]"
       >
         <Image
           src={image}
-          alt={imageAlt}
+          alt={alt}
           fill
-          sizes="(max-width: 639px) 38vw, (max-width: 1023px) 41vw, 20vw"
-          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.055]"
+          sizes="(max-width: 639px) 37vw, (max-width: 1023px) 39vw, 20vw"
+          className="object-cover transition-transform duration-700 group-hover:scale-[1.05]"
         />
 
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_45%,rgba(10,25,41,0.25))]" />
-
-        <span className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-black/10 text-white backdrop-blur-md sm:right-4 sm:top-4">
-          <ArrowUpLeft className="h-3.5 w-3.5" />
+        <span className="absolute right-2.5 top-2.5 flex h-7 w-7 items-center justify-center rounded-full border border-white/15 bg-black/10 text-white backdrop-blur-md">
+          <ArrowUpLeft
+            className="h-3 w-3"
+            strokeWidth={1.8}
+          />
         </span>
       </Link>
 
       <div
-        className="flex min-w-0 flex-1 flex-col justify-between p-4 sm:p-5"
         dir="rtl"
+        className="flex min-w-0 flex-1 flex-col justify-between p-3 sm:p-3.5"
       >
         <div>
-          <div className="mb-3 flex items-center gap-2">
+          <div className="mb-1.5 flex items-center gap-1.5">
             <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#B79464]" />
 
-            <span className="min-w-0 truncate text-[8px] font-black text-[#667085] sm:text-[9px]">
+            <span className="truncate text-[7px] font-black text-[#667085] sm:text-[8px]">
               {category}
             </span>
           </div>
 
-          <Link href={href} className="block">
-            <h3 className="line-clamp-3 text-[13px] font-black leading-[1.8] tracking-[-0.015em] text-[#112F50] transition-colors duration-300 group-hover:text-[#B79464] sm:text-[15px] sm:leading-[1.75]">
+          <Link href={href}>
+            <h3 className="line-clamp-3 text-[11px] font-black leading-[1.75] tracking-[-.01em] text-[#112F50] transition-colors group-hover:text-[#76582f] sm:text-[12px]">
               {article.title}
             </h3>
           </Link>
 
-          {excerpt ? (
-            <p className="mt-2.5 line-clamp-2 text-[8.5px] font-medium leading-[1.9] text-[#667085] sm:mt-3 sm:text-[9.5px]">
+          {excerpt && (
+            <p className="mt-1.5 line-clamp-2 text-[7.5px] font-medium leading-[1.8] text-[#667085] sm:text-[8.5px]">
               {excerpt}
             </p>
-          ) : null}
+          )}
         </div>
 
-        <div className="mt-4 flex items-center justify-between gap-3">
+        <div className="mt-2 flex items-center gap-2">
           <Link
             href={href}
-            className="inline-flex items-center gap-1.5 text-[8px] font-black text-[#112F50] transition-colors duration-300 hover:text-[#B79464] sm:text-[9px]"
+            className="inline-flex min-h-8 shrink-0 items-center gap-1 text-[7px] font-black text-[#112F50] transition-colors hover:text-[#76582f] sm:text-[8px]"
           >
-            <span>مطالعه مقاله</span>
+            مطالعه مقاله
 
-            <ArrowLeft className="h-3 w-3 transition-transform duration-300 group-hover:-translate-x-1" />
+            <ArrowLeft
+              className="h-3 w-3 transition-transform duration-300 group-hover:-translate-x-1"
+              aria-hidden="true"
+            />
           </Link>
 
-          <span className="h-px flex-1 bg-[#112F50]/[0.08]" />
+          <span className="h-px flex-1 bg-[#112F50]/[.07]" />
         </div>
       </div>
     </article>
@@ -206,60 +321,75 @@ export default function ArticlesSection({
     return null
   }
 
-  const featuredArticle = visibleArticles[0]
-  const secondaryArticles = visibleArticles.slice(1, 5)
+  const [featuredArticle, ...secondaryArticles] =
+    visibleArticles
 
   return (
     <section
-      className="w-full overflow-hidden bg-[#FCFCFB] py-16 sm:py-20 lg:py-24"
       dir="rtl"
       aria-label="مقالات و دانش سرای سنگ"
+      className="w-full bg-[#FCFCFB] px-3 pb-6 pt-3 sm:px-0 sm:pb-7 sm:pt-4 lg:pb-9 lg:pt-6"
     >
       <Container>
-        {/* =========================================================
-            SECTION HEADER
-        ========================================================== */}
-        <div className="mb-9 flex flex-col gap-6 sm:mb-11 lg:mb-14 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-[700px]">
-            <div className="mb-4 flex items-center gap-3">
-              <span className="h-px w-8 bg-[#B79464] sm:w-10" />
+        {/* Header */}
+        <div className="mx-auto mb-5 max-w-[700px] text-center sm:mb-6 md:mb-7">
+          <div className="mb-2.5 flex items-center justify-center gap-2.5">
+            <span className="h-px w-7 bg-[#B79464] sm:w-9" />
 
-              <span className="text-[9px] font-black uppercase tracking-[0.22em] text-[#B79464] sm:text-[10px]">
-                Knowledge &amp; Stories
-              </span>
-            </div>
+            <span className="text-[8px] font-black uppercase tracking-[.2em] text-[#76582f] sm:text-[9px]">
+              Knowledge &amp; Stories
+            </span>
 
-            <h2 className="text-[30px] font-black leading-[1.45] tracking-[-0.035em] text-[#112F50] sm:text-[38px] sm:leading-[1.4] lg:text-[46px]">
-              دانش، تجربه
-              <span className="text-[#B79464]">، الهام</span>
-            </h2>
-
-            <p className="mt-3 max-w-[610px] text-[11px] font-medium leading-7 text-[#667085] sm:mt-4 sm:text-[13px] sm:leading-8">
-              روایت‌ها، نکات تخصصی و تجربه‌های ما درباره سنگ، انتخاب متریال
-              و معماری ماندگار.
-            </p>
+            <span className="h-px w-7 bg-[#B79464] sm:w-9" />
           </div>
+
+          <h2 className="text-[25px] font-black leading-[1.4] tracking-[-.035em] text-[#112F50] sm:text-[31px] md:text-[36px] lg:text-[40px]">
+            دانش، تجربه
+            <span className="text-[#76582f]">
+              ، الهام
+            </span>
+          </h2>
 
           <Link
             href="/blog"
-            className="group inline-flex w-fit items-center gap-3 border-b border-[#112F50]/20 pb-2 text-[10px] font-black text-[#112F50] transition-colors duration-300 hover:border-[#B79464] hover:text-[#B79464] sm:text-[11px]"
+            className="
+              group
+              mx-auto
+              mt-3
+              inline-flex
+              min-h-9
+              items-center
+              gap-2
+              rounded-full
+              border
+              border-[#112F50]/10
+              bg-white
+              px-3.5
+              text-[8px]
+              font-black
+              text-[#112F50]
+              shadow-[0_4px_14px_rgba(10,25,41,.04)]
+              transition-all
+              hover:border-[#B79464]/25
+              hover:text-[#76582f]
+              sm:text-[9px]
+            "
           >
-            <span>مشاهده همه مقالات</span>
+            مشاهده همه مقالات
 
-            <ArrowLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />
+            <ArrowLeft
+              className="h-3 w-3 transition-transform duration-300 group-hover:-translate-x-1"
+              aria-hidden="true"
+            />
           </Link>
         </div>
 
-        {/* =========================================================
-            EDITORIAL GRID
-        ========================================================== */}
-        <div className="grid gap-4 lg:grid-cols-[1.12fr_0.88fr] lg:gap-5">
-          {/* FEATURED */}
+        {/* Articles */}
+        <div className="grid gap-3 lg:grid-cols-[1.2fr_.8fr] lg:gap-4">
           <FeaturedArticle article={featuredArticle} />
 
-          {/* SECONDARY ARTICLES */}
-          {secondaryArticles.length > 0 ? (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 lg:gap-5">
+          {secondaryArticles.length > 0 && (
+            <div className="grid gap-3">
               {secondaryArticles.map((article) => (
                 <SecondaryArticle
                   key={article.id}
@@ -267,23 +397,10 @@ export default function ArticlesSection({
                 />
               ))}
             </div>
-          ) : null}
-        </div>
-
-        {/* =========================================================
-            BOTTOM BRAND LINE
-        ========================================================== */}
-        <div className="mt-8 flex items-center gap-4 sm:mt-10">
-          <span className="h-px flex-1 bg-[#112F50]/[0.08]" />
-
-          <span className="text-[8px] font-black tracking-[0.25em] text-[#667085]/55 sm:text-[9px]">
-            SARAYE SANG / INSIGHTS
-          </span>
-
-          <span className="h-px flex-1 bg-[#112F50]/[0.08]" />
-
+          )}
         </div>
       </Container>
     </section>
   )
 }
+

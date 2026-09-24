@@ -1,12 +1,14 @@
 import type { Metadata } from 'next'
 
+import { DEFAULT_SOCIAL_IMAGE } from '@/lib/constants'
+
 import Image from 'next/image'
+
 import Link from 'next/link'
+
 import { notFound } from 'next/navigation'
 
-import {
-  ArrowLeft,
-} from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 
 import Container from '@/components/ui/container'
 
@@ -28,6 +30,7 @@ import {
 
 import {
   rankMathToMetadata,
+  stripHtmlText,
 } from '@/lib/rank-math'
 
 import {
@@ -47,6 +50,7 @@ interface CategoryPageProps {
   params: Promise<{
     slug: string
   }>
+
   searchParams?: Promise<{
     [key: string]:
       | string
@@ -66,6 +70,19 @@ function getFrontendCategoryUrl(
   )}`
 }
 
+function getCategoryCanonicalUrl(
+  baseUrl: string,
+  after?: string,
+): string {
+  if (!after) {
+    return baseUrl
+  }
+
+  return `${baseUrl}?after=${encodeURIComponent(
+    after,
+  )}`
+}
+
 function getFallbackCategoryMetadata(
   category: {
     name: string
@@ -76,11 +93,15 @@ function getFallbackCategoryMetadata(
       altText?: string
     } | null
   },
-  frontendCategoryUrl: string,
+
+  canonicalUrl: string,
+
   hasPagination: boolean,
 ): Metadata {
   const description =
-    category.description ||
+    stripHtmlText(
+      category.description,
+    ) ||
     `محصولات ${category.name}`
 
   const image =
@@ -94,18 +115,19 @@ function getFallbackCategoryMetadata(
 
     alternates: {
       canonical:
-        frontendCategoryUrl,
+        canonicalUrl,
     },
 
-    robots: hasPagination
-      ? {
-          index: false,
-          follow: true,
-        }
-      : {
-          index: true,
-          follow: true,
-        },
+    robots:
+      hasPagination
+        ? {
+            index: false,
+            follow: true,
+          }
+        : {
+            index: true,
+            follow: true,
+          },
 
     openGraph: {
       type: 'website',
@@ -116,7 +138,7 @@ function getFallbackCategoryMetadata(
       description,
 
       url:
-        frontendCategoryUrl,
+        canonicalUrl,
 
       siteName:
         SITE_NAME,
@@ -124,17 +146,18 @@ function getFallbackCategoryMetadata(
       locale:
         'fa_IR',
 
-      images: image
-        ? [
-            {
-              url: image,
-              alt:
-                category.image
-                  ?.altText ||
-                category.name,
-            },
-          ]
-        : undefined,
+      images:
+        image
+          ? [
+              {
+                url: image,
+                alt:
+                  category.image
+                    ?.altText ||
+                  category.name,
+              },
+            ]
+          : undefined,
     },
 
     twitter: {
@@ -146,9 +169,10 @@ function getFallbackCategoryMetadata(
 
       description,
 
-      images: image
-        ? [image]
-        : undefined,
+      images:
+        image
+          ? [image]
+          : undefined,
     },
   }
 }
@@ -163,10 +187,15 @@ export async function generateMetadata({
   const resolvedSearchParams =
     await searchParams
 
-  const hasPagination =
+  const after =
     typeof resolvedSearchParams?.after ===
       'string' &&
     resolvedSearchParams.after.length > 0
+      ? resolvedSearchParams.after
+      : undefined
+
+  const hasPagination =
+    Boolean(after)
 
   const category =
     await getProductCategoryBySlug(
@@ -176,7 +205,7 @@ export async function generateMetadata({
   if (!category) {
     return {
       title:
-        `دسته‌بندی یافت نشد | ${SITE_NAME}`,
+        'دسته‌بندی یافت نشد',
 
       description:
         'دسته‌بندی مورد نظر پیدا نشد.',
@@ -193,6 +222,17 @@ export async function generateMetadata({
       category.slug,
     )
 
+  const canonicalUrl =
+    getCategoryCanonicalUrl(
+      frontendCategoryUrl,
+      after,
+    )
+
+  const categoryDescription =
+    stripHtmlText(
+      category.description,
+    )
+
   const rankMath =
     await getProductCategorySeo(
       category.slug,
@@ -202,22 +242,57 @@ export async function generateMetadata({
     const metadata =
       rankMathToMetadata(
         rankMath,
-        frontendCategoryUrl,
+        canonicalUrl,
+        'website',
       )
 
-    if (hasPagination) {
-      metadata.robots = {
-        index: false,
-        follow: true,
-      }
-    }
+    const description =
+      categoryDescription ||
+      stripHtmlText(
+        metadata.description,
+      ) ||
+      `محصولات ${category.name}`
 
-    return metadata
+    return {
+      ...metadata,
+
+      description,
+
+      alternates: {
+        canonical:
+          canonicalUrl,
+      },
+
+      openGraph: {
+        ...metadata.openGraph,
+
+        type: 'website',
+
+        description,
+
+        url:
+          canonicalUrl,
+      },
+
+      twitter: {
+        ...metadata.twitter,
+
+        description,
+      },
+
+      robots:
+        hasPagination
+          ? {
+              index: false,
+              follow: true,
+            }
+          : metadata.robots,
+    }
   }
 
   return getFallbackCategoryMetadata(
     category,
-    frontendCategoryUrl,
+    canonicalUrl,
     hasPagination,
   )
 }
@@ -251,7 +326,8 @@ export default async function CategoryPage({
     await getProducts({
       first: 12,
       after,
-      category: category.id,
+      category:
+        category.id,
     })
 
   const products =
@@ -264,6 +340,8 @@ export default async function CategoryPage({
     generateCollectionPageSchema(
       category,
       products,
+      pageInfo.total ??
+        products.length,
     )
 
   const breadcrumbItems = [
@@ -290,8 +368,13 @@ export default async function CategoryPage({
   const categoryImage =
     category.image?.sourceUrl
 
+  const categoryDescription =
+    stripHtmlText(
+      category.description,
+    )
+
   return (
-    <main
+    <div
       className="w-full bg-[#FCFCFB]"
       dir="rtl"
     >
@@ -300,15 +383,11 @@ export default async function CategoryPage({
             SEO / STRUCTURED DATA
         ========================================================== */}
         <JsonLd
-          data={
-            collectionSchema
-          }
+          data={collectionSchema}
         />
 
         <JsonLd
-          data={
-            breadcrumbSchema
-          }
+          data={breadcrumbSchema}
         />
 
         {/* =========================================================
@@ -404,9 +483,9 @@ export default async function CategoryPage({
                   {category.name}
                 </h1>
 
-                {category.description && (
+                {categoryDescription && (
                   <p className="mt-3 max-w-[700px] text-[10px] font-medium leading-7 text-white/65 sm:text-[12px] sm:leading-8">
-                    {category.description}
+                    {categoryDescription}
                   </p>
                 )}
               </div>
@@ -468,11 +547,9 @@ export default async function CategoryPage({
                 className="group h-11 rounded-full border-[#112F50]/[0.10] bg-white px-6 text-[10px] font-black text-[#112F50] shadow-[0_6px_20px_rgba(10,25,41,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#B79464]/40 hover:bg-[#FBF8F2] hover:text-[#9E7F50]"
               >
                 <Link
-                  href={
-                    `/categories/${category.slug}?after=${encodeURIComponent(
-                      pageInfo.endCursor,
-                    )}`
-                  }
+                  href={`/categories/${category.slug}?after=${encodeURIComponent(
+                    pageInfo.endCursor,
+                  )}`}
                 >
                   <span>
                     مشاهده محصولات بیشتر
@@ -521,13 +598,14 @@ export default async function CategoryPage({
             <span className="h-px flex-1 bg-[#112F50]/[0.08]" />
 
             <span className="text-[8px] font-black tracking-[0.24em] text-[#667085]/50 sm:text-[9px]">
-              SARAYE SANG / {category.name}
+              SARAYE SANG /{' '}
+              {category.name}
             </span>
 
             <span className="h-px flex-1 bg-[#112F50]/[0.08]" />
           </div>
         )}
       </Container>
-    </main>
+    </div>
   )
 }

@@ -10,6 +10,12 @@ import {
 } from '@/lib/repositories/category-repository'
 
 import {
+  generateBreadcrumbSchema,
+  JsonLd,
+} from '@/lib/seo'
+
+import {
+  DEFAULT_SOCIAL_IMAGE,
   SITE_NAME,
   SITE_URL,
 } from '@/lib/constants'
@@ -18,7 +24,7 @@ export const revalidate = 3600
 
 export const metadata: Metadata = {
   title:
-    `دسته‌بندی محصولات | ${SITE_NAME}`,
+    'دسته‌بندی محصولات',
 
   description:
     'دسته‌بندی‌های سنگ‌های ساختمانی سرای سنگ را مشاهده کنید و سنگ مناسب پروژه خود را پیدا کنید.',
@@ -35,10 +41,45 @@ export const metadata: Metadata = {
     description:
       'دسته‌بندی‌های سنگ‌های ساختمانی سرای سنگ.',
 
-    type: 'website',
+    type:
+      'website',
 
     url:
       `${SITE_URL}/categories`,
+
+    siteName:
+      SITE_NAME,
+
+    locale:
+      'fa_IR',
+
+    images: [
+      {
+        url:
+          DEFAULT_SOCIAL_IMAGE,
+        width:
+          1920,
+        height:
+          758,
+        alt:
+          SITE_NAME,
+      },
+    ],
+  },
+
+  twitter: {
+    card:
+      'summary_large_image',
+
+    images: [
+      DEFAULT_SOCIAL_IMAGE,
+    ],
+
+    title:
+      `دسته‌بندی محصولات | ${SITE_NAME}`,
+
+    description:
+      'دسته‌بندی‌های سنگ‌های ساختمانی سرای سنگ.',
   },
 }
 
@@ -46,12 +87,31 @@ export default async function CategoriesPage() {
   const categories =
     await getProductCategories()
 
+  const breadcrumbSchema =
+    generateBreadcrumbSchema([
+      {
+        name: 'خانه',
+        path: '/',
+      },
+      {
+        name: 'دسته‌بندی‌ها',
+        path: '/categories',
+      },
+    ])
+
   return (
-    <main
+    <div
       className="w-full bg-[#FCFCFB]"
       dir="rtl"
     >
       <Container className="pb-16 pt-5 sm:pb-20 sm:pt-7 lg:pb-24">
+        {/* =========================================================
+            SEO / STRUCTURED DATA
+        ========================================================== */}
+        <JsonLd
+          data={breadcrumbSchema}
+        />
+
         {/* =========================================================
             BREADCRUMB
         ========================================================== */}
@@ -76,7 +136,10 @@ export default async function CategoriesPage() {
               /
             </li>
 
-            <li className="shrink-0 font-black text-[#112F50]">
+            <li
+              aria-current="page"
+              className="shrink-0 font-black text-[#112F50]"
+            >
               دسته‌بندی‌ها
             </li>
           </ol>
@@ -258,6 +321,6 @@ export default async function CategoriesPage() {
           </div>
         )}
       </Container>
-    </main>
+    </div>
   )
 }

@@ -2,6 +2,7 @@ import {
   SITE_NAME,
   SITE_URL,
   TEL_PHONE,
+  SOCIAL_LINKS,
 } from '@/lib/constants'
 
 import {
@@ -29,21 +30,24 @@ export type JsonLdValue =
   | JsonLdValue[]
 
 export interface JsonLdObject {
-  [key: string]: JsonLdValue | undefined
+  [key: string]:
+    | JsonLdValue
+    | undefined
 }
 
-interface PropertyValueSchema extends JsonLdObject {
+interface PropertyValueSchema
+  extends JsonLdObject {
   '@type': 'PropertyValue'
   name: string
   value: string
 }
 
-interface ProductOfferSchema extends JsonLdObject {
+interface ProductOfferSchema
+  extends JsonLdObject {
   '@type': 'Offer'
-  price: string
-  priceCurrency: string
-  availability: string
-  itemCondition: string
+  price?: string
+  priceCurrency?: string
+  availability?: string
   url: string
   seller: {
     '@type': 'Organization'
@@ -52,7 +56,8 @@ interface ProductOfferSchema extends JsonLdObject {
   }
 }
 
-interface ProductSchema extends JsonLdObject {
+interface ProductSchema
+  extends JsonLdObject {
   '@context': 'https://schema.org'
   '@type': 'Product'
   '@id': string
@@ -75,7 +80,8 @@ interface ProductSchema extends JsonLdObject {
   }
 }
 
-interface BreadcrumbSchema extends JsonLdObject {
+interface BreadcrumbSchema
+  extends JsonLdObject {
   '@context': 'https://schema.org'
   '@type': 'BreadcrumbList'
   itemListElement: {
@@ -86,12 +92,14 @@ interface BreadcrumbSchema extends JsonLdObject {
   }[]
 }
 
-interface ArticleSchema extends JsonLdObject {
+interface ArticleSchema
+  extends JsonLdObject {
   '@context': 'https://schema.org'
   '@type': 'BlogPosting'
   '@id': string
   headline: string
   description: string
+  inLanguage?: string
   mainEntityOfPage: {
     '@type': 'WebPage'
     '@id': string
@@ -111,12 +119,14 @@ interface ArticleSchema extends JsonLdObject {
   image?: string[]
 }
 
-interface OrganizationSchema extends JsonLdObject {
+interface OrganizationSchema
+  extends JsonLdObject {
   '@context': 'https://schema.org'
   '@type': 'Organization'
   '@id': string
   name: string
   url: string
+  sameAs?: string[]
   logo?: {
     '@type': 'ImageObject'
     url: string
@@ -130,7 +140,78 @@ interface OrganizationSchema extends JsonLdObject {
   }
 }
 
-interface WebsiteSchema extends JsonLdObject {
+interface AboutPageSchema
+  extends JsonLdObject {
+  '@context': 'https://schema.org'
+  '@type': 'AboutPage'
+  '@id': string
+  name: string
+  description: string
+  url: string
+  inLanguage?: string
+  isPartOf: {
+    '@id': string
+  }
+  about: {
+    '@id': string
+  }
+  publisher: {
+    '@id': string
+  }
+  primaryImageOfPage?: {
+    '@type': 'ImageObject'
+    url: string
+  }
+}
+
+interface ContactPageSchema
+  extends JsonLdObject {
+  '@context': 'https://schema.org'
+  '@type': 'ContactPage'
+  '@id': string
+  name: string
+  description: string
+  url: string
+  inLanguage?: string
+  isPartOf: {
+    '@id': string
+  }
+  about: {
+    '@id': string
+  }
+  mainEntity: {
+    '@id': string
+  }
+  publisher: {
+    '@id': string
+  }
+}
+
+interface LocalBusinessSchema
+  extends JsonLdObject {
+  '@context': 'https://schema.org'
+  '@type': 'LocalBusiness'
+  '@id': string
+  name: string
+  url: string
+  email?: string
+  telephone?: string
+  sameAs?: string[]
+  hasMap?: string
+  address: {
+    '@type': 'PostalAddress'
+    streetAddress: string
+    addressLocality: string
+    addressCountry: string
+  }
+  geo: {
+    '@type': 'GeoCoordinates'
+    latitude: number
+    longitude: number
+  }
+}
+interface WebsiteSchema
+  extends JsonLdObject {
   '@context': 'https://schema.org'
   '@type': 'WebSite'
   '@id': string
@@ -146,24 +227,34 @@ interface WebsiteSchema extends JsonLdObject {
   }
 }
 
-interface CollectionPageSchema extends JsonLdObject {
+interface ItemListSchema
+  extends JsonLdObject {
+  '@type': 'ItemList'
+  numberOfItems: number
+  itemListElement: {
+    '@type': 'ListItem'
+    position: number
+    name: string
+    item: string
+  }[]
+}
+
+interface CollectionPageSchema
+  extends JsonLdObject {
   '@context': 'https://schema.org'
   '@type': 'CollectionPage'
   '@id': string
   name: string
   description: string
   url: string
-  numberOfItems: number
-  itemListElement: {
-    '@type': 'ListItem'
-    position: number
-    url: string
-    name: string
-  }[]
+  mainEntity: ItemListSchema
 }
 
 function getSiteUrl(): string {
-  return SITE_URL.replace(/\/+$/, '')
+  return SITE_URL.replace(
+    /\/+$/,
+    '',
+  )
 }
 
 function getProductUrl(
@@ -194,7 +285,7 @@ function mapStockAvailability(
   status:
     | ProductStockStatus
     | undefined,
-): string {
+): string | undefined {
   switch (status) {
     case 'outofstock':
       return 'https://schema.org/OutOfStock'
@@ -206,7 +297,7 @@ function mapStockAvailability(
       return 'https://schema.org/InStock'
 
     default:
-      return 'https://schema.org/InStock'
+      return undefined
   }
 }
 
@@ -215,9 +306,7 @@ function getProductImages(
 ): string[] {
   const images: string[] = []
 
-  if (
-    product.image?.sourceUrl
-  ) {
+  if (product.image?.sourceUrl) {
     images.push(
       product.image.sourceUrl,
     )
@@ -225,8 +314,7 @@ function getProductImages(
 
   for (
     const image of
-      product.galleryImages?.nodes ??
-      []
+      product.galleryImages?.nodes ?? []
   ) {
     if (
       image.sourceUrl &&
@@ -248,36 +336,29 @@ function addProperty(
   name: string,
   value?: string,
 ): void {
-  if (
-    !value?.trim()
-  ) {
+  if (!value?.trim()) {
     return
   }
 
   properties.push({
     '@type': 'PropertyValue',
     name,
-    value:
-      value.trim(),
+    value: value.trim(),
   })
 }
 
 function getProductProperties(
   product: Product,
 ): PropertyValueSchema[] {
-  const properties:
-    PropertyValueSchema[] =
-    []
+  const properties: PropertyValueSchema[] = []
 
   for (
     const attribute of
-      product.attributes?.nodes ??
-      []
+      product.attributes?.nodes ?? []
   ) {
     if (
       !attribute.name ||
-      attribute.options.length ===
-        0
+      attribute.options.length === 0
     ) {
       continue
     }
@@ -285,9 +366,7 @@ function getProductProperties(
     addProperty(
       properties,
       attribute.name,
-      attribute.options.join(
-        '، ',
-      ),
+      attribute.options.join('، '),
     )
   }
 
@@ -339,82 +418,163 @@ function getProductProperties(
 export function toJsonLdString(
   obj: JsonLdObject,
 ): string {
-  return JSON.stringify(
-    obj,
-  )
+  return JSON.stringify(obj)
 }
 
 export function generateOrganizationSchema(): OrganizationSchema {
-  const siteUrl =
-    getSiteUrl()
+  const siteUrl = getSiteUrl()
+
+  const schema: OrganizationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    '@id': `${siteUrl}/#organization`,
+    name: SITE_NAME,
+    url: siteUrl,
+    logo: {
+      '@type': 'ImageObject',
+      url: siteUrl + '/logo.png',
+    },
+    sameAs: Object.values(SOCIAL_LINKS).filter(
+      (url) => url.trim().length > 0,
+    ),
+  }
+
+  if (process.env.NEXT_PUBLIC_TEL?.trim()) {
+    schema.contactPoint = {
+      '@type': 'ContactPoint',
+      telephone: TEL_PHONE,
+      contactType: 'customer service',
+      areaServed: 'IR',
+      availableLanguage: ['fa'],
+    }
+  }
+
+  return schema
+}
+
+export function generateAboutPageSchema(): AboutPageSchema {
+  const siteUrl = getSiteUrl()
 
   return {
-    '@context':
-      'https://schema.org',
-
-    '@type':
-      'Organization',
-
-    '@id':
-      `${siteUrl}/#organization`,
-
-    name:
-      SITE_NAME,
-
-    url:
-      siteUrl,
-
-    contactPoint: {
-      '@type':
-        'ContactPoint',
-
-      telephone:
-        TEL_PHONE,
-
-      contactType:
-        'customer service',
-
-      areaServed:
-        'IR',
-
-      availableLanguage:
-        ['fa'],
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    '@id': `${siteUrl}/about#about-page`,
+    name: `درباره ما | ${SITE_NAME}`,
+    description: 'سرای سنگ، مرجع تخصصی سنگ‌های ساختمانی با سال‌ها تجربه در تأمین و عرضه سنگ‌های با کیفیت.',
+    url: `${siteUrl}/about`,
+    inLanguage: 'fa-IR',
+    isPartOf: {
+      '@id': `${siteUrl}/#website`,
+    },
+    about: {
+      '@id': `${siteUrl}/#organization`,
+    },
+    publisher: {
+      '@id': `${siteUrl}/#organization`,
+    },
+    primaryImageOfPage: {
+      '@type': 'ImageObject',
+      url: `${siteUrl}/images/home/banner-desktop-1.png`,
     },
   }
 }
 
-export function generateWebSiteSchema(): WebsiteSchema {
-  const siteUrl =
-    getSiteUrl()
+export function generateContactPageSchema(): ContactPageSchema {
+  const siteUrl = getSiteUrl()
 
   return {
-    '@context':
-      'https://schema.org',
-
-    '@type':
-      'WebSite',
-
-    '@id':
-      `${siteUrl}/#website`,
-
-    name:
-      SITE_NAME,
-
-    url:
-      siteUrl,
-
-    publisher: {
-      '@id':
-        `${siteUrl}/#organization`,
+    '@context': 'https://schema.org',
+    '@type': 'ContactPage',
+    '@id': `${siteUrl}/contact#contact-page`,
+    name: `تماس با ما | ${SITE_NAME}`,
+    description: 'برای استعلام قیمت، مشاوره تخصصی و ارتباط مستقیم با تیم سرای سنگ با ما در تماس باشید.',
+    url: `${siteUrl}/contact`,
+    inLanguage: 'fa-IR',
+    isPartOf: {
+      '@id': `${siteUrl}/#website`,
     },
+    about: {
+      '@id': `${siteUrl}/#organization`,
+    },
+    mainEntity: {
+      '@id': `${siteUrl}/#local-business`,
+    },
+    publisher: {
+      '@id': `${siteUrl}/#organization`,
+    },
+  }
+}
 
+export function generateLocalBusinessSchema({
+  streetAddress,
+  addressLocality,
+  addressCountry,
+  latitude,
+  longitude,
+  email,
+  mapUrl,
+}: {
+  streetAddress: string
+  addressLocality: string
+  addressCountry: string
+  latitude: number
+  longitude: number
+  email?: string
+  mapUrl?: string
+}): LocalBusinessSchema {
+  const siteUrl = getSiteUrl()
+
+  const schema: LocalBusinessSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    '@id': `${siteUrl}/#local-business`,
+    name: SITE_NAME,
+    url: siteUrl,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress,
+      addressLocality,
+      addressCountry,
+    },
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude,
+      longitude,
+    },
+    sameAs: Object.values(SOCIAL_LINKS).filter(
+      (url) => url.trim().length > 0,
+    ),
+  }
+
+  if (process.env.NEXT_PUBLIC_TEL?.trim()) {
+    schema.telephone = TEL_PHONE
+  }
+
+  if (email?.trim()) {
+    schema.email = email.trim()
+  }
+
+  if (mapUrl?.trim()) {
+    schema.hasMap = mapUrl.trim()
+  }
+
+  return schema
+}
+export function generateWebSiteSchema(): WebsiteSchema {
+  const siteUrl = getSiteUrl()
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${siteUrl}/#website`,
+    name: SITE_NAME,
+    url: siteUrl,
+    publisher: {
+      '@id': `${siteUrl}/#organization`,
+    },
     potentialAction: {
-      '@type':
-        'SearchAction',
-
-      target:
-        `${siteUrl}/search?q={search_term_string}`,
-
+      '@type': 'SearchAction',
+      target: `${siteUrl}/search?q={search_term_string}`,
       'query-input':
         'required name=search_term_string',
     },
@@ -424,18 +584,15 @@ export function generateWebSiteSchema(): WebsiteSchema {
 export function generateProductSchema(
   product: Product,
 ): ProductSchema {
-  const productUrl =
-    getProductUrl(
-      product.slug,
-    )
+  const productUrl = getProductUrl(
+    product.slug,
+  )
 
   const productId =
     `${productUrl}#product`
 
   const images =
-    getProductImages(
-      product,
-    )
+    getProductImages(product)
 
   const rawPrice =
     product.price ||
@@ -443,14 +600,10 @@ export function generateProductSchema(
     product.regularPrice
 
   const schemaPrice =
-    tomansToRials(
-      rawPrice,
-    )
+    tomansToRials(rawPrice)
 
   const properties =
-    getProductProperties(
-      product,
-    )
+    getProductProperties(product)
 
   const firstCategory =
     product.productCategories
@@ -460,92 +613,64 @@ export function generateProductSchema(
     product.sku ||
     product.acf?.productCode
 
-  const schema: ProductSchema = {
-    '@context':
-      'https://schema.org',
+  const availability =
+    mapStockAvailability(
+      product.stockStatus,
+    )
 
-    '@type':
-      'Product',
-
-    '@id':
-      productId,
-
-    name:
-      product.name,
-
-    description:
-      product.shortDescription ||
-      product.description ||
-      product.name,
-
-    url:
-      productUrl,
-
-    brand: {
-      '@type':
-        'Brand',
-
-      name:
-        SITE_NAME,
-    },
-
-    offers: {
-      '@type':
-        'Offer',
-
-      price:
-        schemaPrice ||
-        '0',
-
-      priceCurrency:
-        SCHEMA_PRICE_CURRENCY,
-
-      availability:
-        mapStockAvailability(
-          product.stockStatus,
-        ),
-
-      itemCondition:
-        'https://schema.org/NewCondition',
-
-      url:
-        productUrl,
-
-      seller: {
-        '@type':
-          'Organization',
-
-        name:
-          SITE_NAME,
-
-        url:
-          getSiteUrl(),
-      },
+  const offer: ProductOfferSchema = {
+    '@type': 'Offer',
+    url: productUrl,
+    seller: {
+      '@type': 'Organization',
+      name: SITE_NAME,
+      url: getSiteUrl(),
     },
   }
 
-  if (
-    images.length > 0
-  ) {
-    schema.image =
-      images
+  if (schemaPrice) {
+    offer.price = schemaPrice
+    offer.priceCurrency =
+      SCHEMA_PRICE_CURRENCY
+  }
+
+  if (availability) {
+    offer.availability =
+      availability
+  }
+
+  const schema: ProductSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    '@id': productId,
+    name: product.name,
+    description:
+      stripHtmlText(
+        product.shortDescription ||
+          product.description,
+      ) || product.name,
+    url: productUrl,
+    brand: {
+      '@type': 'Brand',
+      name: SITE_NAME,
+    },
+    offers: offer,
+  }
+
+  if (images.length > 0) {
+    schema.image = images
   }
 
   if (sku) {
-    schema.sku =
-      sku
+    schema.sku = sku
   }
 
-  if (
-    firstCategory?.name
-  ) {
+  if (firstCategory?.name) {
     schema.category =
       firstCategory.name
   }
 
-  if (
-    properties.length > 0
-  ) {
+  if (properties.length > 0) {
     schema.additionalProperty =
       properties
   }
@@ -557,12 +682,9 @@ export function generateProductSchema(
     product.reviewCount > 0
   ) {
     schema.aggregateRating = {
-      '@type':
-        'AggregateRating',
-
+      '@type': 'AggregateRating',
       ratingValue:
         product.averageRating,
-
       reviewCount:
         product.reviewCount,
     }
@@ -571,13 +693,72 @@ export function generateProductSchema(
   return schema
 }
 
+function stripHtmlText(
+  value?: string | null,
+): string {
+  if (!value) {
+    return ''
+  }
+
+  return value
+    .replace(
+      /<script\b[^>]*>[\s\S]*?<\/script>/gi,
+      ' ',
+    )
+    .replace(
+      /<style\b[^>]*>[\s\S]*?<\/style>/gi,
+      ' ',
+    )
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\u00a0/g, ' ')
+    .replace(
+      /&nbsp;/gi,
+      ' ',
+    )
+    .replace(
+      /&amp;/gi,
+      '&',
+    )
+    .replace(
+      /&lt;/gi,
+      '<',
+    )
+    .replace(
+      /&gt;/gi,
+      '>',
+    )
+    .replace(
+      /&#39;/gi,
+      "'",
+    )
+    .replace(
+      /&quot;/gi,
+      '"',
+    )
+    .replace(
+      /&#(\d+);/g,
+      (_match, code: string) =>
+        String.fromCharCode(
+          Number(code),
+        ),
+    )
+    .replace(
+      /&#x([0-9a-f]+);/gi,
+      (_match, code: string) =>
+        String.fromCharCode(
+          parseInt(code, 16),
+        ),
+    )
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 export function generateArticleSchema(
   post: Post,
 ): ArticleSchema {
-  const postUrl =
-    getPostUrl(
-      post.slug,
-    )
+  const postUrl = getPostUrl(
+    post.slug,
+  )
 
   const postId =
     `${postUrl}#article`
@@ -587,64 +768,43 @@ export function generateArticleSchema(
       ?.node
       ?.sourceUrl
 
-  const schema:
-    ArticleSchema = {
-    '@context':
-      'https://schema.org',
-
-    '@type':
-      'BlogPosting',
-
-    '@id':
-      postId,
-
-    headline:
-      post.title,
-
+  const schema: ArticleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    '@id': postId,
+    headline: post.title,
     description:
-      post.excerpt ||
+      stripHtmlText(post.excerpt) ||
       post.title,
+    inLanguage: 'fa-IR',
 
     mainEntityOfPage: {
-      '@type':
-        'WebPage',
-
-      '@id':
-        postUrl,
+      '@type': 'WebPage',
+      '@id': postUrl,
     },
 
     author: {
-      '@type':
-        'Organization',
-
-      name:
-        SITE_NAME,
-
-      url:
-        getSiteUrl(),
+      '@type': 'Organization',
+      name: SITE_NAME,
+      url: getSiteUrl(),
     },
 
     publisher: {
-      '@type':
-        'Organization',
-
-      name:
-        SITE_NAME,
-
-      url:
-        getSiteUrl(),
+      '@type': 'Organization',
+      name: SITE_NAME,
+      url: getSiteUrl(),
     },
 
     datePublished:
       post.date,
 
     dateModified:
+      post.modified ||
       post.date,
   }
 
   if (image) {
-    schema.image =
-      [image]
+    schema.image = [image]
   }
 
   return schema
@@ -657,37 +817,23 @@ export function generateBreadcrumbSchema(
   }[],
 ): BreadcrumbSchema {
   return {
-    '@context':
-      'https://schema.org',
-
-    '@type':
-      'BreadcrumbList',
-
-    itemListElement:
-      items.map(
-        (
-          item,
-          index,
-        ) => ({
-          '@type':
-            'ListItem',
-
-          position:
-            index + 1,
-
-          name:
-            item.name,
-
-          item:
-            `${getSiteUrl()}${item.path}`,
-        }),
-      ),
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map(
+      (item, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: item.name,
+        item: `${getSiteUrl()}${item.path}`,
+      }),
+    ),
   }
 }
 
 export function generateCollectionPageSchema(
   category: ProductCategoryNode,
   products: ProductSummary[],
+  totalItems = products.length,
 ): CollectionPageSchema {
   const categoryUrl =
     getCategoryUrl(
@@ -695,49 +841,43 @@ export function generateCollectionPageSchema(
     )
 
   return {
-    '@context':
-      'https://schema.org',
-
-    '@type':
-      'CollectionPage',
-
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
     '@id':
       `${categoryUrl}#collection`,
-
-    name:
-      category.name,
-
+    name: category.name,
     description:
-      category.description ||
+      stripHtmlText(
+        category.description,
+      ) ||
       `محصولات ${category.name}`,
+    url: categoryUrl,
 
-    url:
-      categoryUrl,
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems:
+        totalItems,
 
-    numberOfItems:
-      products.length,
+      itemListElement:
+        products.map(
+          (product, index) => {
+            const productUrl =
+              getProductUrl(
+                product.slug,
+              )
 
-    itemListElement:
-      products.map(
-        (
-          product,
-          index,
-        ) => ({
-          '@type':
-            'ListItem',
-
-          position:
-            index + 1,
-
-          name:
-            product.name,
-
-          url:
-            getProductUrl(
-              product.slug,
-            ),
-        }),
-      ),
+            return {
+              '@type': 'ListItem',
+              position:
+                index + 1,
+              name:
+                product.name,
+              item:
+                productUrl,
+            }
+          },
+        ),
+    },
   }
 }
 
@@ -750,9 +890,7 @@ export function generateCollectionPageSchema(
 function serializeJsonLd(
   data: JsonLdObject,
 ): string {
-  return JSON.stringify(
-    data,
-  )
+  return JSON.stringify(data)
     .replace(
       /</g,
       '\\u003c',
@@ -777,9 +915,7 @@ export function JsonLd({
       type="application/ld+json"
       dangerouslySetInnerHTML={{
         __html:
-          serializeJsonLd(
-            data,
-          ),
+          serializeJsonLd(data),
       }}
     />
   )

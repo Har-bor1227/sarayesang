@@ -7,10 +7,13 @@ export const SITE_DESCRIPTION: string =
 export const SITE_URL: string =
   process.env.NEXT_PUBLIC_SITE_URL || 'https://sarayesang.com'
 
+export const DEFAULT_SOCIAL_IMAGE: string =
+  '/images/home/banner-desktop-1.png'
+
 export const WORDPRESS_URL: string =
   process.env.WORDPRESS_URL ||
   process.env.NEXT_PUBLIC_WORDPRESS_URL ||
-  'https://sarayesang.com'
+  'https://api.sarayesang.com'
 
 export const GRAPHQL_ENDPOINT: string =
   process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT ||
@@ -41,12 +44,34 @@ export const SOCIAL_LINKS: Record<string, string> = {
 }
 
 export const NAV_LINKS: NavItem[] = [
-  { title: 'خانه', href: '/' },
-  { title: 'محصولات', href: '/products' },
-  { title: 'دسته‌بندی‌ها', href: '/categories' },
-  { title: 'بلاگ', href: '/blog' },
-  { title: 'درباره ما', href: '/about' },
-  { title: 'تماس با ما', href: '/contact' },
+  {
+    title: 'خانه',
+    href: '/',
+  },
+  {
+    title: 'محصولات',
+    href: '/products',
+  },
+  {
+    title: 'دسته‌بندی‌ها',
+    href: '/categories',
+  },
+  {
+    title: 'ابزارها',
+    href: '/tools',
+  },
+  {
+    title: 'بلاگ',
+    href: '/blog',
+  },
+  {
+    title: 'درباره ما',
+    href: '/about',
+  },
+  {
+    title: 'تماس با ما',
+    href: '/contact',
+  },
 ]
 
 export const BOTTOM_NAV_ITEMS: NavItem[] = [

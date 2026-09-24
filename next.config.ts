@@ -65,6 +65,7 @@ const nextConfig: NextConfig = {
       828,
       1080,
       1200,
+      1280,
       1920,
     ],
 

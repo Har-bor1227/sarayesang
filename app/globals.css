@@ -756,3 +756,57 @@
     }
   }
 }
+
+/* =========================================================
+   STONE CATEGORY ENDLESS MARQUEE
+   ========================================================= */
+@keyframes stone-category-marquee {
+  from {
+    transform: translate3d(-25%, 0, 0);
+  }
+
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.stone-category-marquee {
+  display: flex;
+  width: max-content;
+  flex-shrink: 0;
+  will-change: transform;
+  animation: stone-category-marquee 24s linear infinite;
+  direction: ltr;
+}
+
+.stone-category-group {
+  display: flex;
+  flex-shrink: 0;
+  align-items: flex-start;
+  direction: ltr;
+}
+
+@media (max-width: 639px) {
+  .stone-category-marquee {
+    animation-duration: 18s;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .stone-category-marquee {
+    animation-duration: 21s;
+  }
+}
+
+@media (min-width: 1280px) {
+  .stone-category-marquee {
+    animation-duration: 28s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stone-category-marquee {
+    animation: none;
+    transform: none;
+  }
+}

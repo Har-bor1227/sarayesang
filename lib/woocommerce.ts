@@ -8,6 +8,7 @@ import type {
   ProductStockStatus,
   ProductSummary,
 } from '@/types/wordpress'
+import type { ProductCategorySummary } from '@/types/wordpress'
 
 import { WORDPRESS_URL } from '@/lib/constants'
 
@@ -20,7 +21,7 @@ const CONSUMER_KEY =
 const CONSUMER_SECRET =
   process.env.WORDPRESS_CONSUMER_SECRET
 
-const REQUEST_TIMEOUT_MS = 10_000
+const REQUEST_TIMEOUT_MS = 30_000
 
 if (
   !CONSUMER_KEY ||
@@ -1643,47 +1644,188 @@ export async function getAllProductSlugsFromWooCommerce(): Promise<
   )
 }
 
+export interface ProductSitemapEntry {
+  slug: string
+  lastModified?: string
+  categoryIds: string[]
+}
+
+export async function getAllProductSitemapEntriesFromWooCommerce(): Promise<
+  ProductSitemapEntry[]
+> {
+  const entries = new Map<
+    string,
+    ProductSitemapEntry
+  >()
+
+  let page = 1
+
+  while (page <= 500) {
+    const params =
+      new URLSearchParams({
+        status: 'publish',
+        page: String(page),
+        per_page: '100',
+        orderby: 'modified',
+        order: 'desc',
+      })
+
+    const { data } =
+      await wcFetch<
+        WooCommerceProductList
+      >(
+        PRODUCTS_ENDPOINT,
+        params,
+        300,
+      )
+
+    if (
+      !Array.isArray(data) ||
+      data.length === 0
+    ) {
+      break
+    }
+
+    for (
+      const product of
+      data
+    ) {
+      const slug =
+        normalizeSlug(
+          product.slug,
+        ).trim()
+
+      if (
+        !slug ||
+        entries.has(slug)
+      ) {
+        continue
+      }
+
+      entries.set(
+        slug,
+        {
+          slug,
+          lastModified:
+            product.date_modified?.trim() ||
+            undefined,
+          categoryIds:
+            (
+              product.categories ??
+              []
+            ).map(
+              (category) =>
+                String(
+                  category.id,
+                ),
+            ),
+        },
+      )
+    }
+
+    if (
+      entries.size >
+      50000
+    ) {
+      throw new Error(
+        'Product sitemap exceeds the 50,000 URL limit. Split it into multiple sitemaps.',
+      )
+    }
+
+    if (
+      data.length <
+      100
+    ) {
+      break
+    }
+
+    if (
+      page === 500
+    ) {
+      throw new Error(
+        'Product sitemap reached the 50,000 URL limit. Split it into multiple sitemaps.',
+      )
+    }
+
+    page += 1
+  }
+
+  return Array.from(
+    entries.values(),
+  )
+}
+
 export async function getProductCategoriesFromWooCommerce(): Promise<
   ProductCategoryNode[]
 > {
-  const params =
-    new URLSearchParams({
-      per_page:
-        '100',
+  const perPage = 20
+  const categories: WooCommerceProductCategory[] = []
 
-      page:
-        '1',
+  let page = 1
+  let totalPages = 1
 
-      hide_empty:
-        'true',
+  do {
+    const params =
+      new URLSearchParams({
+        per_page: String(perPage),
+        page: String(page),
+        hide_empty: 'true',
+        orderby: 'name',
+        order: 'asc',
+      })
 
-      orderby:
-        'name',
-
-      order:
-        'asc',
-    })
-
-  const {
-    data,
-  } =
-    await wcFetch<
-      WooCommerceProductCategory[]
-    >(
-      PRODUCT_CATEGORIES_ENDPOINT,
-      params,
-      300,
-    )
-
-  if (
-    !Array.isArray(
+    const {
       data,
-    )
-  ) {
-    return []
-  }
+      headers,
+    } =
+      await wcFetch<
+        WooCommerceProductCategory[]
+      >(
+        PRODUCT_CATEGORIES_ENDPOINT,
+        params,
+        300,
+      )
 
-  return data.map(
+    if (
+      !Array.isArray(
+        data,
+      )
+    ) {
+      break
+    }
+
+    categories.push(
+      ...data,
+    )
+
+    const headerTotalPages =
+      Number(
+        headers.get(
+          'X-WP-TotalPages',
+        ),
+      )
+
+    if (
+      Number.isFinite(
+        headerTotalPages,
+      ) &&
+      headerTotalPages > 0
+    ) {
+      totalPages =
+        headerTotalPages
+    } else {
+      totalPages =
+        data.length < perPage
+          ? page
+          : page + 1
+    }
+
+    page += 1
+  } while (
+    page <= totalPages
+  )
+
+  return categories.map(
     (
       category,
     ) =>
@@ -1692,7 +1834,6 @@ export async function getProductCategoriesFromWooCommerce(): Promise<
       ),
   )
 }
-
 export async function getProductCategoryBySlugFromWooCommerce(
   slug: string,
 ): Promise<ProductCategoryNode | null> {
@@ -1795,4 +1936,375 @@ export async function getHomeProductsFromWooCommerce(): Promise<{
         ),
     },
   }
+}
+
+function getProductAttributeValue(
+  product: WooCommerceProduct,
+  names: string[],
+): string | undefined {
+  const wantedNames = new Set(
+    names.map((name) =>
+      name
+        .replace(/\u200c/g, ' ')
+        .replace(/ي/g, 'ی')
+        .replace(/ك/g, 'ک')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase(),
+    ),
+  )
+
+  const attribute =
+    product.attributes?.find(
+      (item) => {
+        const normalizedName =
+          item.name
+            .replace(/\u200c/g, ' ')
+            .replace(/ي/g, 'ی')
+            .replace(/ك/g, 'ک')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .toLowerCase()
+
+        return wantedNames.has(
+          normalizedName,
+        )
+      },
+    )
+
+  if (
+    !attribute?.options?.length
+  ) {
+    return undefined
+  }
+
+  return attribute.options
+    .map((option) =>
+      String(option).trim(),
+    )
+    .filter(Boolean)
+    .join('، ')
+}
+
+export async function getAllProductsForSmartSearchFromWooCommerce() {
+  const products: Array<{
+    id: string
+    name: string
+    slug: string
+    price?: string
+    regularPrice?: string
+    salePrice?: string
+    onSale?: boolean
+    image?: Image | null
+    productCategories?: {
+      nodes?: ProductCategorySummary[]
+    } | null
+acf: {
+  application?: string
+  stoneType?: string
+  colorFamily?: string
+  surfaceFinish?: string
+  dimensions?: string
+  weight?: string
+}
+  }> = []
+
+  const perPage = 100
+  let page = 1
+  let totalPages = 1
+
+  do {
+    const params = new URLSearchParams({
+      status: 'publish',
+      page: String(page),
+      per_page: String(perPage),
+      orderby: 'date',
+      order: 'desc',
+    })
+
+    const {
+      data,
+      headers,
+    } = await wcFetch<WooCommerceProductList>(
+      PRODUCTS_ENDPOINT,
+      params,
+      600,
+    )
+
+    if (
+      !Array.isArray(data) ||
+      data.length === 0
+    ) {
+      break
+    }
+
+    products.push(
+      ...data.map((product) => ({
+        id: String(product.id),
+
+        name: product.name,
+
+        slug: normalizeSlug(
+          product.slug,
+        ),
+
+        price: normalizeText(
+          product.price,
+        ),
+
+        regularPrice:
+          normalizeText(
+            product.regular_price,
+          ),
+
+        salePrice:
+          normalizeText(
+            product.sale_price,
+          ),
+
+        onSale:
+          Boolean(
+            product.on_sale,
+          ),
+
+        image:
+          normalizeImage(
+            product.images?.[0],
+            product.name,
+          ),
+
+        productCategories:
+          product.categories?.length
+            ? {
+                nodes:
+                  product.categories.map(
+                    (category) => ({
+                      id: String(
+                        category.id,
+                      ),
+
+                      name:
+                        category.name,
+
+                      slug:
+                        normalizeSlug(
+                          category.slug,
+                        ),
+                    }),
+                  ),
+              }
+            : null,
+
+acf: {
+  application:
+    getProductAttributeValue(
+      product,
+      ['کاربرد', 'application'],
+    ),
+
+  stoneType:
+    getProductAttributeValue(
+      product,
+      ['نوع سنگ', 'stone type', 'stoneType'],
+    ),
+
+  colorFamily:
+    getProductAttributeValue(
+      product,
+      ['رنگ', 'color', 'color family', 'colorFamily'],
+    ),
+
+  surfaceFinish:
+    getProductAttributeValue(
+      product,
+      ['پرداخت', 'surface finish', 'surfaceFinish'],
+    ),
+
+  dimensions:
+    product.dimensions
+      ? [
+          product.dimensions.length,
+          product.dimensions.width,
+          product.dimensions.height,
+        ]
+          .filter(Boolean)
+          .join(' × ')
+      : undefined,
+
+  weight:
+    normalizeText(
+      product.weight,
+    ),
+},
+      })),
+    )
+
+    const headerTotalPages = Number(
+      headers.get(
+        'X-WP-TotalPages',
+      ),
+    )
+
+    if (
+      Number.isFinite(
+        headerTotalPages,
+      ) &&
+      headerTotalPages > 0
+    ) {
+      totalPages =
+        headerTotalPages
+    } else {
+      totalPages =
+        data.length < perPage
+          ? page
+          : page + 1
+    }
+
+    page += 1
+  } while (
+    page <= totalPages &&
+    page <= 100
+  )
+
+  return products
+}
+export async function getAllProductsForStoneFinderFromWooCommerce() {
+  const products: Array<{
+    id: string
+    name: string
+    slug: string
+    price?: string
+    regularPrice?: string
+    salePrice?: string
+    onSale?: boolean
+    image?: Image | null
+    productCategories?: {
+      nodes?: ProductCategorySummary[]
+    } | null
+    acf: {
+      application?: string
+      stoneType?: string
+      colorFamily?: string
+      surfaceFinish?: string
+      dimensions?: string
+      weight?: string
+    }
+  }> = []
+
+  const perPage = 100
+  let page = 1
+  let totalPages = 1
+
+  do {
+    const params = new URLSearchParams({
+      status: 'publish',
+      page: String(page),
+      per_page: String(perPage),
+      orderby: 'date',
+      order: 'desc',
+    })
+
+    const {
+      data,
+      headers,
+    } = await wcFetch<WooCommerceProductList>(
+      PRODUCTS_ENDPOINT,
+      params,
+      600,
+    )
+
+    if (
+      !Array.isArray(data) ||
+      data.length === 0
+    ) {
+      break
+    }
+
+    products.push(
+      ...data.map((product) => ({
+        id: String(product.id),
+        name: product.name,
+        slug: normalizeSlug(product.slug),
+        price: normalizeText(product.price),
+        regularPrice: normalizeText(product.regular_price),
+        salePrice: normalizeText(product.sale_price),
+        onSale: Boolean(product.on_sale),
+        image: normalizeImage(
+          product.images?.[0],
+          product.name,
+        ),
+        productCategories:
+          product.categories?.length
+            ? {
+                nodes: product.categories.map(
+                  (category) => ({
+                    id: String(category.id),
+                    name: category.name,
+                    slug: normalizeSlug(category.slug),
+                  }),
+                ),
+              }
+            : null,
+        acf: {
+          application: getAcfString(product, [
+            'application',
+            'applications',
+            'usage',
+          ]),
+          stoneType: getAcfString(product, [
+            'stoneType',
+            'stone_type',
+            'stonetype',
+            'type',
+          ]),
+          colorFamily: getAcfString(product, [
+            'colorFamily',
+            'color_family',
+            'colorfamily',
+            'color',
+            'colour_family',
+          ]),
+          surfaceFinish: getAcfString(product, [
+            'surfaceFinish',
+            'surface_finish',
+            'surfacefinish',
+            'finish',
+            'finishing',
+          ]),
+          dimensions: getAcfString(product, [
+            'dimensions',
+            'dimension',
+            'size',
+          ]),
+          weight: getAcfString(product, [
+            'weight',
+            'weights',
+          ]),
+        },
+      })),
+    )
+
+    const headerTotalPages = Number(
+      headers.get('X-WP-TotalPages'),
+    )
+
+    if (
+      Number.isFinite(headerTotalPages) &&
+      headerTotalPages > 0
+    ) {
+      totalPages = headerTotalPages
+    } else {
+      totalPages =
+        data.length < perPage
+          ? page
+          : page + 1
+    }
+
+    page += 1
+  } while (
+    page <= totalPages &&
+    page <= 100
+  )
+
+  return products
 }

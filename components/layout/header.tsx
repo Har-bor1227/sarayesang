@@ -2,7 +2,15 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { Menu, Phone, Search, X } from 'lucide-react'
+
+import {
+  Camera,
+  Menu,
+  Phone,
+  Search,
+  X,
+} from 'lucide-react'
+
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 
@@ -19,19 +27,32 @@ import MobileDrawer from '../header/MobileDrawer'
 export default function Header() {
   const pathname = usePathname()
 
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [hidden, setHidden] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
+  const [menuOpen, setMenuOpen] =
+    useState(false)
+
+  const [hidden, setHidden] =
+    useState(false)
+
+  const [isMobile, setIsMobile] =
+    useState(false)
+
+  const isImageSearchPage =
+    pathname === '/image-search' ||
+    pathname.startsWith('/image-search/')
 
   useEffect(() => {
     setMenuOpen(false)
   }, [pathname])
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(max-width: 1023px)')
+    const mediaQuery =
+      window.matchMedia(
+        '(max-width: 1023px)',
+      )
 
-    const updateViewport = () => {
-      const mobile = mediaQuery.matches
+    const handleChange = () => {
+      const mobile =
+        mediaQuery.matches
 
       setIsMobile(mobile)
 
@@ -40,21 +61,26 @@ export default function Header() {
       }
     }
 
-    updateViewport()
+    handleChange()
 
-    mediaQuery.addEventListener('change', updateViewport)
+    mediaQuery.addEventListener(
+      'change',
+      handleChange,
+    )
 
     return () => {
-      mediaQuery.removeEventListener('change', updateViewport)
+      mediaQuery.removeEventListener(
+        'change',
+        handleChange,
+      )
     }
   }, [])
 
   useEffect(() => {
-    if (menuOpen && isMobile) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
+    document.body.style.overflow =
+      menuOpen && isMobile
+        ? 'hidden'
+        : ''
 
     return () => {
       document.body.style.overflow = ''
@@ -67,181 +93,425 @@ export default function Header() {
       return
     }
 
-    let previous = window.scrollY
+    let previousScrollY =
+      window.scrollY
 
-    const onScroll = () => {
-      const current = window.scrollY
+    const handleScroll = () => {
+      const currentScrollY =
+        window.scrollY
 
       if (menuOpen) {
         setHidden(false)
-      } else if (current <= 24) {
+      } else if (
+        currentScrollY <= 20
+      ) {
         setHidden(false)
-      } else if (current > previous + 4) {
+      } else if (
+        currentScrollY >
+        previousScrollY + 5
+      ) {
         setHidden(true)
-      } else if (current < previous - 4) {
+      } else if (
+        currentScrollY <
+        previousScrollY - 5
+      ) {
         setHidden(false)
       }
 
-      previous = current
+      previousScrollY =
+        currentScrollY
     }
 
-    window.addEventListener('scroll', onScroll, {
-      passive: true,
-    })
+    window.addEventListener(
+      'scroll',
+      handleScroll,
+      { passive: true },
+    )
 
     return () => {
-      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener(
+        'scroll',
+        handleScroll,
+      )
     }
   }, [isMobile, menuOpen])
 
-  const shouldHide = isMobile && hidden && !menuOpen
+  const shouldHide =
+    (isMobile && hidden) ||
+    menuOpen
 
   return (
     <>
       <header
         dir="rtl"
         className={[
-          'fixed inset-x-0 top-0 z-[60]',
-          'px-3 pt-3 sm:px-4 sm:pt-4 lg:px-6 lg:pt-5',
+          'sticky inset-x-0 top-0 z-[50]',
+          'px-3 pt-3 pb-2',
+          'sm:px-4 sm:pt-4 sm:pb-2.5',
+          'lg:px-6 lg:pt-4 lg:pb-3',
           'transition-transform duration-300 ease-out',
           shouldHide
-            ? '-translate-y-[120%]'
+            ? '-translate-y-[115%]'
             : 'translate-y-0',
         ].join(' ')}
       >
         <div
-          className={[
-            'mx-auto flex w-full max-w-[1440px] items-center',
-            'h-[60px] sm:h-[64px] lg:h-[70px]',
-            'rounded-[20px] lg:rounded-[23px]',
-            'border border-[#e9ecef]/80',
-            'bg-[#fcfcfb]/[0.94]',
-            'px-2.5 sm:px-3 lg:px-4',
-            'shadow-[0_10px_35px_rgba(10,25,41,0.07),0_2px_8px_rgba(10,25,41,0.03)]',
-            'backdrop-blur-2xl',
-            'supports-[backdrop-filter]:bg-[#fcfcfb]/[0.78]',
-          ].join(' ')}
+          className="
+            relative
+            mx-auto
+            flex
+            h-[58px]
+            w-full
+            max-w-[1440px]
+            items-center
+            rounded-[19px]
+            border
+            border-[#E7E8E7]
+            bg-[#FCFCFB]/[0.94]
+            px-2
+            shadow-[0_8px_30px_rgba(10,25,41,0.06)]
+            backdrop-blur-2xl
+            supports-[backdrop-filter]:bg-[#FCFCFB]/[0.80]
+            sm:h-[62px]
+            sm:px-2.5
+            lg:h-[70px]
+            lg:rounded-[22px]
+            lg:px-3
+          "
         >
+          {/* Top highlight */}
+          <span
+            aria-hidden="true"
+            className="
+              pointer-events-none
+              absolute
+              inset-x-8
+              top-0
+              h-px
+              bg-gradient-to-r
+              from-transparent
+              via-[#B79464]/35
+              to-transparent
+              lg:inset-x-12
+            "
+          />
+
           {/* Logo */}
           <Link
             href="/"
             aria-label={SITE_NAME}
-            className={[
-              'relative shrink-0',
-              'h-9 w-[102px]',
-              'sm:h-10 sm:w-[110px]',
-              'lg:h-11 lg:w-[126px]',
-              'transition-transform duration-200',
-              'hover:scale-[1.015]',
-            ].join(' ')}
+            className="
+              absolute
+              right-2.5
+              top-1/2
+              h-8
+              w-[94px]
+              -translate-y-1/2
+              transition-transform
+              duration-200
+              hover:scale-[1.015]
+              sm:right-3
+              sm:h-9
+              sm:w-[104px]
+              lg:static
+              lg:h-10
+              lg:w-[118px]
+              lg:shrink-0
+              lg:translate-y-0
+            "
           >
             <Image
               src="/logo.png"
               alt={SITE_NAME}
               fill
               priority
-              sizes="126px"
+              sizes="118px"
               className="object-contain object-right"
             />
           </Link>
 
-          {/* Desktop navigation */}
-          <DesktopNav
-            links={NAV_LINKS}
-            pathname={pathname}
-          />
+          {/* Desktop center navigation */}
+          <div
+            className="
+              hidden
+              min-w-0
+              flex-1
+              items-center
+              justify-center
+              px-4
+              lg:flex
+            "
+          >
+            <DesktopNav
+              links={NAV_LINKS}
+              pathname={pathname}
+            />
+          </div>
 
           {/* Desktop actions */}
-          <div className="mr-auto hidden items-center gap-2 lg:flex">
-            <HeaderSearch />
+          <div
+            dir="ltr"
+            className="
+              ml-2
+              hidden
+              shrink-0
+              items-center
+              gap-2
+              lg:flex
+            "
+          >
+            {/* Image search CTA */}
+            <Link
+              href="/image-search"
+              aria-current={
+                isImageSearchPage
+                  ? 'page'
+                  : undefined
+              }
+              aria-label="جستجوی تصویری سنگ"
+              className={[
+                `
+                  group
+                  relative
+                  flex
+                  h-11
+                  shrink-0
+                  items-center
+                  justify-center
+                  gap-2
+                  overflow-hidden
+                  rounded-full
+                  border
+                  px-4
+                  text-[10px]
+                  font-black
+                  transition-all
+                  duration-300
+                  active:scale-[0.98]
+                `,
+                isImageSearchPage
+                  ? `
+                    border-[#B79464]
+                    bg-[#B79464]
+                    text-[#112F50]
+                    shadow-[0_8px_22px_rgba(183,148,100,0.20)]
+                  `
+                  : `
+                    border-[#B79464]/35
+                    bg-[#FBF6ED]
+                    text-[#76582F]
+                    shadow-[0_6px_18px_rgba(183,148,100,0.08)]
+                    hover:-translate-y-0.5
+                    hover:border-[#B79464]/60
+                    hover:bg-[#F7F0E4]
+                    hover:shadow-[0_9px_24px_rgba(183,148,100,0.13)]
+                  `,
+              ].join(' ')}
+            >
+              <span
+                aria-hidden="true"
+                className="
+                  flex
+                  h-7
+                  w-7
+                  shrink-0
+                  items-center
+                  justify-center
+                  rounded-full
+                  bg-white/80
+                  text-[#9E7F50]
+                  transition-transform
+                  duration-300
+                  group-hover:scale-105
+                "
+              >
+                <Camera
+                  className="h-[15px] w-[15px]"
+                  strokeWidth={2}
+                />
+              </span>
+
+              <span className="whitespace-nowrap">
+                جستجوی تصویری
+              </span>
+
+              <span
+                aria-hidden="true"
+                className="
+                  absolute
+                  inset-y-0
+                  left-0
+                  w-8
+                  translate-x-[-140%]
+                  skew-x-[-18deg]
+                  bg-white/20
+                  transition-transform
+                  duration-700
+                  group-hover:translate-x-[420%]
+                "
+              />
+            </Link>
+
+            <div dir="rtl">
+              <HeaderSearch />
+            </div>
 
             <a
               href={`tel:${TEL_PHONE}`}
               aria-label="تماس با ما"
-              className={[
-                'group flex h-11 w-11 shrink-0 items-center justify-center',
-                'rounded-full',
-                'bg-primary text-white',
-                'shadow-[0_6px_18px_rgba(17,47,80,0.14)]',
-                'transition-all duration-200',
-                'hover:-translate-y-0.5 hover:bg-primary-light',
-                'hover:shadow-[0_9px_22px_rgba(17,47,80,0.17)]',
-                'active:translate-y-0',
-              ].join(' ')}
+              className="
+                group
+                flex
+                h-11
+                min-w-[116px]
+                shrink-0
+                items-center
+                justify-center
+                gap-2
+                rounded-full
+                bg-[#112F50]
+                px-4
+                text-[11px]
+                font-black
+                text-white
+                shadow-[0_7px_18px_rgba(17,47,80,0.11)]
+                transition-all
+                duration-300
+                hover:-translate-y-0.5
+                hover:bg-[#193F63]
+                hover:shadow-[0_10px_23px_rgba(17,47,80,0.15)]
+                active:translate-y-0
+              "
             >
-              <Phone
-                className="h-[18px] w-[18px] transition-transform duration-200 group-hover:scale-105"
-                strokeWidth={1.8}
-              />
+              <span
+                className="
+                  flex
+                  h-7
+                  w-7
+                  items-center
+                  justify-center
+                  rounded-full
+                  bg-white/[0.09]
+                "
+              >
+                <Phone
+                  className="
+                    h-[15px]
+                    w-[15px]
+                    transition-transform
+                    duration-300
+                    group-hover:scale-110
+                  "
+                  strokeWidth={1.8}
+                />
+              </span>
+
+              تماس با ما
             </a>
           </div>
 
           {/* Mobile actions */}
-          <div className="mr-auto flex items-center gap-1.5 lg:hidden">
-            <Link
-              href="/search"
-              aria-label="جستجو"
-              className={[
-                'flex h-10 w-10 items-center justify-center',
-                'rounded-full',
-                'border border-transparent',
-                'bg-[#f4efe7]',
-                'text-primary',
-                'transition-all duration-200',
-                'active:scale-95',
-              ].join(' ')}
-            >
-              <Search
-                className="h-[18px] w-[18px]"
-                strokeWidth={1.9}
-              />
-            </Link>
-
-            <a
-              href={`tel:${TEL_PHONE}`}
-              aria-label="تماس"
-              className={[
-                'flex h-10 w-10 items-center justify-center',
-                'rounded-full',
-                'bg-primary text-white',
-                'shadow-[0_4px_12px_rgba(17,47,80,0.12)]',
-                'transition-all duration-200',
-                'active:scale-95',
-              ].join(' ')}
-            >
-              <Phone
-                className="h-[17px] w-[17px]"
-                strokeWidth={1.9}
-              />
-            </a>
-
+          <div
+            dir="ltr"
+            className="
+              absolute
+              left-2.5
+              top-1/2
+              flex
+              -translate-y-1/2
+              items-center
+              gap-1.5
+              sm:left-3
+              lg:hidden
+            "
+          >
+            {/* Menu */}
             <button
               type="button"
-              aria-label={menuOpen ? 'بستن منو' : 'باز کردن منو'}
-              aria-expanded={menuOpen}
-              onClick={() => setMenuOpen((value) => !value)}
-              className={[
-                'flex h-10 w-10 items-center justify-center',
-                'rounded-full border',
-                'transition-all duration-200',
-                'active:scale-95',
+              aria-label={
                 menuOpen
-                  ? 'border-primary bg-primary text-white shadow-[0_4px_12px_rgba(17,47,80,0.12)]'
-                  : 'border-[#e5e0d7] bg-white text-primary hover:border-accent/40 hover:bg-accent/[0.04]',
+                  ? 'بستن منو'
+                  : 'باز کردن منو'
+              }
+              aria-expanded={menuOpen}
+              onClick={() =>
+                setMenuOpen(
+                  (value) => !value,
+                )
+              }
+              className={[
+                'flex h-10 w-10 shrink-0 items-center justify-center rounded-full',
+                'border transition-all duration-200 active:scale-95',
+                menuOpen
+                  ? 'border-[#112F50] bg-[#112F50] text-white shadow-[0_5px_14px_rgba(17,47,80,0.12)]'
+                  : 'border-[#DADDDC] bg-white text-[#112F50] hover:border-[#B79464]/40 hover:bg-[#FAF8F4]',
               ].join(' ')}
             >
               {menuOpen ? (
                 <X
-                  className="h-[19px] w-[19px]"
+                  className="h-[18px] w-[18px]"
                   strokeWidth={1.8}
                 />
               ) : (
                 <Menu
-                  className="h-[19px] w-[19px]"
+                  className="h-[18px] w-[18px]"
                   strokeWidth={1.8}
                 />
               )}
             </button>
+
+            {/* Phone */}
+            <a
+              href={`tel:${TEL_PHONE}`}
+              aria-label="تماس"
+              className="
+                flex
+                h-10
+                w-10
+                shrink-0
+                items-center
+                justify-center
+                rounded-full
+                bg-[#112F50]
+                text-white
+                shadow-[0_5px_13px_rgba(17,47,80,0.10)]
+                transition-all
+                duration-200
+                active:scale-95
+              "
+            >
+              <Phone
+                className="h-[16px] w-[16px]"
+                strokeWidth={1.8}
+              />
+            </a>
+
+            {/* Search */}
+            <Link
+              href="/search"
+              aria-label="جستجو"
+              className="
+                flex
+                h-10
+                w-10
+                shrink-0
+                items-center
+                justify-center
+                rounded-full
+                border
+                border-[#E5E0D7]
+                bg-[#F6F2EB]
+                text-[#112F50]
+                transition-all
+                duration-200
+                active:scale-95
+              "
+            >
+              <Search
+                className="h-[17px] w-[17px]"
+                strokeWidth={1.8}
+              />
+            </Link>
           </div>
         </div>
       </header>

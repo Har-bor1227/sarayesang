@@ -1,21 +1,239 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowLeft } from 'lucide-react'
 
 import Container from '@/components/ui/container'
 
 import type { ProductCategoryNode } from '@/types/wordpress'
 
+import StoneCategoryScaleClient from './StoneCategoryScaleClient'
+
 interface StoneCategoryCarouselProps {
   categories: ProductCategoryNode[]
 }
 
+const LOOP_GROUPS = 4
+
+const VISIBLE_CATEGORY_SLUGS = [
+  'basalt',
+  'crystal',
+  'granite',
+  'onyx',
+  'marble',
+] as const
+
 export default function StoneCategoryCarousel({
   categories,
 }: StoneCategoryCarouselProps) {
-  if (!categories.length) {
+  const visibleCategories = VISIBLE_CATEGORY_SLUGS
+    .map((slug) =>
+      categories.find(
+        (category) =>
+          category.slug === slug,
+      ),
+    )
+    .filter(
+      (
+        category,
+      ): category is ProductCategoryNode =>
+        Boolean(category),
+    )
+
+  if (!visibleCategories.length) {
     return null
   }
+
+  const renderCategory = (
+    category: ProductCategoryNode,
+    index: number,
+    groupIndex: number,
+  ) => {
+    const imageSrc =
+      category.image?.sourceUrl ||
+      '/images/home/product-placeholder.webp'
+
+    return (
+      <Link
+        key={`${groupIndex}-${category.id}`}
+        href={`/categories/${category.slug}`}
+        dir="rtl"
+        aria-label={`مشاهده دسته‌بندی ${category.name}`}
+        data-stone-category-item="true"
+        className="
+          group
+          flex
+          w-[118px]
+          shrink-0
+          flex-col
+          items-center
+          outline-none
+          sm:w-[132px]
+          md:w-[148px]
+          lg:w-[164px]
+          xl:w-[180px]
+        "
+        style={{
+          '--category-scale': '1',
+        } as React.CSSProperties}
+      >
+        <div
+          className="
+            relative
+            h-[132px]
+            w-full
+            sm:h-[148px]
+            md:h-[166px]
+            lg:h-[182px]
+            xl:h-[196px]
+          "
+        >
+          <div
+            aria-hidden="true"
+            className="
+              absolute
+              inset-x-[10%]
+              top-[4%]
+              bottom-[5%]
+              rounded-[30%]
+              bg-white
+              opacity-0
+              shadow-[0_14px_32px_rgba(10,25,41,0.05)]
+              transition-all
+              duration-500
+              ease-out
+              group-hover:scale-[1.02]
+              group-hover:opacity-100
+            "
+          />
+
+          <div
+            aria-hidden="true"
+            className="
+              absolute
+              inset-0
+              z-10
+              origin-center
+              will-change-transform
+            "
+            style={{
+              transform:
+                'scale(var(--category-scale, 1))',
+            }}
+          >
+            <Image
+              src={imageSrc}
+              alt=""
+              fill
+              draggable={false}
+              sizes="
+                (max-width: 639px) 118px,
+                (max-width: 767px) 132px,
+                (max-width: 1023px) 148px,
+                (max-width: 1279px) 164px,
+                180px
+              "
+              className="
+                relative
+                object-contain
+                transition-transform
+                duration-700
+                ease-[cubic-bezier(.22,1,.36,1)]
+                group-hover:-translate-y-1.5
+                group-hover:scale-[1.04]
+              "
+            />
+          </div>
+
+          <div
+            aria-hidden="true"
+            className="
+              pointer-events-none
+              absolute
+              bottom-0
+              left-1/2
+              z-0
+              h-[7px]
+              w-[52%]
+              -translate-x-1/2
+              rounded-[50%]
+              bg-[#0a1929]/10
+              blur-[5px]
+              transition-all
+              duration-500
+              group-hover:w-[44%]
+              group-hover:bg-[#0a1929]/7
+            "
+          />
+        </div>
+
+        <div className="mt-1 flex flex-col items-center">
+          <span
+            className="
+              whitespace-nowrap
+              text-[12px]
+              font-black
+              tracking-[-0.02em]
+              text-primary
+              transition-colors
+              duration-300
+              group-hover:text-[#76582f]
+              sm:text-[13px]
+              md:text-[14px]
+            "
+          >
+            {category.name}
+          </span>
+
+          <span
+            aria-hidden="true"
+            className="
+              mt-1.5
+              h-[2px]
+              w-0
+              rounded-full
+              bg-accent
+              transition-all
+              duration-300
+              ease-out
+              group-hover:w-6
+              sm:mt-2
+            "
+          />
+        </div>
+      </Link>
+    )
+  }
+
+  const renderCategoryGroup = (
+    groupIndex: number,
+  ) => (
+    <div
+      className="
+        stone-category-group
+        flex
+        shrink-0
+        items-start
+        gap-3.5
+        px-2
+        sm:gap-5
+        sm:px-2.5
+        md:gap-6
+        md:px-3
+        lg:gap-7
+        lg:px-3.5
+        xl:gap-8
+        xl:px-4
+      "
+    >
+      {visibleCategories.map(
+        (category, index) =>
+          renderCategory(
+            category,
+            index,
+            groupIndex,
+          ),
+      )}
+    </div>
+  )
 
   return (
     <section
@@ -24,253 +242,147 @@ export default function StoneCategoryCarousel({
         w-full
         overflow-hidden
         bg-[#fcfcfb]
-        py-14
-        sm:py-16
-        md:py-20
+        py-3
+        sm:py-4
+        md:py-5
+        lg:py-6
       "
+      dir="ltr"
     >
       <Container>
-        {/* Section heading */}
         <div
           className="
-            mb-8
-            flex
-            flex-col
-            gap-4
-            sm:mb-10
-            md:flex-row
-            md:items-end
-            md:justify-between
+            mb-4
+            text-center
+            sm:mb-5
+            md:mb-6
           "
+          dir="rtl"
         >
-          <div className="max-w-xl">
-            <div className="mb-3 flex items-center gap-3">
-              <span
-                aria-hidden="true"
-                className="h-px w-7 bg-accent"
-              />
-
-              <span
-                className="
-                  text-[10px]
-                  font-bold
-                  tracking-[0.07em]
-                  text-accent-dark
-                  sm:text-[11px]
-                "
-              >
-                COLLECTION
-              </span>
-            </div>
-
-            <h2
+          <div className="mb-1.5 flex items-center justify-center gap-2.5">
+            <span
+              aria-hidden="true"
               className="
-                text-2xl
-                font-black
-                tracking-[-0.025em]
-                text-primary
-                sm:text-3xl
+                h-px
+                w-7
+                bg-gradient-to-r
+                from-transparent
+                to-accent/60
+                sm:w-10
               "
-            >
-              دسته‌بندی سنگ‌ها
-            </h2>
+            />
 
-            <p
+            <span
+              aria-hidden="true"
               className="
-                mt-2
-                text-sm
-                leading-7
-                text-[#667085]
-                sm:text-[15px]
+                h-1.5
+                w-1.5
+                rounded-full
+                bg-accent
+                shadow-[0_0_0_3px_rgba(183,148,100,0.07)]
               "
-            >
-              متریال مناسب پروژه خود را از میان مجموعه سنگ‌های
-              منتخب سرای سنگ پیدا کنید.
-            </p>
+            />
+
+            <span
+              aria-hidden="true"
+              className="
+                h-px
+                w-7
+                bg-gradient-to-l
+                from-transparent
+                to-accent/60
+                sm:w-10
+              "
+            />
           </div>
 
-          <Link
-            href="/categories"
+          <h2
             className="
-              group
-              inline-flex
-              w-fit
-              items-center
-              gap-2
-              text-xs
-              font-bold
+              text-[22px]
+              font-black
+              leading-tight
+              tracking-[-0.035em]
               text-primary
-              transition-colors
-              duration-200
-              hover:text-accent-dark
+              sm:text-[26px]
+              md:text-[30px]
             "
           >
-            مشاهده همه دسته‌بندی‌ها
-
-            <ArrowLeft
-              className="
-                h-4
-                w-4
-                transition-transform
-                duration-200
-                group-hover:-translate-x-1
-              "
-              strokeWidth={1.8}
-            />
-          </Link>
+            دسته‌بندی سنگ‌ها
+          </h2>
         </div>
 
-        {/* Categories */}
-        <div className="relative w-full">
+        <StoneCategoryScaleClient
+          itemCount={visibleCategories.length}
+        >
           <div
             className="
-              flex
-              min-w-0
-              snap-x
-              snap-mandatory
-              items-start
-              justify-start
-              gap-3.5
-              overflow-x-auto
-              px-1
-              pb-5
-              [scrollbar-width:none]
-              [&::-webkit-scrollbar]:hidden
-              sm:justify-center
-              sm:gap-5
-              md:gap-6
-              lg:gap-7
-              xl:gap-8
+              relative
+              w-full
+              overflow-hidden
             "
-            dir="rtl"
+            dir="ltr"
           >
-            {categories.map((category) => {
-              const imageSrc =
-                category.image?.sourceUrl ||
-                '/images/home/product-placeholder.webp'
+            <div
+              aria-hidden="true"
+              className="
+                pointer-events-none
+                absolute
+                inset-y-0
+                left-0
+                z-30
+                w-3
+                bg-gradient-to-r
+                from-[#fcfcfb]
+                to-transparent
+                sm:w-5
+                md:w-6
+              "
+            />
 
-              const imageAlt =
-                category.image?.altText ||
-                `دسته‌بندی ${category.name}`
+            <div
+              aria-hidden="true"
+              className="
+                pointer-events-none
+                absolute
+                inset-y-0
+                right-0
+                z-30
+                w-3
+                bg-gradient-to-l
+                from-[#fcfcfb]
+                to-transparent
+                sm:w-5
+                md:w-6
+              "
+            />
 
-              return (
-                <Link
-                  key={category.id}
-                  href={`/categories/${category.slug}`}
-                  className="
-                    group
-                    flex
-                    w-[126px]
-                    shrink-0
-                    snap-center
-                    flex-col
-                    items-center
-                    outline-none
-                    sm:w-[145px]
-                    md:w-[165px]
-                    lg:w-[182px]
-                    xl:w-[195px]
-                  "
-                >
-                  {/* Image */}
+            <div
+              className="
+                stone-category-marquee
+                flex
+                w-max
+                items-start
+                pl-1
+                hover:[animation-play-state:paused]
+                sm:pl-2
+                md:pl-3
+              "
+            >
+              {Array.from(
+                { length: LOOP_GROUPS },
+                (_, groupIndex) => (
                   <div
-                    className="
-                      relative
-                      h-[155px]
-                      w-[112px]
-                      sm:h-[175px]
-                      sm:w-[128px]
-                      md:h-[195px]
-                      md:w-[140px]
-                      lg:h-[215px]
-                      lg:w-[154px]
-                      xl:h-[230px]
-                      xl:w-[166px]
-                    "
+                    key={groupIndex}
                   >
-                    <Image
-                      src={imageSrc}
-                      alt={imageAlt}
-                      fill
-                      sizes="
-                        (max-width: 639px) 112px,
-                        (max-width: 767px) 128px,
-                        (max-width: 1023px) 140px,
-                        (max-width: 1279px) 154px,
-                        166px
-                      "
-                      className="
-                        object-contain
-                        transition-transform
-                        duration-500
-                        ease-out
-                        group-hover:-translate-y-1.5
-                        group-hover:scale-[1.035]
-                      "
-                    />
-
-                    {/* Ground shadow */}
-                    <div
-                      aria-hidden="true"
-                      className="
-                        pointer-events-none
-                        absolute
-                        bottom-[2px]
-                        left-1/2
-                        h-[10px]
-                        w-[72%]
-                        -translate-x-1/2
-                        rounded-[50%]
-                        bg-[#0a1929]/18
-                        blur-[5px]
-                        transition-all
-                        duration-500
-                        group-hover:w-[64%]
-                        group-hover:bg-[#0a1929]/12
-                      "
-                    />
+                    {renderCategoryGroup(
+                      groupIndex,
+                    )}
                   </div>
-
-                  {/* Label */}
-                  <span
-                    className="
-                      relative
-                      z-10
-                      -mt-1
-                      flex
-                      h-10
-                      w-full
-                      items-center
-                      justify-center
-                      rounded-full
-                      border
-                      border-primary/[0.08]
-                      bg-primary
-                      px-3
-                      text-center
-                      text-[12px]
-                      font-black
-                      text-white
-                      shadow-[0_7px_18px_rgba(10,25,41,0.12)]
-                      transition-all
-                      duration-300
-                      group-hover:-translate-y-1
-                      group-hover:border-accent/15
-                      group-hover:bg-[#193f63]
-                      group-hover:shadow-[0_11px_24px_rgba(10,25,41,0.18)]
-                      sm:h-[42px]
-                      sm:text-[13px]
-                      md:h-11
-                      md:text-sm
-                    "
-                  >
-                    {category.name}
-                  </span>
-                </Link>
-              )
-            })}
+                ),
+              )}
+            </div>
           </div>
-        </div>
+        </StoneCategoryScaleClient>
       </Container>
     </section>
   )

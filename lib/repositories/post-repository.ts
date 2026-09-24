@@ -23,6 +23,7 @@ interface AllPostSlugsConnection {
 
   nodes: {
     slug: string
+    modified: string | null
   }[]
 }
 
@@ -89,10 +90,18 @@ export const getPostBySlug =
     },
   )
 
-export const getAllPostSlugs =
+export const getAllPostSitemapEntries =
   cache(
-    async (): Promise<string[]> => {
-      const slugs: string[] = []
+    async (): Promise<
+      {
+        slug: string
+        lastModified?: string
+      }[]
+    > => {
+      const entries: {
+        slug: string
+        lastModified?: string
+      }[] = []
 
       let hasNextPage = true
 
@@ -100,9 +109,14 @@ export const getAllPostSlugs =
         | string
         | null = null
 
-      while (hasNextPage) {
-        const data: GetAllPostSlugsQueryResponse =
-          await fetchGraphQL<GetAllPostSlugsQueryResponse>(
+      while (
+        hasNextPage
+      ) {
+        const data:
+          GetAllPostSlugsQueryResponse =
+          await fetchGraphQL<
+            GetAllPostSlugsQueryResponse
+          >(
             GET_ALL_POST_SLUGS,
             {
               first: 100,
@@ -114,11 +128,28 @@ export const getAllPostSlugs =
           const post of
           data.posts.nodes
         ) {
-          if (post.slug) {
-            slugs.push(
-              post.slug,
-            )
+          if (
+            !post.slug
+          ) {
+            continue
           }
+
+          entries.push({
+            slug:
+              post.slug,
+            lastModified:
+              post.modified ||
+              undefined,
+          })
+        }
+
+        if (
+          entries.length >
+          50000
+        ) {
+          throw new Error(
+            'Article sitemap exceeds the 50,000 URL limit. Split it into multiple sitemaps.',
+          )
         }
 
         hasNextPage =
@@ -130,6 +161,19 @@ export const getAllPostSlugs =
             .endCursor
       }
 
-      return slugs
+      return entries
+    },
+  )
+
+export const getAllPostSlugs =
+  cache(
+    async (): Promise<string[]> => {
+      const entries =
+        await getAllPostSitemapEntries()
+
+      return entries.map(
+        (entry) =>
+          entry.slug,
+      )
     },
   )

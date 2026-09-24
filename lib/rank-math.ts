@@ -2,14 +2,13 @@ import 'server-only'
 
 import type { Metadata } from 'next'
 
-import { WORDPRESS_URL } from '@/lib/constants'
+import { DEFAULT_SOCIAL_IMAGE, SITE_NAME, WORDPRESS_URL } from '@/lib/constants'
 
 export interface RankMathSeoData {
   title?: string
   description?: string
   canonical?: string
   robots?: string
-
   openGraph?: {
     locale?: string
     type?: string
@@ -25,14 +24,12 @@ export interface RankMathSeoData {
       type?: string
     }
   }
-
   twitter?: {
     card?: string
     title?: string
     description?: string
     image?: string
   }
-
   jsonLd: Record<string, unknown>[]
 }
 
@@ -75,20 +72,14 @@ function decodeHtmlEntities(
     )
     .replace(
       /&#(\d+);/g,
-      (
-        _match,
-        code: string,
-      ) =>
+      (_match, code: string) =>
         String.fromCharCode(
           Number(code),
         ),
     )
     .replace(
       /&#x([0-9a-f]+);/gi,
-      (
-        _match,
-        code: string,
-      ) =>
+      (_match, code: string) =>
         String.fromCharCode(
           parseInt(
             code,
@@ -96,6 +87,40 @@ function decodeHtmlEntities(
           ),
         ),
     )
+}
+
+export function stripHtmlText(
+  value?: string | null,
+): string {
+  if (!value) {
+    return ''
+  }
+
+  const decoded =
+    decodeHtmlEntities(value)
+
+  return decoded
+    .replace(
+      /<script\b[^>]*>[\s\S]*?<\/script>/gi,
+      ' ',
+    )
+    .replace(
+      /<style\b[^>]*>[\s\S]*?<\/style>/gi,
+      ' ',
+    )
+    .replace(
+      /<[^>]*>/g,
+      ' ',
+    )
+    .replace(
+      /\u00a0/g,
+      ' ',
+    )
+    .replace(
+      /\s+/g,
+      ' ',
+    )
+    .trim()
 }
 
 function getAttribute(
@@ -152,8 +177,7 @@ function extractMetaTags(
       )
 
     if (
-      content !==
-      undefined
+      content !== undefined
     ) {
       results.push({
         name,
@@ -175,9 +199,7 @@ function getMetaValue(
 
   const match =
     metas.find(
-      (
-        meta,
-      ) =>
+      (meta) =>
         meta.name?.toLowerCase() ===
           normalizedKey ||
         meta.property?.toLowerCase() ===
@@ -239,7 +261,8 @@ function extractJsonLd(
   head: string,
 ): Record<string, unknown>[] {
   const schemas:
-    Record<string, unknown>[] = []
+    Record<string, unknown>[] =
+    []
 
   const regex =
     /<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi
@@ -249,9 +272,7 @@ function extractJsonLd(
 
   while (
     (match =
-      regex.exec(
-        head,
-      )) !== null
+      regex.exec(head)) !== null
   ) {
     const raw =
       match[1]?.trim()
@@ -272,8 +293,7 @@ function extractJsonLd(
         )
       ) {
         for (
-          const item of
-            parsed
+          const item of parsed
         ) {
           if (
             item &&
@@ -356,37 +376,39 @@ function extractSchemaField(
       schema['@graph']
 
     if (
-      Array.isArray(
+      !Array.isArray(
         graph,
       )
     ) {
-      for (
-        const item of
-          graph
+      continue
+    }
+
+    for (
+      const item of
+        graph
+    ) {
+      if (
+        !item ||
+        typeof item !==
+          'object' ||
+        Array.isArray(
+          item,
+        )
       ) {
-        if (
-          !item ||
-          typeof item !==
-            'object' ||
-          Array.isArray(
-            item,
-          )
-        ) {
-          continue
-        }
+        continue
+      }
 
-        const value =
-          extractSchemaValue(
-            item as Record<
-              string,
-              unknown
-            >,
-            field,
-          )
+      const value =
+        extractSchemaValue(
+          item as Record<
+            string,
+            unknown
+          >,
+          field,
+        )
 
-        if (value) {
-          return value
-        }
+      if (value) {
+        return value
       }
     }
   }
@@ -569,9 +591,7 @@ export function normalizeRankMathSchemaUrls(
     )
   ) {
     return value.map(
-      (
-        item,
-      ) =>
+      (item) =>
         normalizeRankMathSchemaUrls(
           item,
           wordpressSourceUrl,
@@ -653,15 +673,12 @@ export async function getRankMathHead(
         requestUrl.toString(),
         {
           method: 'GET',
-
           headers: {
             Accept:
               'application/json',
           },
-
           signal:
             controller.signal,
-
           next: {
             revalidate,
           },
@@ -725,24 +742,20 @@ export function parseRankMathHead(
       extractTitle(
         head,
       ),
-
     description:
       getMetaValue(
         metas,
         'description',
       ),
-
     canonical:
       extractCanonical(
         head,
       ),
-
     robots:
       getMetaValue(
         metas,
         'robots',
       ),
-
     jsonLd,
   }
 
@@ -824,28 +837,21 @@ export function parseRankMathHead(
     result.openGraph = {
       locale:
         ogLocale,
-
       type:
         ogType,
-
       title:
         ogTitle,
-
       description:
         ogDescription,
-
       url:
         ogUrl,
-
       siteName:
         ogSiteName,
-
       image:
         ogImage
           ? {
               url:
                 ogImage,
-
               width:
                 ogImageWidth &&
                 Number.isFinite(
@@ -857,7 +863,6 @@ export function parseRankMathHead(
                       ogImageWidth,
                     )
                   : undefined,
-
               height:
                 ogImageHeight &&
                 Number.isFinite(
@@ -869,10 +874,8 @@ export function parseRankMathHead(
                       ogImageHeight,
                     )
                   : undefined,
-
               alt:
                 ogImageAlt,
-
               type:
                 ogImageType,
             }
@@ -913,13 +916,10 @@ export function parseRankMathHead(
     result.twitter = {
       card:
         twitterCard,
-
       title:
         twitterTitle,
-
       description:
         twitterDescription,
-
       image:
         twitterImage,
     }
@@ -953,9 +953,48 @@ export async function getRankMathSEO(
  * When a frontend canonical is supplied, it is always
  * authoritative over the WordPress canonical.
  */
+function normalizePageTitle(
+  value?: string,
+): string | undefined {
+  const title =
+    stripHtmlText(
+      value,
+    )
+
+  if (!title) {
+    return undefined
+  }
+
+  const siteName =
+    SITE_NAME.trim()
+
+  if (!siteName) {
+    return title
+  }
+
+  const escapedSiteName =
+    siteName.replace(
+      /[.*+?^${}()|[\]\\]/g,
+      '\\$&',
+    )
+
+  return (
+    title
+      .replace(
+        new RegExp(
+          `\\s*(?:\\||[-–—])\\s*${escapedSiteName}$`,
+          'i',
+        ),
+        '',
+      )
+      .trim() || title
+  )
+}
+
 export function rankMathToMetadata(
   seo: RankMathSeoData,
   canonicalOverride?: string,
+  openGraphTypeOverride?: 'website' | 'article' | 'book' | 'profile',
 ): Metadata {
   const canonical =
     canonicalOverride ||
@@ -963,6 +1002,7 @@ export function rankMathToMetadata(
     seo.openGraph?.url
 
   const openGraphType =
+    openGraphTypeOverride ||
     getAllowedOpenGraphType(
       seo.openGraph?.type,
     )
@@ -973,39 +1013,49 @@ export function rankMathToMetadata(
     )
 
   const title =
-    seo.title?.trim() ||
-    undefined
+    normalizePageTitle(
+      seo.title,
+    )
 
   const description =
-    seo.description?.trim() ||
-    undefined
+    stripHtmlText(
+      seo.description,
+    ) || undefined
 
   const openGraphTitle =
-    seo.openGraph?.title?.trim() ||
-    title
+    stripHtmlText(
+      seo.openGraph?.title,
+    ) || title
 
   const openGraphDescription =
-    seo.openGraph?.description?.trim() ||
-    description
+    stripHtmlText(
+      seo.openGraph?.description,
+    ) || description
 
   const openGraphSiteName =
-    seo.openGraph?.siteName?.trim() ||
-    undefined
+    stripHtmlText(
+      seo.openGraph?.siteName,
+    ) || SITE_NAME
 
   const openGraphLocale =
     seo.openGraph?.locale?.trim() ||
     'fa_IR'
 
   const openGraphImage =
-    seo.openGraph?.image
+    seo.openGraph?.image ?? {
+      url: DEFAULT_SOCIAL_IMAGE,
+      alt: SITE_NAME,
+    }
 
   const twitterTitle =
-    seo.twitter?.title?.trim() ||
-    title
+    stripHtmlText(
+      seo.twitter?.title,
+    ) || title
 
   const twitterDescription =
-    seo.twitter?.description?.trim() ||
-    description
+    stripHtmlText(
+      seo.twitter?.description,
+    ) || description
 
   const twitterImage =
     seo.twitter?.image?.trim() ||
@@ -1052,15 +1102,14 @@ export function rankMathToMetadata(
               {
                 url:
                   openGraphImage.url,
-
                 width:
                   openGraphImage.width,
-
                 height:
                   openGraphImage.height,
-
                 alt:
-                  openGraphImage.alt,
+                  stripHtmlText(
+                    openGraphImage.alt,
+                  ),
               },
             ]
           : undefined,

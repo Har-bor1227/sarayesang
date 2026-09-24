@@ -5,7 +5,7 @@ type NavLink = {
   href: string
 }
 
-type Props = {
+interface DesktopNavProps {
   links: NavLink[]
   pathname: string
 }
@@ -13,7 +13,7 @@ type Props = {
 export default function DesktopNav({
   links,
   pathname,
-}: Props) {
+}: DesktopNavProps) {
   const isActive = (href: string) =>
     href === '/'
       ? pathname === '/'
@@ -23,9 +23,14 @@ export default function DesktopNav({
   return (
     <nav
       aria-label="منوی اصلی"
-      className="mx-auto hidden lg:block"
+      className="
+        flex
+        min-w-0
+        items-center
+        justify-center
+      "
     >
-      <div className="flex items-center gap-0.5 xl:gap-1">
+      <div className="flex items-center gap-0.5">
         {links.map((item) => {
           const active = isActive(item.href)
 
@@ -33,22 +38,22 @@ export default function DesktopNav({
             <Link
               key={item.href}
               href={item.href}
-              aria-current={active ? 'page' : undefined}
+              aria-current={
+                active ? 'page' : undefined
+              }
               className={[
-                'group relative flex items-center',
-                'h-10 rounded-full',
-                'px-3.5 xl:px-4.5',
+                'group relative flex h-11 items-center',
+                'rounded-[13px] px-3.5 xl:px-4',
                 'whitespace-nowrap',
-                'text-[13px] xl:text-[14px]',
-                'font-semibold',
-                'tracking-[-0.01em]',
+                'text-[12px] xl:text-[13px]',
+                'font-bold tracking-[-0.015em]',
                 'transition-all duration-200',
                 active
-                  ? 'text-primary'
-                  : 'text-[#667085] hover:bg-primary/[0.035] hover:text-primary',
+                  ? 'bg-[#F5F1E9] text-[#112F50]'
+                  : 'text-[#667085] hover:bg-[#F8F7F4] hover:text-[#112F50]',
               ].join(' ')}
             >
-              {item.title}
+              <span>{item.title}</span>
 
               <span
                 aria-hidden="true"
@@ -56,11 +61,11 @@ export default function DesktopNav({
                   'absolute bottom-[5px] left-1/2',
                   '-translate-x-1/2',
                   'h-[2px] rounded-full',
-                  'bg-accent',
-                  'transition-all duration-250 ease-out',
+                  'bg-[#B79464]',
+                  'transition-all duration-200',
                   active
                     ? 'w-5 opacity-100'
-                    : 'w-0 opacity-0 group-hover:w-5 group-hover:opacity-100',
+                    : 'w-0 opacity-0 group-hover:w-4 group-hover:opacity-100',
                 ].join(' ')}
               />
             </Link>

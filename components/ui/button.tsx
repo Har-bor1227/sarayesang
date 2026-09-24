@@ -27,7 +27,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       asChild = false,
       ...props
     },
-    ref
+    ref,
   ) => {
     const Comp = asChild ? Slot : 'button'
 
@@ -49,10 +49,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             '[&_svg]:size-4',
             '[&_svg]:shrink-0',
           ].join(' '),
-
-          /* --------------------------------
-             Variants
-             -------------------------------- */
 
           variant === 'default' &&
             [
@@ -90,8 +86,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
           variant === 'secondary' &&
             [
-              'bg-secondary text-secondary-foreground',
               'border border-transparent',
+              'bg-secondary text-secondary-foreground',
               'hover:bg-secondary/75',
               'hover:border-border',
             ].join(' '),
@@ -117,7 +113,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
               'h-auto bg-transparent p-0',
               'text-primary',
               'underline-offset-4',
-              'hover:text-accent-dark',
+              'hover:text-[#76582f]',
               'hover:underline',
             ].join(' '),
 
@@ -131,10 +127,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
               'active:translate-y-0',
             ].join(' '),
 
-          /* --------------------------------
-             Sizes
-             -------------------------------- */
-
           size === 'default' &&
             'h-10 rounded-lg px-4 text-sm',
 
@@ -147,12 +139,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           size === 'icon' &&
             'size-10 rounded-lg',
 
-          className
+          className,
         )}
         {...props}
       />
     )
-  }
+  },
 )
 
 Button.displayName = 'Button'
