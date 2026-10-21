@@ -11,7 +11,11 @@ import {
   X,
 } from 'lucide-react'
 
-import { useEffect, useState } from 'react'
+import {
+  useEffect,
+  useState,
+} from 'react'
+
 import { usePathname } from 'next/navigation'
 
 import {
@@ -20,13 +24,41 @@ import {
   TEL_PHONE,
 } from '@/lib/constants'
 
+import type {
+  ProductCategoryNode,
+} from '@/types/wordpress'
+
 import DesktopNav from '../header/DesktopNav'
 import HeaderSearch from '../header/HeaderSearch'
 import MobileDrawer from '../header/MobileDrawer'
 
-export default function Header() {
+interface HeaderProps {
+  categories: ProductCategoryNode[]
+}
+
+interface HeaderContentProps {
+  pathname: string
+  categories: ProductCategoryNode[]
+}
+
+export default function Header({
+  categories,
+}: HeaderProps) {
   const pathname = usePathname()
 
+  return (
+    <HeaderContent
+      key={pathname}
+      pathname={pathname}
+      categories={categories}
+    />
+  )
+}
+
+function HeaderContent({
+  pathname,
+  categories,
+}: HeaderContentProps) {
   const [menuOpen, setMenuOpen] =
     useState(false)
 
@@ -39,10 +71,6 @@ export default function Header() {
   const isImageSearchPage =
     pathname === '/image-search' ||
     pathname.startsWith('/image-search/')
-
-  useEffect(() => {
-    setMenuOpen(false)
-  }, [pathname])
 
   useEffect(() => {
     const mediaQuery =
@@ -89,7 +117,6 @@ export default function Header() {
 
   useEffect(() => {
     if (!isMobile) {
-      setHidden(false)
       return
     }
 
@@ -213,7 +240,9 @@ export default function Header() {
               sm:right-3
               sm:h-9
               sm:w-[104px]
-              lg:static
+              lg:relative
+              lg:right-auto
+              lg:top-auto
               lg:h-10
               lg:w-[118px]
               lg:shrink-0
@@ -245,6 +274,7 @@ export default function Header() {
             <DesktopNav
               links={NAV_LINKS}
               pathname={pathname}
+              categories={categories}
             />
           </div>
 

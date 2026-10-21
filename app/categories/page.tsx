@@ -3,10 +3,17 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 
+import {
+  ArrowLeft,
+  Layers3,
+  Sparkles,
+} from 'lucide-react'
+
 import Container from '@/components/ui/container'
 
 import {
-  getProductCategories,
+  getChildProductCategories,
+  getRootProductCategories,
 } from '@/lib/repositories/category-repository'
 
 import {
@@ -20,32 +27,38 @@ import {
   SITE_URL,
 } from '@/lib/constants'
 
-export const revalidate = 3600
+export const revalidate = 300
 
 export const metadata: Metadata = {
   title:
-    'دسته‌بندی محصولات',
+    'دسته‌بندی سنگ‌های ساختمانی',
 
   description:
-    'دسته‌بندی‌های سنگ‌های ساختمانی سرای سنگ را مشاهده کنید و سنگ مناسب پروژه خود را پیدا کنید.',
+    'دسته‌بندی انواع سنگ‌های ساختمانی سرای سنگ را مشاهده کنید؛ از تراورتن و مرمریت تا گرانیت، مرمر، چینی، بازالت و سایر سنگ‌ها.',
 
   alternates: {
     canonical:
-      `${SITE_URL}/categories`,
+      `${SITE_URL.replace(
+        /\/+$/,
+        '',
+      )}/categories`,
   },
 
   openGraph: {
     title:
-      `دسته‌بندی محصولات | ${SITE_NAME}`,
+      `${SITE_NAME} | دسته‌بندی سنگ‌های ساختمانی`,
 
     description:
-      'دسته‌بندی‌های سنگ‌های ساختمانی سرای سنگ.',
+      'انواع سنگ‌های ساختمانی سرای سنگ را بر اساس دسته‌بندی بررسی کنید.',
 
     type:
       'website',
 
     url:
-      `${SITE_URL}/categories`,
+      `${SITE_URL.replace(
+        /\/+$/,
+        '',
+      )}/categories`,
 
     siteName:
       SITE_NAME,
@@ -57,10 +70,13 @@ export const metadata: Metadata = {
       {
         url:
           DEFAULT_SOCIAL_IMAGE,
+
         width:
           1920,
+
         height:
           758,
+
         alt:
           SITE_NAME,
       },
@@ -71,31 +87,54 @@ export const metadata: Metadata = {
     card:
       'summary_large_image',
 
+    title:
+      `${SITE_NAME} | دسته‌بندی سنگ‌های ساختمانی`,
+
+    description:
+      'انواع سنگ‌های ساختمانی سرای سنگ را بر اساس دسته‌بندی بررسی کنید.',
+
     images: [
       DEFAULT_SOCIAL_IMAGE,
     ],
-
-    title:
-      `دسته‌بندی محصولات | ${SITE_NAME}`,
-
-    description:
-      'دسته‌بندی‌های سنگ‌های ساختمانی سرای سنگ.',
   },
 }
 
 export default async function CategoriesPage() {
-  const categories =
-    await getProductCategories()
+  const [
+    rootCategories,
+  ] = await Promise.all([
+    getRootProductCategories(),
+  ])
+
+  const rootWithChildren =
+    await Promise.all(
+      rootCategories.map(
+        async (
+          root,
+        ) => ({
+          root,
+
+          children:
+            await getChildProductCategories(
+              root.id,
+            ),
+        }),
+      ),
+    )
 
   const breadcrumbSchema =
     generateBreadcrumbSchema([
       {
-        name: 'خانه',
-        path: '/',
+        name:
+          'خانه',
+        path:
+          '/',
       },
       {
-        name: 'دسته‌بندی‌ها',
-        path: '/categories',
+        name:
+          'دسته‌بندی‌ها',
+        path:
+          '/categories',
       },
     ])
 
@@ -105,16 +144,15 @@ export default async function CategoriesPage() {
       dir="rtl"
     >
       <Container className="pb-16 pt-5 sm:pb-20 sm:pt-7 lg:pb-24">
-        {/* =========================================================
-            SEO / STRUCTURED DATA
-        ========================================================== */}
         <JsonLd
-          data={breadcrumbSchema}
+          data={
+            breadcrumbSchema
+          }
         />
 
-        {/* =========================================================
+        {/* =====================================================
             BREADCRUMB
-        ========================================================== */}
+        ====================================================== */}
         <nav
           className="mb-8 pt-16 sm:pt-12 md:pt-5"
           aria-label="مسیر راهنما"
@@ -123,7 +161,7 @@ export default async function CategoriesPage() {
             <li className="shrink-0">
               <Link
                 href="/"
-                className="font-semibold text-[#667085] transition-colors duration-200 hover:text-[#B79464]"
+                className="font-semibold text-[#667085] transition-colors hover:text-[#B79464]"
               >
                 خانه
               </Link>
@@ -145,181 +183,242 @@ export default async function CategoriesPage() {
           </ol>
         </nav>
 
-        {/* =========================================================
-            PAGE INTRO
-        ========================================================== */}
-        <header className="mb-9 sm:mb-12 lg:mb-14">
-          <div className="max-w-[780px]">
+        {/* =====================================================
+            HERO
+        ====================================================== */}
+        <header className="mb-10 lg:mb-14">
+          <div className="max-w-[820px]">
             <div className="mb-4 flex items-center gap-3">
-              <span className="h-px w-8 bg-[#B79464] sm:w-10" />
+              <span className="h-px w-9 bg-[#B79464] sm:w-11" />
 
               <span className="text-[9px] font-black uppercase tracking-[0.22em] text-[#B79464] sm:text-[10px]">
-                Stone Categories
+                Stone Architecture
               </span>
             </div>
 
-            <h1 className="text-[30px] font-black leading-[1.45] tracking-[-0.035em] text-[#112F50] sm:text-[38px] sm:leading-[1.4] lg:text-[46px]">
-              انتخاب خود را از میان
-              <span className="text-[#B79464]">
+            <h1 className="text-[32px] font-black leading-[1.4] tracking-[-0.04em] text-[#112F50] sm:text-[42px] lg:text-[54px]">
+              دسته‌بندی
+              <span className="mr-2 text-[#B79464]">
                 {' '}
-                مجموعه سنگ‌ها
+                سنگ‌های ساختمانی
               </span>
-              پیدا کنید
             </h1>
 
-            <p className="mt-4 max-w-[680px] text-[11px] font-medium leading-7 text-[#667085] sm:text-[13px] sm:leading-8">
-              دسته‌بندی‌های مختلف سنگ‌های ساختمانی
-              را بر اساس نوع، ویژگی و کاربرد بررسی
-              کنید و متریال مناسب پروژه خود را
-              پیدا کنید.
+            <p className="mt-5 max-w-[730px] text-[12px] font-medium leading-8 text-[#667085] sm:text-[13px] sm:leading-9">
+              برای پیدا کردن سنگ مناسب پروژه، ابتدا نوع
+              سنگ موردنظر خود را انتخاب کنید و سپس
+              مجموعه محصولات همان دسته را بررسی کنید.
             </p>
           </div>
 
-          <div className="mt-7 h-px w-full bg-[#112F50]/[0.07]" />
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link
+              href="/products"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#112F50] px-5 text-[10px] font-black text-white shadow-[0_9px_25px_rgba(17,47,80,0.12)] transition-all hover:-translate-y-0.5 hover:bg-[#0A1929]"
+            >
+              مشاهده همه سنگ‌ها
+
+              <ArrowLeft
+                className="h-3.5 w-3.5"
+                aria-hidden="true"
+              />
+            </Link>
+
+            <Link
+              href="/smart-search"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[#112F50]/[0.09] bg-white px-5 text-[10px] font-black text-[#112F50] transition-all hover:border-[#B79464]/40 hover:bg-[#FBF8F2]"
+            >
+              پیدا کردن سنگ مناسب
+
+              <Sparkles
+                className="h-3.5 w-3.5 text-[#B79464]"
+                aria-hidden="true"
+              />
+            </Link>
+          </div>
+
+          <div className="mt-8 h-px w-full bg-[#112F50]/[0.07]" />
         </header>
 
-        {/* =========================================================
-            CATEGORY GALLERY
-        ========================================================== */}
-        {categories.length > 0 ? (
-          <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-12 lg:gap-5">
-            {categories.map(
-              (category, index) => {
-                const image =
-                  category.image?.sourceUrl
-
-                const imageAlt =
-                  category.image?.altText ||
-                  category.name
-
-                const isFeatured =
-                  index === 0
-
-                return (
-                  <Link
-                    key={category.id}
-                    href={`/categories/${category.slug}`}
-                    className={[
-                      'group relative overflow-hidden rounded-[24px] bg-[#0A1929]',
-                      isFeatured
-                        ? 'min-h-[300px] sm:min-h-[360px] lg:col-span-7 lg:row-span-2 lg:min-h-[530px]'
-                        : 'min-h-[220px] sm:min-h-[250px] lg:col-span-5 lg:min-h-[255px]',
-                    ].join(' ')}
-                  >
-                    {/* IMAGE */}
-                    {image ? (
-                      <Image
-                        src={image}
-                        alt={imageAlt}
-                        fill
-                        sizes={
-                          isFeatured
-                            ? '(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 58vw'
-                            : '(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 42vw'
-                        }
-                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.045]"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center bg-[linear-gradient(135deg,#112F50,#0A1929)]">
-                        <span className="text-[13px] font-black text-white/45">
-                          سنگ
-                        </span>
-                      </div>
-                    )}
-
-                    {/* OVERLAY */}
-                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,25,41,0.03)_15%,rgba(10,25,41,0.10)_40%,rgba(10,25,41,0.88)_100%)] transition-opacity duration-500 group-hover:opacity-95" />
-
-                    {/* TOP LABEL */}
-                    <div className="absolute right-4 top-4 z-10 sm:right-5 sm:top-5">
-                      <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#0A1929]/25 px-3 py-1.5 text-[7px] font-black uppercase tracking-[0.18em] text-white backdrop-blur-md sm:text-[8px]">
-                        {isFeatured
-                          ? 'Featured Collection'
-                          : `Collection 0${index + 1}`}
-                      </span>
-                    </div>
-
-                    {/* ARROW */}
-                    <span className="absolute left-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white backdrop-blur-md transition-all duration-300 group-hover:border-[#B79464]/60 group-hover:bg-[#B79464] sm:left-5 sm:top-5">
-                      <span className="text-[17px] leading-none transition-transform duration-300 group-hover:-translate-x-0.5">
-                        ←
-                      </span>
-                    </span>
-
-                    {/* CONTENT */}
-                    <div className="absolute inset-x-0 bottom-0 z-10 p-5 sm:p-6 lg:p-7">
-                      <div className="mb-3 flex items-center gap-2">
-                        <span className="h-1.5 w-1.5 rounded-full bg-[#B79464]" />
-
-                        <span className="text-[8px] font-bold text-white/60 sm:text-[9px]">
-                          {typeof category.count ===
-                          'number'
-                            ? `${category.count} محصول`
-                            : 'مجموعه سرای سنگ'}
-                        </span>
-                      </div>
-
-                      <h2
-                        className={[
-                          'max-w-[90%] font-black leading-[1.5] tracking-[-0.02em] text-white',
-                          isFeatured
-                            ? 'text-[24px] sm:text-[30px] lg:text-[38px]'
-                            : 'text-[20px] sm:text-[24px] lg:text-[27px]',
-                        ].join(' ')}
-                      >
-                        {category.name}
-                      </h2>
-
-                      <div className="mt-3 h-px w-10 bg-[#B79464] transition-all duration-500 group-hover:w-16" />
-                    </div>
-                  </Link>
-                )
-              },
-            )}
-          </div>
-        ) : (
-          /* =======================================================
-             EMPTY STATE
-          ======================================================== */
-          <div className="rounded-[26px] border border-dashed border-[#112F50]/[0.10] bg-white px-6 py-20 text-center shadow-[0_10px_35px_rgba(10,25,41,0.035)]">
-            <div className="mx-auto max-w-[420px]">
-              <span className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-[16px] bg-[#FBF8F2] text-[#B79464]">
-                <span className="h-2 w-2 rounded-full bg-current" />
-              </span>
-
-              <h2 className="text-[17px] font-black text-[#112F50]">
-                دسته‌بندی‌ای یافت نشد
-              </h2>
-
-              <p className="mt-2 text-[10px] font-medium leading-6 text-[#667085] sm:text-[11px]">
-                در حال حاضر دسته‌بندی‌ای برای
-                نمایش وجود ندارد.
-              </p>
-
-              <Link
-                href="/products"
-                className="mt-6 inline-flex items-center justify-center rounded-full bg-[#112F50] px-5 py-2.5 text-[9px] font-black text-white shadow-[0_8px_22px_rgba(17,47,80,0.14)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#0A1929]"
+        {/* =====================================================
+            CATEGORY GROUPS
+        ====================================================== */}
+        <div className="space-y-14">
+          {rootWithChildren.map(
+            ({
+              root,
+              children,
+            }) => (
+              <section
+                key={root.id}
+                aria-labelledby={`category-root-${root.id}`}
               >
-                مشاهده محصولات
-              </Link>
-            </div>
-          </div>
-        )}
+                {/* ROOT CATEGORY */}
+                <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <div className="mb-2 flex items-center gap-2">
+                      <Layers3
+                        className="h-4 w-4 text-[#B79464]"
+                        aria-hidden="true"
+                      />
 
-        {/* =========================================================
-            FOOTER NOTE
-        ========================================================== */}
-        {categories.length > 0 && (
-          <div className="mt-8 flex items-center gap-4 sm:mt-10">
-            <span className="h-px flex-1 bg-[#112F50]/[0.08]" />
+                      <span className="text-[8px] font-black uppercase tracking-[0.18em] text-[#B79464] sm:text-[9px]">
+                        Main Category
+                      </span>
+                    </div>
 
-            <span className="text-[8px] font-black tracking-[0.24em] text-[#667085]/50 sm:text-[9px]">
-              SARAYE SANG / COLLECTIONS
-            </span>
+                    <h2
+                      id={`category-root-${root.id}`}
+                      className="text-[25px] font-black tracking-[-0.025em] text-[#112F50] sm:text-[31px]"
+                    >
+                      {root.name}
+                    </h2>
 
-            <span className="h-px flex-1 bg-[#112F50]/[0.08]" />
-          </div>
-        )}
+                    {root.description && (
+                      <p className="mt-3 max-w-[680px] text-[11px] font-medium leading-7 text-[#667085] sm:text-[12px]">
+                        {root.description}
+                      </p>
+                    )}
+                  </div>
+
+                  <Link
+                    href={`/categories/${root.slug}`}
+                    className="group inline-flex min-h-10 items-center gap-2 self-start rounded-full border border-[#112F50]/[0.08] bg-white px-4 text-[9px] font-black text-[#112F50] transition-all hover:border-[#B79464]/40 hover:bg-[#FBF8F2] sm:self-auto"
+                  >
+                    مشاهده این دسته
+
+                    <ArrowLeft
+                      className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1"
+                      aria-hidden="true"
+                    />
+                  </Link>
+                </div>
+
+                {/* CHILD CATEGORIES */}
+                {children.length > 0 ? (
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {children.map(
+                      (
+                        category,
+                        index,
+                      ) => {
+                        const image =
+                          category.image?.sourceUrl
+
+                        const imageAlt =
+                          category.image?.altText ||
+                          category.name
+
+                        return (
+                          <Link
+                            key={
+                              category.id
+                            }
+                            href={`/categories/${category.slug}`}
+                            className="group relative min-h-[230px] overflow-hidden rounded-[24px] bg-[#0A1929] shadow-[0_10px_35px_rgba(10,25,41,0.06)]"
+                          >
+                            {image ? (
+                              <Image
+                                src={
+                                  image
+                                }
+                                alt={
+                                  imageAlt
+                                }
+                                fill
+                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                                className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+                              />
+                            ) : (
+                              <div className="absolute inset-0 bg-[linear-gradient(135deg,#112F50,#0A1929)]" />
+                            )}
+
+                            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,25,41,0.03)_10%,rgba(10,25,41,0.16)_38%,rgba(10,25,41,0.90)_100%)]" />
+
+                            <div className="absolute right-4 top-4">
+                              <span className="inline-flex rounded-full border border-white/15 bg-[#0A1929]/25 px-2.5 py-1.5 text-[7px] font-black uppercase tracking-[0.16em] text-white backdrop-blur-md">
+                                Stone 0
+                                {index +
+                                  1}
+                              </span>
+                            </div>
+
+                            <span
+                              aria-hidden="true"
+                              className="absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white backdrop-blur-md transition-all duration-300 group-hover:border-[#B79464]/60 group-hover:bg-[#B79464]"
+                            >
+                              <ArrowLeft className="h-3.5 w-3.5" />
+                            </span>
+
+                            <div className="absolute inset-x-0 bottom-0 p-5">
+                              <div className="mb-3 flex items-center gap-2">
+                                <span className="h-1.5 w-1.5 rounded-full bg-[#B79464]" />
+
+                                <span className="text-[8px] font-bold text-white/65">
+                                  {typeof category.count ===
+                                  'number'
+                                    ? `${category.count.toLocaleString('fa-IR')} محصول`
+                                    : 'مجموعه سنگ'}
+                                </span>
+                              </div>
+
+                              <h3 className="text-[21px] font-black leading-[1.45] text-white sm:text-[23px]">
+                                {
+                                  category.name
+                                }
+                              </h3>
+
+                              <div className="mt-3 h-px w-10 bg-[#B79464] transition-all duration-500 group-hover:w-16" />
+                            </div>
+                          </Link>
+                        )
+                      },
+                    )}
+                  </div>
+                ) : (
+                  <div className="rounded-[24px] border border-dashed border-[#112F50]/[0.10] bg-white px-6 py-14 text-center">
+                    <p className="text-[11px] font-bold text-[#667085]">
+                      هنوز زیر‌دسته‌ای برای این بخش ثبت نشده است.
+                    </p>
+                  </div>
+                )}
+              </section>
+            ),
+          )}
+        </div>
+
+        {/* =====================================================
+            BOTTOM CTA
+        ====================================================== */}
+        <section className="mt-16 rounded-[28px] bg-[#112F50] px-6 py-10 text-center shadow-[0_18px_55px_rgba(10,25,41,0.12)] sm:px-10">
+          <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#B79464]/15 text-[#D6B67D]">
+            <Sparkles
+              className="h-4 w-4"
+              aria-hidden="true"
+            />
+          </span>
+
+          <h2 className="mt-4 text-[23px] font-black leading-[1.5] text-white sm:text-[29px]">
+            هنوز نمی‌دانید کدام سنگ مناسب پروژه شماست؟
+          </h2>
+
+          <p className="mx-auto mt-3 max-w-[620px] text-[11px] font-medium leading-7 text-white/60 sm:text-[12px]">
+            از ابزارهای انتخاب و جستجوی سرای سنگ برای
+            پیدا کردن گزینه مناسب استفاده کنید.
+          </p>
+
+          <Link
+            href="/smart-search"
+            className="mt-6 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-white px-6 text-[10px] font-black text-[#112F50] transition hover:-translate-y-0.5"
+          >
+            شروع انتخاب سنگ
+
+            <ArrowLeft
+              className="h-3.5 w-3.5"
+              aria-hidden="true"
+            />
+          </Link>
+        </section>
       </Container>
     </div>
   )

@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation'
 
 import {
   Home,
-  Grid2X2,
   Search,
   Phone,
   BookOpen,
@@ -23,16 +22,26 @@ import {
 } from '@/components/ui/sheet'
 
 import LiveSearch from '@/components/search/LiveSearch'
+import MobileCategorySheet from '@/components/header/MobileCategorySheet'
+
+import type {
+  ProductCategoryNode,
+} from '@/types/wordpress'
 
 const icons = {
   home: Home,
-  grid: Grid2X2,
   search: Search,
   phone: Phone,
   book: BookOpen,
 } as const
 
-export default function BottomNav() {
+interface BottomNavProps {
+  categories: ProductCategoryNode[]
+}
+
+export default function BottomNav({
+  categories,
+}: BottomNavProps) {
   const pathname = usePathname()
 
   function isActive(href: string) {
@@ -47,21 +56,19 @@ export default function BottomNav() {
     return pathname.startsWith(href)
   }
 
-  /*
-   * خانه همیشه در مرکز قرار می‌گیرد،
-   * بدون اینکه ترتیب اصلی BOTTOM_NAV_ITEMS را تغییر دهیم.
-   */
-  const homeItemIndex = BOTTOM_NAV_ITEMS.findIndex(
-    (item) =>
-      item.href === '/' ||
-      item.icon === 'home',
-  )
+  const homeItemIndex =
+    BOTTOM_NAV_ITEMS.findIndex(
+      (item) =>
+        item.href === '/' ||
+        item.icon === 'home',
+    )
 
   const navigationItems =
     homeItemIndex >= 0
       ? [
           ...BOTTOM_NAV_ITEMS.filter(
-            (_, index) => index !== homeItemIndex,
+            (_, index) =>
+              index !== homeItemIndex,
           ).slice(
             0,
             Math.floor(
@@ -70,7 +77,8 @@ export default function BottomNav() {
           ),
           BOTTOM_NAV_ITEMS[homeItemIndex],
           ...BOTTOM_NAV_ITEMS.filter(
-            (_, index) => index !== homeItemIndex,
+            (_, index) =>
+              index !== homeItemIndex,
           ).slice(
             Math.floor(
               (BOTTOM_NAV_ITEMS.length - 1) / 2,
@@ -139,7 +147,9 @@ export default function BottomNav() {
           "
         >
           {navigationItems.map((item) => {
-            const active = isActive(item.href)
+            const active =
+              isActive(item.href)
+
             const isHome =
               item.href === '/' ||
               item.icon === 'home'
@@ -147,8 +157,11 @@ export default function BottomNav() {
             /*
              * SEARCH
              */
-            if (item.icon === 'search') {
-              const Icon = icons.search
+            if (
+              item.icon === 'search'
+            ) {
+              const Icon =
+                icons.search
 
               return (
                 <Sheet key={item.href}>
@@ -278,10 +291,30 @@ export default function BottomNav() {
             }
 
             /*
+             * CATEGORY SHEET
+             */
+            if (
+              item.href ===
+              '/categories'
+            ) {
+              return (
+                <MobileCategorySheet
+                  key={item.href}
+                  categories={categories}
+                />
+              )
+            }
+
+            /*
              * PHONE
              */
-            if (item.href.startsWith('tel:')) {
-              const Icon = icons.phone
+            if (
+              item.href.startsWith(
+                'tel:',
+              )
+            ) {
+              const Icon =
+                icons.phone
 
               return (
                 <a
@@ -335,147 +368,154 @@ export default function BottomNav() {
                 </a>
               )
             }
-/*
- * HOME
- */
-if (isHome) {
-  const Icon = icons.home
 
-  return (
-    <Link
-      key={item.href}
-      href="/"
-      aria-current={active ? 'page' : undefined}
-      aria-label="صفحه اصلی"
-      className="
-        group
-        relative
-        flex
-        min-w-0
-        flex-1
-        self-stretch
-        items-center
-        justify-center
-        px-1
-        outline-none
-      "
-    >
-      {/* Floating home button */}
-      <span
-        className={[
-          `
-            absolute
-            bottom-[20px]
-            flex
-            h-[56px]
-            w-[56px]
-            items-center
-            justify-center
-            rounded-full
-            border
-            transition-all
-            duration-300
-            ease-[cubic-bezier(.22,1,.36,1)]
-            group-hover:-translate-y-1
-            group-active:scale-95
-            group-focus-visible:ring-2
-            group-focus-visible:ring-[#B79464]/60
-            group-focus-visible:ring-offset-2
-            group-focus-visible:ring-offset-[#FCFCFB]
-          `,
-          active
-            ? `
-              border-white/60
-              bg-gradient-to-br
-              from-[#D8BC8D]
-              via-[#B79464]
-              to-[#9E7B4F]
-              text-[#112F50]
-              shadow-[0_9px_24px_rgba(17,47,80,0.18),0_3px_10px_rgba(183,148,100,0.20)]
-              group-hover:shadow-[0_12px_28px_rgba(17,47,80,0.22),0_4px_14px_rgba(183,148,100,0.24)]
-            `
-            : `
-              border-[#DCE2E7]
-              bg-white
-              text-[#112F50]
-              shadow-[0_7px_18px_rgba(17,47,80,0.10)]
-              group-hover:border-[#C8D0D7]
-              group-hover:bg-[#F9FAFA]
-              group-hover:shadow-[0_10px_22px_rgba(17,47,80,0.14)]
-            `,
-        ].join(' ')}
-      >
-        {/* Active inner shine */}
-        {active && (
-          <span
-            aria-hidden="true"
-            className="
-              absolute
-              inset-[3px]
-              rounded-full
-              border
-              border-white/20
-              bg-gradient-to-br
-              from-white/15
-              via-transparent
-              to-[#112F50]/[0.08]
-            "
-          />
-        )}
+            /*
+             * HOME
+             */
+            if (isHome) {
+              const Icon =
+                icons.home
 
-        <Icon
-          className="
-            relative
-            z-10
-            h-[23px]
-            w-[23px]
-            transition-transform
-            duration-300
-            group-hover:scale-105
-          "
-          strokeWidth={active ? 2.35 : 2}
-        />
-      </span>
+              return (
+                <Link
+                  key={item.href}
+                  href="/"
+                  aria-current={
+                    active
+                      ? 'page'
+                      : undefined
+                  }
+                  aria-label="صفحه اصلی"
+                  className="
+                    group
+                    relative
+                    flex
+                    min-w-0
+                    flex-1
+                    self-stretch
+                    items-center
+                    justify-center
+                    px-1
+                    outline-none
+                  "
+                >
+                  {/* Floating home button */}
+                  <span
+                    className={[
+                      `
+                        absolute
+                        bottom-[20px]
+                        flex
+                        h-[56px]
+                        w-[56px]
+                        items-center
+                        justify-center
+                        rounded-full
+                        border
+                        transition-all
+                        duration-300
+                        ease-[cubic-bezier(.22,1,.36,1)]
+                        group-hover:-translate-y-1
+                        group-active:scale-95
+                        group-focus-visible:ring-2
+                        group-focus-visible:ring-[#B79464]/60
+                        group-focus-visible:ring-offset-2
+                        group-focus-visible:ring-offset-[#FCFCFB]
+                      `,
+                      active
+                        ? `
+                          border-white/60
+                          bg-gradient-to-br
+                          from-[#D8BC8D]
+                          via-[#B79464]
+                          to-[#9E7B4F]
+                          text-[#112F50]
+                          shadow-[0_9px_24px_rgba(17,47,80,0.18),0_3px_10px_rgba(183,148,100,0.20)]
+                          group-hover:shadow-[0_12px_28px_rgba(17,47,80,0.22),0_4px_14px_rgba(183,148,100,0.24)]
+                        `
+                        : `
+                          border-[#DCE2E7]
+                          bg-white
+                          text-[#112F50]
+                          shadow-[0_7px_18px_rgba(17,47,80,0.10)]
+                          group-hover:border-[#C8D0D7]
+                          group-hover:bg-[#F9FAFA]
+                          group-hover:shadow-[0_10px_22px_rgba(17,47,80,0.14)]
+                        `,
+                    ].join(' ')}
+                  >
+                    {active && (
+                      <span
+                        aria-hidden="true"
+                        className="
+                          absolute
+                          inset-[3px]
+                          rounded-full
+                          border
+                          border-white/20
+                          bg-gradient-to-br
+                          from-white/15
+                          via-transparent
+                          to-[#112F50]/[0.08]
+                        "
+                      />
+                    )}
 
-      {/* Home label */}
-      <span
-        className={[
-          `
-            absolute
-            bottom-[6px]
-            text-[9px]
-            font-black
-            leading-none
-            transition-colors
-            duration-200
-          `,
-          active
-            ? 'text-[#112F50]'
-            : 'text-[#667085] group-hover:text-[#112F50]',
-        ].join(' ')}
-      >
-        خانه
-      </span>
+                    <Icon
+                      className="
+                        relative
+                        z-10
+                        h-[23px]
+                        w-[23px]
+                        transition-transform
+                        duration-300
+                        group-hover:scale-105
+                      "
+                      strokeWidth={
+                        active
+                          ? 2.35
+                          : 2
+                      }
+                    />
+                  </span>
 
-      {/* Active indicator */}
-      {active && (
-        <span
-          aria-hidden="true"
-          className="
-            absolute
-            bottom-[1px]
-            left-1/2
-            h-[3px]
-            w-5
-            -translate-x-1/2
-            rounded-full
-            bg-[#B79464]
-          "
-        />
-      )}
-    </Link>
-  )
-}
+                  <span
+                    className={[
+                      `
+                        absolute
+                        bottom-[6px]
+                        text-[9px]
+                        font-black
+                        leading-none
+                        transition-colors
+                        duration-200
+                      `,
+                      active
+                        ? 'text-[#112F50]'
+                        : 'text-[#667085] group-hover:text-[#112F50]',
+                    ].join(' ')}
+                  >
+                    خانه
+                  </span>
+
+                  {active && (
+                    <span
+                      aria-hidden="true"
+                      className="
+                        absolute
+                        bottom-[1px]
+                        left-1/2
+                        h-[3px]
+                        w-5
+                        -translate-x-1/2
+                        rounded-full
+                        bg-[#B79464]
+                      "
+                    />
+                  )}
+                </Link>
+              )
+            }
 
             /*
              * NORMAL ITEMS
@@ -490,7 +530,9 @@ if (isHome) {
                 key={item.href}
                 href={item.href}
                 aria-current={
-                  active ? 'page' : undefined
+                  active
+                    ? 'page'
+                    : undefined
                 }
                 className={[
                   'group relative flex min-w-0 flex-1',

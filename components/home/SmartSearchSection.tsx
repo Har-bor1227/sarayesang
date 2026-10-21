@@ -1,7 +1,6 @@
 import {
   ArrowLeft,
   Check,
-  Sparkles,
 } from 'lucide-react'
 
 import SmartSearchSelectionSummary from './SmartSearchSelectionSummary'

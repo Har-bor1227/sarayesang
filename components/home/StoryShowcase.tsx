@@ -1,6 +1,6 @@
 import Image from 'next/image'
 
-import StoryInteractionClient from './StoryInteractionClient'
+import DeferredStoryInteraction from './DeferredStoryInteraction'
 
 type Story = {
   id: number
@@ -135,7 +135,7 @@ export default function StoryShowcase() {
         "
       />
 
-      <StoryInteractionClient stories={STORIES}>
+      <DeferredStoryInteraction stories={STORIES}>
         {/* Header */}
         <div
           className="
@@ -654,7 +654,7 @@ export default function StoryShowcase() {
             "
           />
         </div>
-      </StoryInteractionClient>
+      </DeferredStoryInteraction>
     </section>
   )
 }

@@ -16,7 +16,6 @@ import {
 import { formatPrice } from '@/lib/format'
 
 import {
-  SITE_NAME,
   SITE_URL,
 } from '@/lib/constants'
 

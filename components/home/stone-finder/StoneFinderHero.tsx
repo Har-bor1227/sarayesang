@@ -178,8 +178,8 @@ export default function StoneFinderHero({
             <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-[#B79464]/20 bg-white/80 px-2.5 py-1.5 shadow-sm sm:px-3">
               <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#B79464] shadow-[0_0_0_4px_rgba(183,148,100,0.10)]" />
 
-              <span className="truncate text-[8px] font-black uppercase tracking-[0.14em] text-[#8E744F] sm:text-[10px] sm:tracking-[0.18em]">
-                Saraye Sang Finder
+              <span className="truncate text-[8px] font-black text-[#8E744F] sm:text-[10px]">
+                جستجوی هوشمند سنگ
               </span>
             </div>
 
@@ -248,8 +248,8 @@ export default function StoneFinderHero({
               <div className="rounded-[16px] border border-white/[0.08] bg-[#0D2741] p-3.5 sm:rounded-[21px] sm:p-5">
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <span className="text-[7px] font-black uppercase tracking-[0.16em] text-[#D8BC8D] sm:text-[8px] sm:tracking-[0.18em]">
-                      Smart selection
+                    <span className="text-[7px] font-black tracking-[0.16em] text-[#D8BC8D] sm:text-[8px] sm:tracking-[0.18em]">
+                      انتخاب هوشمند
                     </span>
 
                     <p className="mt-1 text-[13px] font-black text-white sm:text-[15px]">
@@ -332,5 +332,4 @@ export default function StoneFinderHero({
       </div>
     </section>
   )
-  
 }

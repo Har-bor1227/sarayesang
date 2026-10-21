@@ -7,6 +7,7 @@ import {
   X,
 } from 'lucide-react'
 import {
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -51,22 +52,27 @@ export default function StoryInteractionClient({
       ? stories[activeIndex]
       : null
 
-  const goNext = () => {
+  const goNext = useCallback(() => {
+    if (stories.length === 0) {
+      return
+    }
+
     setActiveIndex((current) => {
       if (current === null) {
         return null
       }
 
-      return (
-        (current + 1) %
-        stories.length
-      )
+      return (current + 1) % stories.length
     })
 
     setProgress(0)
-  }
+  }, [stories.length])
 
-  const goPrevious = () => {
+  const goPrevious = useCallback(() => {
+    if (stories.length === 0) {
+      return
+    }
+
     setActiveIndex((current) => {
       if (current === null) {
         return null
@@ -79,12 +85,12 @@ export default function StoryInteractionClient({
     })
 
     setProgress(0)
-  }
+  }, [stories.length])
 
-  const closeViewer = () => {
+  const closeViewer = useCallback(() => {
     setActiveIndex(null)
     setProgress(0)
-  }
+  }, [])
 
   const handleContentClick = (
     event: MouseEvent<HTMLDivElement>,
@@ -143,56 +149,61 @@ export default function StoryInteractionClient({
     })
   }
 
+  /*
+   * Automatically advance the story viewer.
+   * Stable callbacks are included in the dependency list.
+   */
   useEffect(() => {
     if (!isOpen || stories.length <= 1) {
-      if (progressTimer.current) {
-        clearInterval(
-          progressTimer.current,
-        )
-
+      if (progressTimer.current !== null) {
+        clearInterval(progressTimer.current)
         progressTimer.current = null
       }
 
       return
     }
 
-    setProgress(0)
-
     const startedAt = Date.now()
 
-    progressTimer.current =
-      setInterval(() => {
-        const elapsed =
-          Date.now() - startedAt
+    progressTimer.current = setInterval(() => {
+      const elapsed = Date.now() - startedAt
 
-        const nextProgress = Math.min(
-          100,
-          (elapsed / STORY_DURATION) *
-            100,
-        )
+      const nextProgress = Math.min(
+        100,
+        (elapsed / STORY_DURATION) * 100,
+      )
 
-        setProgress(nextProgress)
+      setProgress(nextProgress)
 
-        if (nextProgress >= 100) {
-          goNext()
-        }
-      }, 40)
+      if (nextProgress >= 100) {
+        goNext()
+      }
+    }, 40)
 
     return () => {
-      if (progressTimer.current) {
-        clearInterval(
-          progressTimer.current,
-        )
-
+      if (progressTimer.current !== null) {
+        clearInterval(progressTimer.current)
         progressTimer.current = null
       }
     }
-  }, [activeIndex, isOpen, stories.length])
+  }, [
+    activeIndex,
+    goNext,
+    isOpen,
+    stories.length,
+  ])
 
+  /*
+   * Keyboard navigation and body scroll locking.
+   * Restore the previous overflow value during cleanup.
+   */
   useEffect(() => {
     if (!isOpen) {
       return
     }
+
+    const previousBodyOverflow =
+      document.body.style.overflow
 
     const handleKeyDown = (
       event: KeyboardEvent,
@@ -203,11 +214,13 @@ export default function StoryInteractionClient({
       }
 
       if (event.key === 'ArrowLeft') {
+        event.preventDefault()
         goNext()
         return
       }
 
       if (event.key === 'ArrowRight') {
+        event.preventDefault()
         goPrevious()
       }
     }
@@ -217,8 +230,7 @@ export default function StoryInteractionClient({
       handleKeyDown,
     )
 
-    document.body.style.overflow =
-      'hidden'
+    document.body.style.overflow = 'hidden'
 
     return () => {
       document.removeEventListener(
@@ -226,9 +238,15 @@ export default function StoryInteractionClient({
         handleKeyDown,
       )
 
-      document.body.style.overflow = ''
+      document.body.style.overflow =
+        previousBodyOverflow
     }
-  }, [isOpen])
+  }, [
+    closeViewer,
+    goNext,
+    goPrevious,
+    isOpen,
+  ])
 
   return (
     <>
@@ -307,48 +325,46 @@ export default function StoryInteractionClient({
                 sm:top-4
               "
             >
-              {stories.map(
-                (story, index) => {
-                  const completed =
-                    activeIndex !== null &&
-                    index < activeIndex
+              {stories.map((story, index) => {
+                const completed =
+                  activeIndex !== null &&
+                  index < activeIndex
 
-                  const current =
-                    activeIndex === index
+                const current =
+                  activeIndex === index
 
-                  return (
+                return (
+                  <div
+                    key={story.id}
+                    className="
+                      relative
+                      h-[3px]
+                      flex-1
+                      overflow-hidden
+                      rounded-full
+                      bg-white/20
+                    "
+                  >
                     <div
-                      key={story.id}
                       className="
-                        relative
-                        h-[3px]
-                        flex-1
-                        overflow-hidden
+                        absolute
+                        inset-y-0
+                        right-0
                         rounded-full
-                        bg-white/20
+                        bg-[#D9BC91]
+                        shadow-[0_0_8px_rgba(217,188,145,0.35)]
                       "
-                    >
-                      <div
-                        className="
-                          absolute
-                          inset-y-0
-                          right-0
-                          rounded-full
-                          bg-[#D9BC91]
-                          shadow-[0_0_8px_rgba(217,188,145,0.35)]
-                        "
-                        style={{
-                          width: completed
-                            ? '100%'
-                            : current
-                              ? `${progress}%`
-                              : '0%',
-                        }}
-                      />
-                    </div>
-                  )
-                },
-              )}
+                      style={{
+                        width: completed
+                          ? '100%'
+                          : current
+                            ? `${progress}%`
+                            : '0%',
+                      }}
+                    />
+                  </div>
+                )
+              })}
             </div>
 
             {/* Close */}

@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 
   openGraph: {
     title:
-      `درباره ما | ${SITE_NAME}`,
+      `${SITE_NAME} | درباره ما`,
 
     description:
       'سرای سنگ، مرجع تخصصی سنگ‌های ساختمانی با سال‌ها تجربه.',
@@ -48,7 +48,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     images: [DEFAULT_SOCIAL_IMAGE],
-    title: `درباره ما | ${SITE_NAME}`,
+    title:
+      `${SITE_NAME} | درباره ما`,
     description:
       'سرای سنگ، مرجع تخصصی سنگ‌های ساختمانی با سال‌ها تجربه.',
   },

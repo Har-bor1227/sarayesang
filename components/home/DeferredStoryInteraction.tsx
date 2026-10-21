@@ -46,13 +46,13 @@ export default function DeferredStoryInteraction({
 
     const loadInteraction = async () => {
       try {
-        const module = await import(
+        const loadedModule = await import(
           './StoryInteractionClient'
         )
 
         if (!cancelled) {
           setStoryInteractionClient(
-            () => module.default,
+            () => loadedModule.default,
           )
         }
       } catch {

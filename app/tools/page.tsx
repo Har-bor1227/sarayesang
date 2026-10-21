@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   openGraph: {
-    title: 'ابزارهای محاسبات سنگ | سرای سنگ',
+    title: `${SITE_NAME} | ابزارهای محاسبات سنگ`,
     description:
       'ابزارهای تخصصی سرای سنگ برای محاسبه متراژ، پرت، تایل، اسلب، مصالح نصب و وزن بار.',
     type: 'website',
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     images: [DEFAULT_SOCIAL_IMAGE],
-    title: 'ابزارهای محاسبات سنگ | سرای سنگ',
+    title: `${SITE_NAME} | ابزارهای محاسبات سنگ`,
     description:
       'ابزارهای تخصصی سرای سنگ برای محاسبه متراژ، پرت، تایل، اسلب، مصالح نصب و وزن بار.',
   },

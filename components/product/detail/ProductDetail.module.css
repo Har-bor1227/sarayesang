@@ -1,0 +1,43 @@
+.page { background: #f8f7f4; color: #17344c; }
+.shell { max-width: 1320px; margin: auto; padding: 24px 28px 80px; }
+.hero { display: grid; grid-template-columns: minmax(0,1.08fr) minmax(0,1fr); align-items: start; gap: clamp(28px,4vw,64px); }
+.visual { min-width: 0; position: sticky; top: 112px; }
+.imageNote { display: flex; justify-content: space-between; gap: 16px; padding: 16px 4px 0; font-size: 12px; color: #706e68; line-height: 1.9; }
+.imageNote span:first-child { color: #17344c; font-weight: 700; white-space: nowrap; }
+.info { min-width: 0; padding: 8px 0; }
+.categories { display: flex; flex-wrap: wrap; gap: 8px; }
+.categories a { font-size: 12px; padding: 5px 12px; border: 1px solid #dfd8cc; border-radius: 6px; color: #785d37; background: #f3eee5; text-decoration: none; }
+.title { font-size: clamp(28px,3vw,42px); line-height: 1.55; font-weight: 900; margin: 16px 0 12px; letter-spacing: -.025em; overflow-wrap: anywhere; }
+.summary { font-size: 14px; color: #646d72; line-height: 2.1; margin: 0; }
+.commerce { margin-top: 24px; padding: 22px; border: 1px solid #e5dfd5; border-radius: 24px; background: #fff; box-shadow: 0 12px 36px #302d2305; }
+.primaryAction { margin-top: 22px; }
+.purchaseNote { text-align: center; color: #707775; font-size: 12px; line-height: 1.9; margin: 14px 0 0; }
+.detailArea { margin-top: 48px; padding: 30px; border: 1px solid #e5dfd5; border-radius: 24px; background: #fff; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 32px; scroll-margin-top: 110px; }
+.specSection:only-child { grid-column: 1 / -1; }
+.specSection { min-width: 0; }
+.specSection h2 { font-size: 20px; font-weight: 800; margin: 0 0 20px; }
+.specGrid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; margin: 0; }
+.specGrid > div { background: #f7f6f2; border: 1px solid #efebe4; border-radius: 12px; padding: 15px 18px; }
+.specGrid dt,.technicalList dt { font-size: 13px; color: #757b7c; line-height: 1.8; }
+.specGrid dd { font-size: 14px; font-weight: 700; line-height: 1.9; margin: 6px 0 0; overflow-wrap: anywhere; }
+.technicalList { margin: 0; }
+.technicalList > div { display: grid; grid-template-columns: minmax(0,.7fr) minmax(0,1.3fr); gap: 20px; padding: 15px 12px; border-bottom: 1px solid #ece9e3; }
+.technicalList > div:nth-child(odd) { background: #faf9f6; border-radius: 8px; }
+.technicalList dd { font-size: 14px; font-weight: 600; line-height: 1.8; margin: 0; overflow-wrap: anywhere; }
+.description { margin-top: 40px; padding: 36px; border: 1px solid #e5dfd5; border-radius: 24px; background: #fff; scroll-margin-top: 110px; }
+.sectionHeading { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+.sectionHeading > span { width: 4px; height: 52px; background: #b79464; border-radius: 3px; }
+.sectionHeading p { font-size: 12px; color: #8a6d45; margin: 0 0 4px; }
+.sectionHeading h2 { font-size: 25px; font-weight: 800; margin: 0; }
+.richText { max-width: 100%; padding: 0 !important; font-size: 15px !important; line-height: 2.25 !important; color: #58626a; overflow-x: auto; overflow-wrap: anywhere; }
+.richText p,.richText li { font-size: 15px !important; line-height: 2.25 !important; }
+.richText h2,.richText h3 { color: #17344c; line-height: 1.7; margin: 28px 0 14px; }
+.richText table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.richText th { background: #17344c; color: #fff; padding: 14px; text-align: right; }
+.richText td { padding: 14px; border: 1px solid #e8e4dc; }
+.richText tr:nth-child(even) { background: #f8f7f4; }
+.richText img { max-width: 100%; height: auto; border-radius: 14px; }
+.page a:focus-visible,.page button:focus-visible { outline: 2px solid #98713e; outline-offset: 4px; }
+@media (max-width: 1023px) { .hero { gap: 28px; grid-template-columns: minmax(0,1fr); } .visual { position: static; } .shell { max-width: 760px; } .detailArea { grid-template-columns: minmax(0,1fr); } }
+@media (max-width: 639px) { .shell { padding: 16px 16px 44px; } .info { padding: 0; } .title { font-size: 29px; } .commerce { padding: 14px; border-radius: 18px; margin-top: 20px; } .detailArea,.description { padding: 20px 16px; border-radius: 18px; margin-top: 28px; } .specGrid { gap: 8px; } .specGrid > div { padding: 12px; } .imageNote { font-size: 11px; } .sectionHeading h2 { font-size: 22px; } }
+@media (prefers-reduced-motion: reduce) { .page *, .page *::before, .page *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }

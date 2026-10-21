@@ -3,20 +3,26 @@ import {
   Phone,
 } from 'lucide-react'
 
+import { TEL_PHONE } from '@/lib/constants'
+
 type ProductCTAProps = {
   productName: string
-  telPhone: string
+  telPhone?: string
 }
 
 export default function ProductCTA({
   productName,
   telPhone,
 }: ProductCTAProps) {
+  const phoneNumber =
+    telPhone?.trim() ||
+    TEL_PHONE.trim()
+
   return (
-    <div className="mt-8">
+    <div>
       <a
-        href={`tel:${telPhone}`}
-        aria-label={`تماس برای استعلام قیمت ${productName}`}
+        href={`tel:${phoneNumber}`}
+        aria-label={`استعلام قیمت ${productName}`}
         className="
           group
           flex
@@ -25,25 +31,28 @@ export default function ProductCTA({
           items-center
           justify-between
           gap-4
-          rounded-[19px]
+          rounded-[16px]
           bg-[#112F50]
-          px-5
+          px-4
           py-3
           text-white
-          shadow-[0_18px_40px_rgba(17,47,80,0.18)]
+          shadow-[0_16px_34px_rgba(17,47,80,0.16)]
           transition-all
-          duration-300
+          duration-250
           hover:-translate-y-0.5
           hover:bg-[#0A1929]
-          hover:shadow-[0_22px_48px_rgba(17,47,80,0.22)]
+          hover:shadow-[0_20px_40px_rgba(17,47,80,0.2)]
           focus-visible:outline-none
           focus-visible:ring-2
-          focus-visible:ring-[#B79464]
+          focus-visible:ring-[#B79464]/70
           focus-visible:ring-offset-2
+          sm:min-h-[60px]
+          sm:px-5
         "
       >
         <span className="flex min-w-0 items-center gap-3">
           <span
+            aria-hidden="true"
             className="
               flex
               h-10
@@ -51,42 +60,28 @@ export default function ProductCTA({
               shrink-0
               items-center
               justify-center
-              rounded-full
-              bg-white/[0.08]
+              rounded-[12px]
+              bg-white/[0.09]
+              text-[#DCC39D]
             "
           >
-            <Phone className="h-4.5 w-4.5" />
+            <Phone className="h-4 w-4" />
           </span>
 
-          <span className="min-w-0">
-            <span
-              className="
-                block
-                text-[12px]
-                font-black
-                sm:text-[13px]
-              "
-            >
-              تماس برای استعلام قیمت
-            </span>
-
-            <span
-              className="
-                mt-0.5
-                block
-                text-[8px]
-                font-medium
-                text-white/55
-                sm:text-[9px]
-              "
-            >
-              موجودی و شرایط سفارش را
-              هماهنگ کنید
-            </span>
+          <span
+            className="
+              min-w-0
+              text-[13px]
+              font-black
+              sm:text-[14px]
+            "
+          >
+            استعلام قیمت
           </span>
         </span>
 
         <span
+          aria-hidden="true"
           className="
             flex
             h-9
@@ -96,42 +91,15 @@ export default function ProductCTA({
             justify-center
             rounded-full
             bg-[#B79464]
+            text-white
             transition-transform
-            duration-300
+            duration-250
             group-hover:-translate-x-1
           "
         >
           <ArrowLeft className="h-4 w-4" />
         </span>
       </a>
-
-      <div
-        className="
-          mt-3
-          flex
-          items-center
-          justify-center
-          gap-2
-          text-center
-          text-[8px]
-          font-medium
-          leading-5
-          text-[#7A838D]
-          sm:text-[9px]
-        "
-      >
-        <span
-          className="
-            h-1.5
-            w-1.5
-            rounded-full
-            bg-[#B79464]
-          "
-        />
-
-        کارشناسان سرای سنگ پاسخگوی شما
-        هستند.
-      </div>
     </div>
   )
 }

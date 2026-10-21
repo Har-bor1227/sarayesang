@@ -3,7 +3,7 @@ import type { NextConfig } from 'next'
 const wordpressUrl =
   process.env.NEXT_PUBLIC_WORDPRESS_URL ||
   process.env.WORDPRESS_URL ||
-  'https://sarayesang.com'
+  'https://api.sarayesang.com'
 
 const wordpressHostname = (() => {
   try {

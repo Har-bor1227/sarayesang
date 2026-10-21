@@ -13,7 +13,6 @@ import {
 } from '@/lib/repositories/smart-search-repository'
 
 import {
-  SITE_NAME,
   SITE_URL,
 } from '@/lib/constants'
 

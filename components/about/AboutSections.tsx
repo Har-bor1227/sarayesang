@@ -12,17 +12,6 @@ import {
   Users,
 } from 'lucide-react'
 
-const COLORS = {
-  navy: '#112F50',
-  navyDark: '#0A1929',
-  gold: '#B79464',
-  goldLight: '#D8B883',
-  text: '#112F50',
-  muted: '#667085',
-  cream: '#FCFCFB',
-  border: '#E9ECEF',
-  white: '#FFFFFF',
-} as const
 
 const values = [
   {
@@ -222,9 +211,6 @@ export function AboutHero() {
             <div className="mb-5 flex items-center justify-start gap-3">
               <span className="h-px w-9 bg-[#B79464] sm:w-12" />
 
-              <span className="text-[8px] font-black uppercase tracking-[0.24em] text-[#B79464] sm:text-[9px]">
-                About Saraye Sang
-              </span>
             </div>
 
             <h1
@@ -283,10 +269,6 @@ export function AboutHero() {
 
                   <div className="absolute bottom-5 right-5 left-5 flex items-end justify-between gap-4 sm:bottom-6 sm:right-6 sm:left-6">
                     <div>
-                      <span className="block text-[8px] font-black uppercase tracking-[0.18em] text-[#D8B883]">
-                        Experience / Craft
-                      </span>
-
                       <span className="mt-1 block text-[10px] font-bold text-white">
                         تجربه، تخصص، انتخاب دقیق
                       </span>
@@ -314,7 +296,7 @@ export function AboutIntro() {
     >
       <SectionContainer>
         <SectionHeading
-          eyebrow="Our Story"
+          eyebrow="داستان سرای سنگ"
           title={
             <>
               قصه ما از
@@ -356,9 +338,6 @@ export function AboutIntro() {
             <div className="mt-7 flex items-center gap-4">
               <span className="h-px w-10 bg-[#B79464]" />
 
-              <span className="text-[8px] font-black uppercase tracking-[0.2em] text-[#667085]">
-                SARAYE SANG / SINCE 1397
-              </span>
             </div>
           </div>
 
@@ -383,7 +362,7 @@ export function ValuesSection() {
     >
       <SectionContainer>
         <SectionHeading
-          eyebrow="Our Principles"
+          eyebrow="ارزش‌های ما"
           title={
             <>
               چیزهایی که برای ما
@@ -497,7 +476,7 @@ export function CollaborationSection() {
 
           <div>
             <SectionHeading
-              eyebrow="Collaboration"
+              eyebrow="همکاری حرفه‌ای"
               align="right"
               title={
                 <>
@@ -642,9 +621,6 @@ export function WhyUsSection() {
         <div className="grid items-end gap-8 lg:grid-cols-[0.6fr_1.4fr] lg:gap-16">
           <div className="order-2 lg:order-1">
             <div className="hidden border-r border-[#B79464]/30 pr-5 lg:block">
-              <span className="text-[8px] font-black uppercase tracking-[0.24em] text-[#B79464]">
-                Trust / Experience / Detail
-              </span>
 
               <p className="mt-4 max-w-[260px] text-[10px] font-medium leading-6 text-white/38">
                 کیفیت محصول زمانی ارزشمند است که در تمام مسیر همکاری نیز
@@ -656,10 +632,6 @@ export function WhyUsSection() {
           <div className="order-1 lg:order-2">
             <div className="mb-4 flex items-center gap-3">
               <span className="h-px w-8 bg-[#B79464] sm:w-10" />
-
-              <span className="text-[8px] font-black uppercase tracking-[0.24em] text-[#B79464] sm:text-[9px]">
-                Why Saraye Sang
-              </span>
             </div>
 
             <h2
@@ -690,10 +662,6 @@ export function WhyUsSection() {
 
         <div className="mt-8 flex items-center gap-4 sm:mt-10">
           <span className="h-px flex-1 bg-white/[0.08]" />
-
-          <span className="text-[8px] font-black tracking-[0.24em] text-white/25 sm:text-[9px]">
-            SARAYE SANG / SINCE 1397
-          </span>
 
           <span className="h-px flex-1 bg-white/[0.08]" />
         </div>

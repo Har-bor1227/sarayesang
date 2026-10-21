@@ -2,13 +2,18 @@ import 'server-only'
 
 import type { Metadata } from 'next'
 
-import { DEFAULT_SOCIAL_IMAGE, SITE_NAME, WORDPRESS_URL } from '@/lib/constants'
+import {
+  DEFAULT_SOCIAL_IMAGE,
+  SITE_NAME,
+  WORDPRESS_URL,
+} from '@/lib/constants'
 
 export interface RankMathSeoData {
   title?: string
   description?: string
   canonical?: string
   robots?: string
+
   openGraph?: {
     locale?: string
     type?: string
@@ -16,6 +21,7 @@ export interface RankMathSeoData {
     description?: string
     url?: string
     siteName?: string
+
     image?: {
       url: string
       width?: number
@@ -24,12 +30,14 @@ export interface RankMathSeoData {
       type?: string
     }
   }
+
   twitter?: {
     card?: string
     title?: string
     description?: string
     image?: string
   }
+
   jsonLd: Record<string, unknown>[]
 }
 
@@ -45,6 +53,28 @@ interface MetaTag {
 }
 
 const REQUEST_TIMEOUT_MS = 7_000
+
+const BRAND_ALIASES = [
+  SITE_NAME.trim(),
+  'سرای',
+].filter(Boolean)
+
+function escapeRegExp(
+  value: string,
+): string {
+  return value.replace(
+    /[.*+?^${}()|[\]\\]/g,
+    '\\$&',
+  )
+}
+
+function getBrandAlternation(): string {
+  return BRAND_ALIASES
+    .map(
+      escapeRegExp,
+    )
+    .join('|')
+}
 
 function decodeHtmlEntities(
   value: string,
@@ -97,7 +127,9 @@ export function stripHtmlText(
   }
 
   const decoded =
-    decodeHtmlEntities(value)
+    decodeHtmlEntities(
+      value,
+    )
 
   return decoded
     .replace(
@@ -134,7 +166,9 @@ function getAttribute(
     )
 
   const match =
-    tag.match(regex)
+    tag.match(
+      regex,
+    )
 
   if (!match?.[1]) {
     return undefined
@@ -673,12 +707,15 @@ export async function getRankMathHead(
         requestUrl.toString(),
         {
           method: 'GET',
+
           headers: {
             Accept:
               'application/json',
           },
+
           signal:
             controller.signal,
+
           next: {
             revalidate,
           },
@@ -742,20 +779,24 @@ export function parseRankMathHead(
       extractTitle(
         head,
       ),
+
     description:
       getMetaValue(
         metas,
         'description',
       ),
+
     canonical:
       extractCanonical(
         head,
       ),
+
     robots:
       getMetaValue(
         metas,
         'robots',
       ),
+
     jsonLd,
   }
 
@@ -837,21 +878,28 @@ export function parseRankMathHead(
     result.openGraph = {
       locale:
         ogLocale,
+
       type:
         ogType,
+
       title:
         ogTitle,
+
       description:
         ogDescription,
+
       url:
         ogUrl,
+
       siteName:
         ogSiteName,
+
       image:
         ogImage
           ? {
               url:
                 ogImage,
+
               width:
                 ogImageWidth &&
                 Number.isFinite(
@@ -863,6 +911,7 @@ export function parseRankMathHead(
                       ogImageWidth,
                     )
                   : undefined,
+
               height:
                 ogImageHeight &&
                 Number.isFinite(
@@ -874,8 +923,10 @@ export function parseRankMathHead(
                       ogImageHeight,
                     )
                   : undefined,
+
               alt:
                 ogImageAlt,
+
               type:
                 ogImageType,
             }
@@ -916,10 +967,13 @@ export function parseRankMathHead(
     result.twitter = {
       card:
         twitterCard,
+
       title:
         twitterTitle,
+
       description:
         twitterDescription,
+
       image:
         twitterImage,
     }
@@ -948,10 +1002,22 @@ export async function getRankMathSEO(
 }
 
 /**
- * Converts Rank Math SEO data into Next.js metadata.
+ * Normalize Rank Math titles into a clean page title.
  *
- * When a frontend canonical is supplied, it is always
- * authoritative over the WordPress canonical.
+ * Examples:
+ *
+ *   سرای سنگ | سنگ مرمریت
+ *   سنگ مرمریت | سرای سنگ
+ *   سرای | سنگ مرمریت
+ *   سنگ مرمریت | سرای
+ *
+ * All become:
+ *
+ *   سنگ مرمریت
+ *
+ * The site brand itself is normalized to:
+ *
+ *   سرای سنگ
  */
 function normalizePageTitle(
   value?: string,
@@ -972,29 +1038,74 @@ function normalizePageTitle(
     return title
   }
 
-  const escapedSiteName =
-    siteName.replace(
-      /[.*+?^${}()|[\]\\]/g,
-      '\\$&',
+  const brandAlternation =
+    getBrandAlternation()
+
+  const isBrandOnly =
+    BRAND_ALIASES.some(
+      (brand) =>
+        title.toLowerCase() ===
+        brand.toLowerCase(),
+    )
+
+  if (isBrandOnly) {
+    return siteName
+  }
+
+  let normalized =
+    title.replace(
+      new RegExp(
+        `^\\s*(?:${brandAlternation})\\s*(?:\\||[-–—])\\s*`,
+        'i',
+      ),
+      '',
+    )
+
+  normalized =
+    normalized.replace(
+      new RegExp(
+        `\\s*(?:\\||[-–—])\\s*(?:${brandAlternation})\\s*$`,
+        'i',
+      ),
+      '',
     )
 
   return (
-    title
-      .replace(
-        new RegExp(
-          `\\s*(?:\\||[-–—])\\s*${escapedSiteName}$`,
-          'i',
-        ),
-        '',
-      )
-      .trim() || title
+    normalized.trim() ||
+    siteName
   )
+}
+
+function toBrandFirstTitle(
+  value?: string,
+): string | undefined {
+  const normalized =
+    normalizePageTitle(
+      value,
+    )
+
+  if (!normalized) {
+    return undefined
+  }
+
+  if (
+    normalized.toLowerCase() ===
+    SITE_NAME.trim().toLowerCase()
+  ) {
+    return SITE_NAME
+  }
+
+  return `${SITE_NAME} | ${normalized}`
 }
 
 export function rankMathToMetadata(
   seo: RankMathSeoData,
   canonicalOverride?: string,
-  openGraphTypeOverride?: 'website' | 'article' | 'book' | 'profile',
+  openGraphTypeOverride?:
+    | 'website'
+    | 'article'
+    | 'book'
+    | 'profile',
 ): Metadata {
   const canonical =
     canonicalOverride ||
@@ -1023,9 +1134,10 @@ export function rankMathToMetadata(
     ) || undefined
 
   const openGraphTitle =
-    stripHtmlText(
-      seo.openGraph?.title,
-    ) || title
+    toBrandFirstTitle(
+      seo.openGraph?.title ||
+        title,
+    )
 
   const openGraphDescription =
     stripHtmlText(
@@ -1033,9 +1145,7 @@ export function rankMathToMetadata(
     ) || description
 
   const openGraphSiteName =
-    stripHtmlText(
-      seo.openGraph?.siteName,
-    ) || SITE_NAME
+    SITE_NAME
 
   const openGraphLocale =
     seo.openGraph?.locale?.trim() ||
@@ -1043,14 +1153,18 @@ export function rankMathToMetadata(
 
   const openGraphImage =
     seo.openGraph?.image ?? {
-      url: DEFAULT_SOCIAL_IMAGE,
-      alt: SITE_NAME,
+      url:
+        DEFAULT_SOCIAL_IMAGE,
+
+      alt:
+        SITE_NAME,
     }
 
   const twitterTitle =
-    stripHtmlText(
-      seo.twitter?.title,
-    ) || title
+    toBrandFirstTitle(
+      seo.twitter?.title ||
+        title,
+    )
 
   const twitterDescription =
     stripHtmlText(
@@ -1102,10 +1216,13 @@ export function rankMathToMetadata(
               {
                 url:
                   openGraphImage.url,
+
                 width:
                   openGraphImage.width,
+
                 height:
                   openGraphImage.height,
+
                 alt:
                   stripHtmlText(
                     openGraphImage.alt,
@@ -1137,7 +1254,10 @@ export function rankMathToMetadata(
 
 export function getRankMathSchema(
   seo: RankMathSeoData,
-): Record<string, unknown>[] {
+): Record<
+  string,
+  unknown
+>[] {
   return seo.jsonLd
 }
 
@@ -1145,7 +1265,10 @@ export function getRankMathProductSchema(
   seo: RankMathSeoData,
   wordpressProductUrl: string,
   frontendProductUrl: string,
-): Record<string, unknown>[] {
+): Record<
+  string,
+  unknown
+>[] {
   return seo.jsonLd.map(
     (
       schema,
@@ -1165,7 +1288,10 @@ export function getRankMathPostSchema(
   seo: RankMathSeoData,
   wordpressPostUrl: string,
   frontendPostUrl: string,
-): Record<string, unknown>[] {
+): Record<
+  string,
+  unknown
+>[] {
   return seo.jsonLd.map(
     (
       schema,

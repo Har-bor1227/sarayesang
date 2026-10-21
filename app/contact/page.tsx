@@ -1,10 +1,7 @@
 import type { Metadata } from 'next'
 
-import Link from 'next/link'
-
 import {
   ArrowLeft,
-  ArrowUpLeft,
   Globe2,
   Mail,
   MapPin,
@@ -19,12 +16,13 @@ import {
 import Container from '@/components/ui/container'
 
 import {
+  BUSINESS,
+  CONTACT,
+  DEFAULT_SOCIAL_IMAGE,
   SITE_NAME,
   SITE_URL,
   SOCIAL_LINKS,
 } from '@/lib/constants'
-
-import { DEFAULT_SOCIAL_IMAGE } from '@/lib/constants'
 
 import {
   generateContactPageSchema,
@@ -43,20 +41,27 @@ export const metadata: Metadata = {
   },
 
   openGraph: {
-    title: `تماس با ما | ${SITE_NAME}`,
+    title: `${SITE_NAME} | تماس با ما`,
     description:
       'برای استعلام قیمت، مشاوره تخصصی و ارتباط مستقیم با تیم سرای سنگ با ما در تماس باشید.',
     type: 'website',
     url: `${SITE_URL}/contact`,
     siteName: SITE_NAME,
     locale: 'fa_IR',
-    images: [{ url: DEFAULT_SOCIAL_IMAGE, width: 1920, height: 758, alt: SITE_NAME }],
+    images: [
+      {
+        url: DEFAULT_SOCIAL_IMAGE,
+        width: 1920,
+        height: 758,
+        alt: SITE_NAME,
+      },
+    ],
   },
 
   twitter: {
     card: 'summary_large_image',
     images: [DEFAULT_SOCIAL_IMAGE],
-    title: `تماس با ما | ${SITE_NAME}`,
+    title: `${SITE_NAME} | تماس با ما`,
     description:
       'برای استعلام قیمت، مشاوره تخصصی و ارتباط مستقیم با تیم سرای سنگ با ما در تماس باشید.',
   },
@@ -66,12 +71,12 @@ const contactPersons = [
   {
     name: 'محمدرضا مومنیان',
     role: 'کارشناس فروش',
-    phone: '09137071730',
+    phone: CONTACT.phone,
   },
   {
     name: 'علی حجاری',
     role: 'کارشناس فروش',
-    phone: '09135055775',
+    phone: CONTACT.secondaryPhone,
   },
 ]
 
@@ -79,8 +84,8 @@ const contactChannels = [
   {
     icon: Mail,
     label: 'ایمیل',
-    value: 'info@sarayesang.com',
-    href: 'mailto:info@sarayesang.com',
+    value: CONTACT.email,
+    href: `mailto:${CONTACT.email}`,
   },
 ]
 
@@ -103,10 +108,13 @@ const socialItems = [
 ]
 
 const OFFICE_ADDRESS =
-  'اصفهان - شهرک صنعتی محمود آباد - خیابان 28 - ساختمان ماهفر'
+  BUSINESS.address
 
-const MAP_LAT = 32.798606
-const MAP_LNG = 51.545424
+const MAP_LAT =
+  BUSINESS.latitude
+
+const MAP_LNG =
+  BUSINESS.longitude
 
 const MAP_EMBED_URL =
   `https://www.google.com/maps?q=${MAP_LAT},${MAP_LNG}&z=16&output=embed`
@@ -116,14 +124,31 @@ const GOOGLE_MAPS_URL =
 
 const localBusinessSchema =
   generateLocalBusinessSchema({
-    streetAddress: 'شهرک صنعتی محمود آباد - خیابان 28 - ساختمان ماهفر',
-    addressLocality: 'اصفهان',
-    addressCountry: 'IR',
-    latitude: MAP_LAT,
-    longitude: MAP_LNG,
-    email: 'info@sarayesang.com',
-    mapUrl: GOOGLE_MAPS_URL,
+    streetAddress:
+      `${BUSINESS.street} - ${BUSINESS.building}`,
+
+    addressLocality:
+      BUSINESS.city,
+
+    addressCountry:
+      BUSINESS.country,
+
+    latitude:
+      MAP_LAT,
+
+    longitude:
+      MAP_LNG,
+
+    email:
+      CONTACT.email,
+
+    mapUrl:
+      GOOGLE_MAPS_URL,
   })
+
+const contactPageSchema =
+  generateContactPageSchema()
+
 
 function PhonePersonCard({
   name,
@@ -157,9 +182,6 @@ function PhonePersonCard({
         sm:p-6
       "
     >
-      <JsonLd data={contactPageSchema} />
-      <JsonLd data={localBusinessSchema} />
-
       <div
         aria-hidden="true"
         className="
@@ -214,10 +236,6 @@ function PhonePersonCard({
             className="h-5 w-5"
             strokeWidth={1.7}
           />
-        </span>
-
-        <span className="mt-4 text-[8px] font-black uppercase tracking-[0.2em] text-[#B79464]">
-          Direct Contact
         </span>
 
         <h3 className="mt-1.5 text-[15px] font-black text-white sm:text-[16px]">
@@ -276,8 +294,6 @@ function PhonePersonCard({
     </a>
   )
 }
-const contactPageSchema =
-  generateContactPageSchema()
 
 
 export default function ContactPage() {
@@ -291,6 +307,9 @@ export default function ContactPage() {
         text-[#112F50]
       "
     >
+      <JsonLd data={contactPageSchema} />
+      <JsonLd data={localBusinessSchema} />
+
       <Container className="pb-16 pt-4 sm:pb-20 sm:pt-6 lg:pb-24">
         {/* =========================================================
             HERO
@@ -319,8 +338,11 @@ export default function ContactPage() {
               className="pointer-events-none absolute inset-0"
             >
               <div className="absolute -right-24 -top-28 h-80 w-80 rounded-full bg-[#B79464]/[0.12] blur-3xl" />
+
               <div className="absolute -bottom-28 -left-24 h-80 w-80 rounded-full bg-[#396183]/[0.12] blur-3xl" />
+
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_0%,rgba(255,255,255,0.05),transparent_35%)]" />
+
               <div className="absolute inset-0 bg-[linear-gradient(120deg,transparent_15%,rgba(255,255,255,0.025)_50%,transparent_82%)]" />
             </div>
 
@@ -329,9 +351,6 @@ export default function ContactPage() {
                 <div className="mb-5 flex items-center gap-3">
                   <span className="h-px w-8 bg-[#B79464] sm:w-11" />
 
-                  <span className="text-[8px] font-black uppercase tracking-[0.25em] text-[#D8BC8D] sm:text-[9px]">
-                    Contact / Consultation
-                  </span>
                 </div>
 
                 <h1 className="max-w-[820px] text-[29px] font-black leading-[1.45] tracking-[-0.045em] text-white sm:text-[40px] sm:leading-[1.4] lg:text-[54px] lg:leading-[1.32]">
@@ -384,42 +403,38 @@ export default function ContactPage() {
         {/* =========================================================
             CONTACT PEOPLE
         ========================================================== */}
-<section className="mt-5 sm:mt-6">
-  <div className="mb-5 px-1 text-center sm:mb-6">
-    <span className="text-[8px] font-black uppercase tracking-[0.23em] text-[#B79464]">
-      Direct Contact
-    </span>
+        <section className="mt-5 sm:mt-6">
+          <div className="mb-5 px-1 text-center sm:mb-6">
+            <h2 className="mt-2 text-[21px] font-black text-[#112F50] sm:text-[25px]">
+              مستقیم با کارشناسان فروش صحبت کنید
+            </h2>
 
-    <h2 className="mt-2 text-[21px] font-black text-[#112F50] sm:text-[25px]">
-      مستقیم با کارشناسان فروش صحبت کنید
-    </h2>
+            <p className="mx-auto mt-2 max-w-[580px] text-[10px] font-medium leading-6 text-[#667085] sm:text-[11px] sm:leading-7">
+              برای استعلام قیمت، مشاوره و هماهنگی خرید،
+              می‌توانید مستقیماً با کارشناسان فروش سرای سنگ
+              در ارتباط باشید.
+            </p>
 
-    <p className="mx-auto mt-2 max-w-[580px] text-[10px] font-medium leading-6 text-[#667085] sm:text-[11px] sm:leading-7">
-      برای استعلام قیمت، مشاوره و هماهنگی خرید،
-      می‌توانید مستقیماً با کارشناسان فروش سرای سنگ
-      در ارتباط باشید.
-    </p>
+            <div className="mx-auto mt-3 flex items-center justify-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#B79464]" />
 
-    <div className="mx-auto mt-3 flex items-center justify-center gap-2">
-      <span className="h-1.5 w-1.5 rounded-full bg-[#B79464]" />
+              <span className="text-[8px] font-bold text-[#8A94A0]">
+                پاسخ‌گویی مستقیم
+              </span>
 
-      <span className="text-[8px] font-bold text-[#8A94A0]">
-        پاسخ‌گویی مستقیم
-      </span>
+              <span className="h-1.5 w-1.5 rounded-full bg-[#B79464]" />
+            </div>
+          </div>
 
-      <span className="h-1.5 w-1.5 rounded-full bg-[#B79464]" />
-    </div>
-  </div>
-
-  <div className="grid gap-3 sm:grid-cols-2">
-    {contactPersons.map((person) => (
-      <PhonePersonCard
-        key={person.phone}
-        {...person}
-      />
-    ))}
-  </div>
-</section>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {contactPersons.map((person) => (
+              <PhonePersonCard
+                key={person.phone}
+                {...person}
+              />
+            ))}
+          </div>
+        </section>
 
         {/* =========================================================
             MAIN CONTACT EXPERIENCE
@@ -460,10 +475,6 @@ export default function ContactPage() {
                 <div>
                   <div className="flex items-center gap-3">
                     <span className="h-px w-7 bg-[#B79464] sm:w-9" />
-
-                    <span className="text-[8px] font-black uppercase tracking-[0.2em] text-[#B79464]">
-                      Our Office
-                    </span>
                   </div>
 
                   <h2 className="mt-4 text-[22px] font-black leading-8 text-[#112F50] sm:text-[28px]">
@@ -560,6 +571,7 @@ export default function ContactPage() {
                     "
                   >
                     مسیریابی
+
                     <Navigation
                       aria-hidden="true"
                       className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
@@ -593,7 +605,7 @@ export default function ContactPage() {
                   </div>
 
                   <p className="mt-2 text-[12px] font-black text-[#112F50]">
-                    اصفهان
+                    {BUSINESS.city}
                   </p>
                 </div>
 
@@ -621,7 +633,7 @@ export default function ContactPage() {
                   </div>
 
                   <p className="mt-2 text-[12px] font-black text-[#112F50]">
-                    شهرک صنعتی محمود آباد
+                    {BUSINESS.area}
                   </p>
                 </div>
               </div>
@@ -646,16 +658,13 @@ export default function ContactPage() {
               className="pointer-events-none absolute inset-0"
             >
               <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#B79464]/[0.10] blur-3xl" />
+
               <div className="absolute -bottom-24 -left-20 h-64 w-64 rounded-full bg-[#31567D]/[0.10] blur-3xl" />
             </div>
 
             <div className="relative z-10">
               <div className="flex items-center gap-3">
                 <span className="h-px w-8 bg-[#B79464]" />
-
-                <span className="text-[8px] font-black uppercase tracking-[0.22em] text-[#B79464]">
-                  More Channels
-                </span>
               </div>
 
               <h2 className="mt-4 text-[22px] font-black leading-8 text-white sm:text-[27px]">
@@ -799,13 +808,6 @@ export default function ContactPage() {
               </div>
 
               <div className="mt-7 flex items-center justify-between gap-3 border-t border-white/[0.08] pt-5">
-                <span className="text-[8px] font-black uppercase tracking-[0.19em] text-white/25">
-                  SARAYE SANG
-                </span>
-
-                <span className="text-[8px] font-medium text-white/25">
-                  Direct / Personal Contact
-                </span>
               </div>
             </div>
           </section>
@@ -831,10 +833,6 @@ export default function ContactPage() {
             <div>
               <div className="flex items-center gap-3">
                 <span className="h-px w-8 bg-[#B79464]" />
-
-                <span className="text-[8px] font-black uppercase tracking-[0.22em] text-[#B79464]">
-                  Google Maps / Location
-                </span>
               </div>
 
               <h2 className="mt-2.5 text-[19px] font-black text-[#112F50] sm:text-[23px]">
@@ -842,7 +840,7 @@ export default function ContactPage() {
               </h2>
 
               <p className="mt-1.5 text-[9px] font-medium text-[#7B8590] sm:text-[10px]">
-                اصفهان، شهرک صنعتی محمود آباد، خیابان 28
+                {OFFICE_ADDRESS}
               </p>
             </div>
 
@@ -922,7 +920,7 @@ export default function ContactPage() {
                   </span>
 
                   <span className="mt-0.5 block text-[9px] font-black leading-5 text-white">
-                    ساختمان ماهفر
+                    {BUSINESS.building}
                   </span>
                 </div>
               </div>
@@ -949,16 +947,15 @@ export default function ContactPage() {
             className="pointer-events-none absolute inset-0"
           >
             <div className="absolute -left-16 -top-20 h-48 w-48 rounded-full bg-[#B79464]/[0.10] blur-3xl" />
+
             <div className="absolute -right-20 -bottom-20 h-52 w-52 rounded-full bg-white/[0.04] blur-3xl" />
+
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(255,255,255,0.04),transparent_42%)]" />
           </div>
 
           <div className="relative z-10 px-5 py-7 sm:px-8 sm:py-9 lg:px-10 lg:py-10">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <span className="text-[8px] font-black uppercase tracking-[0.22em] text-[#B79464]">
-                  Start a Conversation
-                </span>
 
                 <h2 className="mt-2 text-[19px] font-black text-white sm:text-[24px]">
                   برای استعلام قیمت، مستقیم تماس بگیرید.
@@ -971,7 +968,7 @@ export default function ContactPage() {
               </div>
 
               <a
-                href={`tel:${contactPersons[0].phone}`}
+                href={`tel:${CONTACT.phone}`}
                 className="
                   group
                   inline-flex
@@ -1016,9 +1013,6 @@ export default function ContactPage() {
             FOOT NOTE
         ========================================================== */}
         <div className="mt-5 flex flex-col items-center justify-center gap-1.5 text-center sm:mt-6">
-          <span className="text-[8px] font-black uppercase tracking-[0.22em] text-[#B79464]">
-            SARAYE SANG
-          </span>
 
           <span className="text-[8px] font-medium text-[#9AA3AD]">
             دفتر فروش اصفهان · ارتباط مستقیم با تیم سرای سنگ

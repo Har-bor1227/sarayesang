@@ -2,18 +2,16 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import {
-  ArrowLeft,
-  Phone,
+  PhoneCall,
 } from 'lucide-react'
 
 import {
-  Card,
-  CardContent,
-  CardFooter,
-} from '@/components/ui/card'
+  formatPrice,
+} from '@/lib/format'
 
-import { formatPrice } from '@/lib/format'
-import { TEL_PHONE } from '@/lib/constants'
+import {
+  TEL_PHONE,
+} from '@/lib/constants'
 
 import type {
   ProductSummary,
@@ -28,241 +26,407 @@ export default function ProductCard({
   product,
   priority = false,
 }: ProductCardProps) {
-  const category =
-    product.productCategories?.nodes?.[0]
+  const imageUrl = product.image?.sourceUrl
 
-  const imageUrl =
-    product.image?.sourceUrl
+  const productName =
+    product.name || 'سنگ ساختمانی'
+
+  const productHref = product.slug
+    ? `/products/${product.slug}`
+    : '/products'
 
   const hasSalePrice = Boolean(
     product.onSale &&
       product.salePrice &&
       product.regularPrice &&
-      product.salePrice !==
-        product.regularPrice,
+      product.salePrice !== product.regularPrice,
   )
 
   const displayPrice = hasSalePrice
     ? product.salePrice
     : product.price
 
+  const normalizedPrice = (displayPrice ?? '')
+    .replace(/[٬,]/g, '')
+    .trim()
+
+  const numericPrice = Number(normalizedPrice)
+
+  const hasPrice =
+    normalizedPrice !== '' &&
+    Number.isFinite(numericPrice) &&
+    numericPrice > 0
+
   return (
-    <article className="h-full">
-      <Card
+    <article
+      dir="rtl"
+      className="
+        group
+        mx-auto
+        w-full
+        max-w-[260px]
+        min-w-0
+      "
+    >
+      <div
         className="
-          group
-          flex
-          h-full
-          flex-col
+          relative
+          isolate
+          aspect-[0.66]
+          w-full
           overflow-hidden
-          rounded-[24px]
+          rounded-[26px]
           border
-          border-[#112F50]/[0.07]
-          bg-white
-          shadow-[0_8px_28px_rgba(10,25,41,0.045)]
-          ring-0
-          transition-all
-          duration-500
-          hover:-translate-y-1
-          hover:border-[#B79464]/25
-          hover:shadow-[0_18px_48px_rgba(10,25,41,0.10)]
+          border-white/70
+          bg-[#112F50]
+          shadow-[0_10px_26px_rgba(17,47,80,0.12)]
+          ring-1
+          ring-inset
+          ring-[#112F50]/[0.04]
+          transition-shadow
+          duration-300
+          ease-out
+          group-hover:shadow-[0_14px_32px_rgba(17,47,80,0.17)]
         "
       >
+        {/* Product image with fallback */}
         <Link
-          href={`/products/${product.slug}`}
-          className="block outline-none"
-          aria-label={`مشاهده ${product.name}`}
+          href={productHref}
+          aria-label={`مشاهده محصول ${productName}`}
+          className="
+            absolute
+            inset-0
+            z-0
+            block
+            overflow-hidden
+            rounded-[inherit]
+            outline-none
+            focus-visible:ring-2
+            focus-visible:ring-inset
+            focus-visible:ring-[#D8BC8D]
+          "
         >
-          <div className="relative aspect-[1.08] w-full overflow-hidden bg-[#F0EFEC]">
-            {imageUrl ? (
-              <Image
-                src={imageUrl}
-                alt={
-                  product.image?.altText ||
-                  product.name
-                }
-                fill
-                preload={priority}
-                sizes="(max-width: 640px) 47vw, (max-width: 1024px) 31vw, (max-width: 1280px) 23vw, 20vw"
-                quality={80}
-                className="
-                  object-cover
-                  transition-transform
-                  duration-700
-                  ease-out
-                  group-hover:scale-[1.045]
-                "
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-[#F2F1EE] text-[10px] font-bold text-[#667085] sm:text-[11px]">
-                بدون تصویر
-              </div>
-            )}
-
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(10,25,41,0.02)_0%,transparent_62%,rgba(10,25,41,0.18)_100%)]" />
-
-            <div className="absolute right-3 top-3">
-              <span className="inline-flex rounded-full border border-white/20 bg-[#0A1929]/30 px-2.5 py-1.5 text-[7px] font-black uppercase tracking-[0.16em] text-white backdrop-blur-md sm:text-[8px]">
-                Saraye Sang
-              </span>
-            </div>
-
-            {product.onSale && (
-              <div className="absolute left-3 top-3">
-                <span className="inline-flex rounded-full bg-[#B79464] px-2.5 py-1.5 text-[8px] font-black text-white shadow-[0_7px_20px_rgba(183,148,100,0.22)] sm:text-[9px]">
-                  ویژه
-                </span>
-              </div>
-            )}
-
-            <span
-              aria-hidden="true"
+          {imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt={
+                product.image?.altText ||
+                productName
+              }
+              fill
+              preload={priority}
+              sizes="
+                (max-width: 639px) 76vw,
+                (max-width: 767px) 55vw,
+                (max-width: 1023px) 30vw,
+                260px
+              "
+              quality={75}
+              draggable={false}
+              className="
+                rounded-[inherit]
+                object-cover
+                transition-transform
+                duration-500
+                ease-out
+                group-hover:scale-[1.025]
+              "
+            />
+          ) : (
+            <div
               className="
                 absolute
-                bottom-3
-                left-3
-                flex
-                h-9
-                w-9
-                items-center
-                justify-center
-                rounded-full
-                border
-                border-white/20
-                bg-[#0A1929]/25
-                text-white
-                opacity-0
-                backdrop-blur-md
-                transition-all
-                duration-400
-                group-hover:opacity-100
+                inset-0
+                bg-[radial-gradient(circle_at_25%_20%,rgba(216,188,141,0.24),transparent_30%),linear-gradient(145deg,#294763,#112F50_65%,#0A1929)]
               "
             >
-              <ArrowLeft
-                className="h-3.5 w-3.5"
-                aria-hidden="true"
-              />
-            </span>
-          </div>
+              <div
+                className="
+                  absolute
+                  inset-x-0
+                  bottom-[43%]
+                  flex
+                  items-center
+                  justify-center
+                  px-3
+                  text-center
+                  text-[11px]
+                  font-bold
+                  text-white/65
+                  sm:text-xs
+                "
+              >
+                تصویر محصول موجود نیست
+              </div>
+            </div>
+          )}
         </Link>
 
-        <CardContent className="flex-1 p-4 sm:p-5">
-          {category && (
+        {/* Image contrast */}
+        <div
+          aria-hidden="true"
+          className="
+            pointer-events-none
+            absolute
+            inset-0
+            z-[1]
+            rounded-[inherit]
+            bg-[linear-gradient(180deg,rgba(5,17,30,0.08)_0%,rgba(8,24,44,0.02)_25%,rgba(8,24,44,0.12)_46%,rgba(6,24,34,0.64)_70%,rgba(5,17,26,0.96)_100%)]
+          "
+        />
+
+        {/* Compact title overlay with soft fading edges */}
+        <div
+          className="
+            pointer-events-none
+            absolute
+            inset-x-0
+            top-0
+            z-10
+            overflow-hidden
+            rounded-t-[25px]
+            px-3
+            pb-2
+            pt-3
+            sm:px-4
+            sm:pb-3
+            sm:pt-4
+          "
+        >
+          {/* Subtle dark gradient and blur */}
+          <div
+            aria-hidden="true"
+            className="
+              pointer-events-none
+              absolute
+              inset-0
+              z-0
+              rounded-t-[25px]
+              bg-[linear-gradient(180deg,rgba(7,22,38,0.78)_0%,rgba(7,22,38,0.48)_55%,rgba(7,22,38,0)_100%)]
+              backdrop-blur-[2px]
+              [mask-image:linear-gradient(to_bottom,black_0%,black_65%,transparent_100%)]
+            "
+          />
+
+          <div className="relative z-10">
             <Link
-              href={`/categories/${category.slug}`}
-              className="group/category mb-2.5 inline-flex min-h-11 max-w-full items-center gap-2"
-            >
-              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#B79464]" />
-
-              <span className="truncate text-[9px] font-black text-[#5f6977] transition-colors duration-200 group-hover/category:text-[#76582f] sm:text-[9px]">
-                {category.name}
-              </span>
-            </Link>
-          )}
-
-          <Link
-            href={`/products/${product.slug}`}
-            className="block outline-none"
-          >
-            <h2
+              href={productHref}
+              aria-label={`مشاهده محصول ${productName}`}
               className="
-                line-clamp-2
-                min-h-[3.2rem]
-                text-[14px]
-                font-black
-                leading-[1.75]
-                tracking-[-0.015em]
-                text-[#112F50]
-                transition-colors
-                duration-300
-                group-hover:text-[#76582f]
-                sm:text-[15px]
-                sm:leading-[1.7]
+                pointer-events-auto
+                block
+                rounded-sm
+                text-center
+                outline-none
+                focus-visible:ring-2
+                focus-visible:ring-[#D8BC8D]
               "
             >
-              {product.name}
-            </h2>
-          </Link>
+              <h3
+                className="
+                  line-clamp-2
+                  text-center
+                  text-[14px]
+                  font-black
+                  leading-[1.8]
+                  tracking-[-0.02em]
+                  text-white
+                  drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]
+                  transition-colors
+                  duration-300
+                  group-hover:text-[#F0D7AE]
+                  sm:text-[15px]
+                "
+              >
+                {productName}
+              </h3>
+            </Link>
 
-          <div className="mt-4 h-px w-full bg-[#112F50]/[0.06]" />
-        </CardContent>
+            {/* Thin gold accent */}
+            <div
+              aria-hidden="true"
+              className="
+                mx-auto
+                mt-2
+                h-px
+                w-12
+                max-w-full
+                bg-gradient-to-r
+                from-transparent
+                via-[#D8BC8D]
+                to-transparent
+                transition-[width]
+                duration-300
+                ease-out
+                group-hover:w-16
+                sm:mt-2.5
+              "
+            />
+          </div>
+        </div>
 
-        <CardFooter className="mt-auto flex min-w-0 items-end justify-between gap-3 px-4 pb-4 pt-0 sm:px-5 sm:pb-5">
-          <div className="min-w-0">
-            {displayPrice ? (
-              <>
-                <span className="block text-[8px] font-semibold text-[#5f6977] sm:text-[9px]">
-                  قیمت
+        {/* Compact bottom product details */}
+        <div
+          className="
+            absolute
+            inset-x-0
+            bottom-0
+            z-10
+            px-3.5
+            pb-3
+            pt-8
+            sm:px-4
+            sm:pb-3.5
+            sm:pt-9
+          "
+        >
+          {/* Compact price without a box or background */}
+          <div
+            className="
+              mb-2
+              flex
+              min-w-0
+              flex-col
+              items-center
+              justify-center
+              text-center
+              sm:mb-2.5
+            "
+          >
+            <span
+              className="
+                mb-0.5
+                text-[9px]
+                font-bold
+                leading-relaxed
+                text-white/80
+                drop-shadow-[0_1px_4px_rgba(0,0,0,0.45)]
+                sm:text-[10px]
+              "
+            >
+              قیمت هر متر مربع
+            </span>
+
+            {hasPrice ? (
+              <div
+                className="
+                  flex
+                  max-w-full
+                  flex-wrap
+                  items-baseline
+                  justify-center
+                  gap-x-1
+                  gap-y-0.5
+                "
+              >
+                <span
+                  className="
+                    text-[14px]
+                    font-black
+                    leading-tight
+                    tracking-[-0.025em]
+                    text-white
+                    tabular-nums
+                    drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]
+                    sm:text-[16px]
+                  "
+                >
+                  {formatPrice(displayPrice)}
                 </span>
 
-                <div className="mt-1 flex min-w-0 items-end gap-2">
-                  <span className="block truncate text-[14px] font-black tracking-[-0.02em] text-[#112F50] sm:text-[16px]">
-                    {formatPrice(
-                      displayPrice,
-                    )}
+                {hasSalePrice && product.regularPrice && (
+                  <span
+                    className="
+                      text-[9px]
+                      font-medium
+                      text-white/65
+                      line-through
+                      decoration-[#D8BC8D]
+                      sm:text-[10px]
+                    "
+                  >
+                    {formatPrice(product.regularPrice)}
                   </span>
-
-                  {hasSalePrice && (
-                    <span className="block shrink-0 pb-0.5 text-[9px] font-semibold text-[#667085] line-through sm:text-[10px]">
-                      {formatPrice(
-                        product.regularPrice,
-                      )}
-                    </span>
-                  )}
-                </div>
-              </>
+                )}
+              </div>
             ) : (
-              <>
-                <span className="block text-[8px] font-semibold text-[#5f6977] sm:text-[9px]">
-                  قیمت
-                </span>
-
-                <span className="mt-1 block text-[11px] font-black text-[#112F50] sm:text-[12px]">
-                  برای استعلام
-                </span>
-              </>
+              <span
+                className="
+                  text-[13px]
+                  font-black
+                  leading-tight
+                  text-white
+                  drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]
+                  sm:text-[15px]
+                "
+              >
+                تماس بگیرید
+              </span>
             )}
           </div>
 
+          {/* Green price inquiry button */}
           <a
             href={`tel:${TEL_PHONE}`}
-            aria-label={`تماس برای مشاوره درباره ${product.name}`}
+            aria-label={`تماس برای استعلام قیمت ${productName}`}
             className="
-              group/cta
-              inline-flex
-              min-h-11
-              min-w-[94px]
-              shrink-0
+              flex
+              h-10
+              w-full
+              min-w-0
               items-center
               justify-center
-              gap-1.5
+              gap-2
               rounded-full
               border
-              border-[#B79464]/55
-              bg-[#FBF8F2]
+              border-[#48B875]
+              bg-[#279B59]
               px-3
-              py-2
-              text-[9px]
+              text-[11px]
               font-black
-              text-[#76582f]
-              transition-all
-              duration-300
-              hover:border-[#8E6F45]
-              hover:bg-[#B79464]
-              hover:text-white
-              sm:px-3.5
-              sm:text-[9px]
+              text-white
+              shadow-[0_3px_10px_rgba(0,0,0,0.12)]
+              outline-none
+              transition-colors
+              duration-200
+              hover:border-[#58C982]
+              hover:bg-[#218A4D]
+              focus-visible:ring-2
+              focus-visible:ring-[#48B875]
+              focus-visible:ring-offset-2
+              focus-visible:ring-offset-[#112F50]
+              active:bg-[#197743]
+              sm:h-11
+              sm:text-[12px]
             "
           >
-            <Phone
-              className="h-3.5 w-3.5"
+            <PhoneCall
               aria-hidden="true"
+              className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4"
+              strokeWidth={1.9}
             />
 
-            <span>مشاوره</span>
+            <span>
+              استعلام قیمت
+            </span>
           </a>
-        </CardFooter>
-      </Card>
+        </div>
+
+        {/* Inner edge stays within the card */}
+        <div
+          aria-hidden="true"
+          className="
+            pointer-events-none
+            absolute
+            inset-0
+            z-30
+            rounded-[inherit]
+            ring-1
+            ring-inset
+            ring-white/[0.12]
+          "
+        />
+      </div>
     </article>
   )
 }

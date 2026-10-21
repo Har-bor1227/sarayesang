@@ -117,6 +117,9 @@ export default function ImageSearchClient() {
   const resultsRef =
     useRef<HTMLElement>(null)
 
+  const previewObjectUrlRef =
+    useRef<string | null>(null)
+
   const [selectedFile, setSelectedFile] =
     useState<File | null>(null)
 
@@ -136,24 +139,46 @@ export default function ImageSearchClient() {
     useState(false)
 
   useEffect(() => {
-    if (!selectedFile) {
-      setPreviewUrl(null)
-      return
+    return () => {
+      if (previewObjectUrlRef.current) {
+        URL.revokeObjectURL(
+          previewObjectUrlRef.current,
+        )
+
+        previewObjectUrlRef.current = null
+      }
+    }
+  }, [])
+
+  function clearPreviewUrl() {
+    if (previewObjectUrlRef.current) {
+      URL.revokeObjectURL(
+        previewObjectUrlRef.current,
+      )
+
+      previewObjectUrlRef.current = null
+    }
+
+    setPreviewUrl(null)
+  }
+
+  function setPreviewForFile(
+    file: File,
+  ) {
+    if (previewObjectUrlRef.current) {
+      URL.revokeObjectURL(
+        previewObjectUrlRef.current,
+      )
     }
 
     const objectUrl =
-      URL.createObjectURL(
-        selectedFile,
-      )
+      URL.createObjectURL(file)
+
+    previewObjectUrlRef.current =
+      objectUrl
 
     setPreviewUrl(objectUrl)
-
-    return () => {
-      URL.revokeObjectURL(
-        objectUrl,
-      )
-    }
-  }, [selectedFile])
+  }
 
   useEffect(() => {
     if (!results.length) {
@@ -184,6 +209,7 @@ export default function ImageSearchClient() {
 
     if (validationError) {
       setSelectedFile(null)
+      clearPreviewUrl()
 
       if (galleryInputRef.current) {
         galleryInputRef.current.value = ''
@@ -197,6 +223,7 @@ export default function ImageSearchClient() {
     }
 
     setSelectedFile(file)
+    setPreviewForFile(file)
   }
 
   function handleGalleryChange(
@@ -255,7 +282,7 @@ export default function ImageSearchClient() {
     }
 
     setSelectedFile(null)
-    setPreviewUrl(null)
+    clearPreviewUrl()
     setResults([])
     setError(null)
     setIsDragging(false)
@@ -315,17 +342,17 @@ export default function ImageSearchClient() {
         data = null
       }
 
-if (!response.ok) {
-  const errorMessage =
-    typeof data === 'object' &&
-    data !== null &&
-    'error' in data &&
-    typeof data.error === 'string'
-      ? data.error
-      : 'جستجوی تصویری با خطا مواجه شد.'
+      if (!response.ok) {
+        const errorMessage =
+          typeof data === 'object' &&
+          data !== null &&
+          'error' in data &&
+          typeof data.error === 'string'
+            ? data.error
+            : 'جستجوی تصویری با خطا مواجه شد.'
 
-  throw new Error(errorMessage)
-}
+        throw new Error(errorMessage)
+      }
 
       const payload =
         data as SearchResponse
@@ -1024,21 +1051,16 @@ if (!response.ok) {
                             className="group overflow-hidden rounded-[26px] border border-[#112F50]/[0.08] bg-white shadow-[0_12px_38px_rgba(17,47,80,0.045)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(17,47,80,0.075)]"
                           >
                             <div className="relative aspect-[4/3] overflow-hidden bg-[#F2F0EC]">
-                              <img
-                                src={result.image_url}
-                                alt={
-                                  result.title ||
-                                  'محصول سنگ'
-                                }
-                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.035]"
-                                loading={
-                                  index < 2
-                                    ? 'eager'
-                                    : 'lazy'
-                                }
-                                decoding="async"
-                                referrerPolicy="no-referrer"
-                              />
+<Image
+  src={result.image_url}
+  alt={result.title || 'محصول سنگ'}
+  fill
+  sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
+  className="object-cover transition-transform duration-700 group-hover:scale-[1.035]"
+  loading={index < 2 ? 'eager' : 'lazy'}
+  unoptimized
+  referrerPolicy="no-referrer"
+/>
 
                               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#0A1929]/80 via-[#0A1929]/20 to-transparent px-4 pb-4 pt-16">
                                 <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[9px] font-black text-white backdrop-blur-md">

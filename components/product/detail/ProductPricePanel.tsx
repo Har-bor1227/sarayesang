@@ -1,235 +1,542 @@
-import {
-  Check,
-  CircleDollarSign,
-} from 'lucide-react'
+'use client'
 
-import { formatPrice } from '@/lib/format'
+import { useState } from 'react'
+
+import { Check } from 'lucide-react'
+
+import { formatNumber } from '@/lib/format'
+
+import ProductVariationSelector from './ProductVariationSelector'
+
+import type {
+  ProductDetailAttribute,
+  ProductDetailProduct,
+  ProductDetailVariation,
+} from './types'
 
 type ProductPricePanelProps = {
   price?: string | null
   regularPrice?: string | null
   onSale?: boolean | null
+
+  isVariable?: boolean
+
+  priceFrom?: string | null
+  priceTo?: string | null
+
+  variationAttributes?: ProductDetailAttribute[]
+  variations?: ProductDetailVariation[]
+  defaultAttributes?: ProductDetailProduct['defaultAttributes']
+}
+
+function parsePrice(
+  value?: string | null,
+): number | null {
+  if (
+    value === null ||
+    value === undefined ||
+    value.trim() === ''
+  ) {
+    return null
+  }
+
+  const numericValue = Number(value)
+
+  return Number.isFinite(numericValue) &&
+    numericValue > 0
+    ? numericValue
+    : null
+}
+
+function formatPrice(
+  value?: string | null,
+): string | null {
+  const numericValue = parsePrice(value)
+
+  if (numericValue === null) {
+    return null
+  }
+
+  const formatted = formatNumber(
+    String(numericValue),
+  )
+
+  return formatted !== '0'
+    ? formatted
+    : null
+}
+
+function getVariationSummary(
+  variation?: ProductDetailVariation | null,
+): string {
+  if (!variation) {
+    return ''
+  }
+
+  return variation.attributes
+    .map((attribute) =>
+      attribute.option?.trim(),
+    )
+    .filter(Boolean)
+    .join(' • ')
+}
+
+function getVariationPriceRange(
+  variations?: ProductDetailVariation[],
+) {
+  if (
+    !variations ||
+    variations.length === 0
+  ) {
+    return {
+      min: null,
+      max: null,
+    }
+  }
+
+  const prices = variations
+    .map((variation) =>
+      parsePrice(variation.price),
+    )
+    .filter(
+      (
+        value,
+      ): value is number =>
+        value !== null,
+    )
+
+  if (prices.length === 0) {
+    return {
+      min: null,
+      max: null,
+    }
+  }
+
+  return {
+    min: Math.min(...prices),
+    max: Math.max(...prices),
+  }
 }
 
 export default function ProductPricePanel({
   price,
   regularPrice,
   onSale,
+  isVariable = false,
+  priceFrom,
+  priceTo,
+  variationAttributes = [],
+  variations = [],
+  defaultAttributes,
 }: ProductPricePanelProps) {
-  if (!price) {
-    return (
-      <div
-        className="
-          mt-7
-          overflow-hidden
-          rounded-[24px]
-          border
-          border-[#B79464]/15
-          bg-[#FBF8F2]
-          p-5
-          sm:p-6
-        "
-      >
-        <div className="flex items-center gap-3">
-          <div
-            className="
-              flex
-              h-10
-              w-10
-              shrink-0
-              items-center
-              justify-center
-              rounded-full
-              bg-[#F1E6D5]
-              text-[#9E7D4F]
-            "
-          >
-            <CircleDollarSign className="h-5 w-5" />
-          </div>
+  const [
+    selectedVariation,
+    setSelectedVariation,
+  ] =
+    useState<ProductDetailVariation | null>(
+      null,
+    )
 
-          <div>
-            <span
-              className="
-                block
-                text-[9px]
-                font-black
-                text-[#112F50]
-              "
-            >
-              قیمت و شرایط سفارش
-            </span>
+  const derivedRange =
+    getVariationPriceRange(
+      variations,
+    )
 
-            <p
-              className="
-                mt-1
-                text-[9px]
-                font-medium
-                leading-6
-                text-[#727C85]
-              "
-            >
-              برای دریافت قیمت روز و
-              وضعیت موجودی با کارشناسان
-              سرای سنگ هماهنگ کنید.
-            </p>
-          </div>
-        </div>
-      </div>
+  const effectivePriceFrom =
+    priceFrom ||
+    (
+      derivedRange.min !== null
+        ? String(derivedRange.min)
+        : null
+    )
+
+  const effectivePriceTo =
+    priceTo ||
+    (
+      derivedRange.max !== null
+        ? String(derivedRange.max)
+        : null
+    )
+
+  const selectedPrice =
+    selectedVariation?.price?.trim() ||
+    null
+
+  const selectedRegularPrice =
+    selectedVariation?.regularPrice?.trim() ||
+    null
+
+  const selectedOnSale =
+    Boolean(
+      selectedVariation?.onSale,
+    )
+
+  const exactPrice =
+    selectedPrice ||
+    (
+      !isVariable
+        ? price?.trim() || null
+        : null
+    )
+
+  const exactRegularPrice =
+    selectedRegularPrice ||
+    (
+      !isVariable
+        ? regularPrice?.trim() || null
+        : null
+    )
+
+  const exactOnSale =
+    selectedVariation
+      ? selectedOnSale
+      : Boolean(onSale)
+
+  const rangeFrom =
+    formatPrice(
+      effectivePriceFrom,
+    )
+
+  const rangeTo =
+    formatPrice(
+      effectivePriceTo,
+    )
+
+  const formattedExactPrice =
+    formatPrice(exactPrice)
+
+  const formattedExactRegularPrice =
+    formatPrice(
+      exactRegularPrice,
+    )
+
+  const hasExactPrice =
+    Boolean(
+      formattedExactPrice,
+    )
+
+  const hasVariableRange =
+    isVariable &&
+    !selectedVariation &&
+    Boolean(rangeFrom)
+
+  const hasDifferentRange =
+    hasVariableRange &&
+    Boolean(rangeTo) &&
+    rangeFrom !== rangeTo
+
+  const hasAnyPrice =
+    hasExactPrice ||
+    hasVariableRange
+
+  const variationSummary =
+    getVariationSummary(
+      selectedVariation,
+    )
+
+  const showVariationSelector =
+    isVariable &&
+    variations.length > 0 &&
+    variationAttributes.length > 0
+
+  const handleVariationChange = (
+    variation: ProductDetailVariation | null,
+  ) => {
+    setSelectedVariation(
+      variation,
     )
   }
 
   return (
-    <div
-      className="
-        mt-7
-        overflow-hidden
-        rounded-[26px]
-        border
-        border-[#B79464]/20
-        bg-[linear-gradient(135deg,#FCFAF5_0%,#F7F2E9_100%)]
-        shadow-[0_18px_45px_rgba(183,148,100,0.08)]
-      "
-    >
-      <div className="p-5 sm:p-6">
-        <div className="flex items-start justify-between gap-4">
+    <div className="min-w-0">
+      {showVariationSelector && (
+        <div>
+          <ProductVariationSelector
+            attributes={
+              variationAttributes
+            }
+            variations={
+              variations
+            }
+            defaultAttributes={
+              defaultAttributes
+            }
+            onVariationChange={
+              handleVariationChange
+            }
+          />
+        </div>
+      )}
+
+      <section
+        className={[
+          showVariationSelector
+            ? 'mt-5 border-t border-[#112F50]/10 pt-5'
+            : '',
+          'min-w-0',
+        ].join(' ')}
+        aria-labelledby="product-price-title"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        <div
+          className="
+            flex
+            items-end
+            justify-between
+            gap-4
+          "
+        >
           <div className="min-w-0">
             <span
               className="
                 block
-                text-[8px]
-                font-black
-                uppercase
-                tracking-[0.17em]
-                text-[#A38354]
-                sm:text-[9px]
+                text-[12px]
+                font-extrabold
+                text-[#7A838D]
+                sm:text-[12px]
               "
             >
-              Current Price
+              قیمت
             </span>
 
-            <p
-              className="
-                mt-2
-                text-[10px]
-                font-bold
-                text-[#69737E]
-              "
-            >
-              قیمت محصول
-            </p>
-
-            <div
-              className="
-                mt-1
-                flex
-                flex-wrap
-                items-end
-                gap-3
-              "
-            >
-              <span
-                className="
-                  text-[27px]
-                  font-black
-                  leading-none
-                  tracking-[-0.04em]
-                  text-[#112F50]
-                  sm:text-[34px]
-                "
-              >
-                {formatPrice(price)}
-              </span>
-
-              <span
-                className="
-                  pb-0.5
-                  text-[10px]
-                  font-bold
-                  text-[#7A838D]
-                "
-              >
-                تومان
-              </span>
-
-              {onSale &&
-                regularPrice && (
+            <div className="mt-2">
+              {hasVariableRange &&
+              hasDifferentRange ? (
+                <div
+                  className="
+                    flex
+                    flex-wrap
+                    items-baseline
+                    gap-2
+                  "
+                >
                   <span
+                    id="product-price-title"
                     className="
-                      pb-0.5
-                      text-[11px]
-                      font-semibold
-                      text-[#7A838D]/50
-                      line-through
+                      text-[28px]
+                      font-black
+                      leading-none
+                      tracking-[-0.045em]
+                      text-[#112F50]
+                      sm:text-[30px]
                     "
                   >
-                    {formatPrice(
-                      regularPrice,
-                    )}
+                    {rangeFrom}
                   </span>
-                )}
+
+                  <span
+                    className="
+                      text-[12px]
+                      font-extrabold
+                      text-[#B79464]
+                    "
+                  >
+                    تا
+                  </span>
+
+                  <span
+                    className="
+                      text-[28px]
+                      font-black
+                      leading-none
+                      tracking-[-0.045em]
+                      text-[#112F50]
+                      sm:text-[30px]
+                    "
+                  >
+                    {rangeTo}
+                  </span>
+
+                  <span
+                    className="
+                      text-[12px]
+                      font-bold
+                      text-[#7A838D]
+                    "
+                  >
+                    تومان
+                  </span>
+                </div>
+              ) : hasVariableRange ? (
+                <div
+                  className="
+                    flex
+                    items-baseline
+                    gap-2
+                  "
+                >
+                  <span
+                    id="product-price-title"
+                    className="
+                      text-[29px]
+                      font-black
+                      leading-none
+                      tracking-[-0.045em]
+                      text-[#112F50]
+                      sm:text-[32px]
+                    "
+                  >
+                    {rangeFrom}
+                  </span>
+
+                  <span
+                    className="
+                      text-[12px]
+                      font-bold
+                      text-[#7A838D]
+                    "
+                  >
+                    تومان
+                  </span>
+                </div>
+              ) : hasExactPrice ? (
+                <div
+                  className="
+                    flex
+                    flex-wrap
+                    items-baseline
+                    gap-x-3
+                    gap-y-1
+                  "
+                >
+                  <span
+                    id="product-price-title"
+                    className="
+                      text-[30px]
+                      font-black
+                      leading-none
+                      tracking-[-0.045em]
+                      text-[#112F50]
+                      sm:text-[34px]
+                    "
+                  >
+                    {formattedExactPrice}
+                  </span>
+
+                  <span
+                    className="
+                      text-[12px]
+                      font-bold
+                      text-[#7A838D]
+                    "
+                  >
+                    تومان
+                  </span>
+
+                  {exactOnSale &&
+                    formattedExactRegularPrice && (
+                      <span
+                        className="
+                          text-[12px]
+                          font-semibold
+                          text-[#98A0A8]
+                          line-through
+                          decoration-[#B79464]/60
+                        "
+                      >
+                        {
+                          formattedExactRegularPrice
+                        }{' '}
+                        تومان
+                      </span>
+                    )}
+                </div>
+              ) : (
+                <div
+                  id="product-price-title"
+                  className="
+                    text-[17px]
+                    font-black
+                    text-[#112F50]
+                    sm:text-[19px]
+                  "
+                >
+                  استعلام قیمت
+                </div>
+              )}
             </div>
           </div>
 
+          {exactOnSale &&
+            formattedExactRegularPrice &&
+            hasExactPrice && (
+              <span
+                className="
+                  shrink-0
+                  rounded-full
+                  bg-[#F4EBDD]
+                  px-2.5
+                  py-1.5
+                  text-[12px]
+                  font-black
+                  text-[#927149]
+                "
+              >
+                ویژه
+              </span>
+            )}
+        </div>
+
+        {selectedVariation &&
+          variationSummary && (
+            <div
+              className="
+                mt-3
+                flex
+                min-w-0
+                items-center
+                gap-2
+              "
+            >
+              <Check
+                aria-hidden="true"
+                className="
+                  h-4
+                  w-4
+                  shrink-0
+                  text-[#B79464]
+                "
+              />
+
+              <span
+                className="
+                  min-w-0
+                  truncate
+                  text-[12px]
+                  font-extrabold
+                  text-[#112F50]
+                  sm:text-[12px]
+                "
+              >
+                {variationSummary}
+              </span>
+            </div>
+          )}
+
+        {!hasAnyPrice && (
           <div
             className="
-              shrink-0
-              rounded-full
-              bg-[#112F50]
-              px-3
-              py-2
-              text-[8px]
-              font-black
-              text-white
-              shadow-[0_10px_25px_rgba(17,47,80,0.14)]
-              sm:text-[9px]
+              mt-4
+              border-t
+              border-[#112F50]/[0.07]
+              pt-4
             "
           >
-            استعلام نهایی
+            <span
+              className="
+                text-[12px]
+                font-medium
+                text-[#7A838D]
+                sm:text-[12px]
+              "
+            >
+              قیمت نهایی بر اساس شرایط سفارش
+              اعلام می‌شود.
+            </span>
           </div>
-        </div>
-
-        <div
-          className="
-            mt-5
-            flex
-            items-start
-            gap-2.5
-            rounded-[17px]
-            border
-            border-[#112F50]/[0.06]
-            bg-white/60
-            px-3.5
-            py-3
-          "
-        >
-          <Check
-            aria-hidden="true"
-            className="
-              mt-0.5
-              h-4
-              w-4
-              shrink-0
-              text-[#B79464]
-            "
-          />
-
-          <p
-            className="
-              text-[9px]
-              font-medium
-              leading-6
-              text-[#68737D]
-              sm:text-[10px]
-            "
-          >
-            قیمت نمایش داده‌شده برای
-            استعلام اولیه است؛ موجودی،
-            قیمت نهایی و شرایط سفارش
-            پیش از خرید با شما هماهنگ
-            می‌شود.
-          </p>
-        </div>
-      </div>
+        )}
+      </section>
     </div>
   )
 }

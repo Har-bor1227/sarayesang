@@ -9,8 +9,17 @@
      TYPOGRAPHY
      ========================================================= */
 
-  --font-sans: var(--font-vazirmatn), ui-sans-serif, system-ui, sans-serif;
-  --font-heading: var(--font-vazirmatn), ui-sans-serif, system-ui, sans-serif;
+  --font-sans:
+    "Estedad Variable",
+    ui-sans-serif,
+    system-ui,
+    sans-serif;
+
+  --font-heading:
+    "Estedad Variable",
+    ui-sans-serif,
+    system-ui,
+    sans-serif;
 
   /* =========================================================
      BRAND / COLOR SYSTEM
@@ -150,7 +159,14 @@
   html {
     scroll-behavior: smooth;
     background-color: var(--color-background);
+
+    font-family: var(--font-sans);
+    font-optical-sizing: auto;
+    font-synthesis: none;
+    font-kerning: normal;
+
     text-rendering: optimizeLegibility;
+
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -163,11 +179,17 @@
     color: var(--color-foreground);
 
     font-family: var(--font-sans);
-    line-height: 1.7;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.8;
+    font-optical-sizing: auto;
+    font-synthesis: none;
+    font-kerning: normal;
 
     overflow-x: hidden;
 
     text-rendering: optimizeLegibility;
+
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -231,8 +253,34 @@
   h5,
   h6 {
     margin: 0;
+
     font-family: var(--font-heading);
+    font-optical-sizing: auto;
+    font-synthesis: none;
+    font-kerning: normal;
+
+    font-weight: 750;
+    line-height: 1.45;
+
     text-wrap: balance;
+  }
+
+  h1 {
+    font-weight: 800;
+  }
+
+  h2 {
+    font-weight: 800;
+  }
+
+  h3 {
+    font-weight: 750;
+  }
+
+  h4,
+  h5,
+  h6 {
+    font-weight: 700;
   }
 
   p {
@@ -760,6 +808,7 @@
 /* =========================================================
    STONE CATEGORY ENDLESS MARQUEE
    ========================================================= */
+
 @keyframes stone-category-marquee {
   from {
     transform: translate3d(-25%, 0, 0);
@@ -808,5 +857,339 @@
   .stone-category-marquee {
     animation: none;
     transform: none;
+  }
+}
+
+/* =========================================================
+   WORDPRESS ARTICLE CONTENT
+========================================================= */
+
+.wordpress-content {
+  width: 100%;
+  color: #344054;
+  font-size: 14px;
+  line-height: 2.15;
+}
+
+.wordpress-content img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.wordpress-content figure {
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+.wordpress-content figure img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+}
+
+.wordpress-content .wp-block-image {
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+.wordpress-content .wp-block-image img {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+}
+
+.wordpress-content .aligncenter {
+  margin-inline: auto;
+}
+
+.wordpress-content .alignleft {
+  margin-inline-start: 0;
+  margin-inline-end: auto;
+}
+
+.wordpress-content .alignright {
+  margin-inline-start: auto;
+  margin-inline-end: 0;
+}
+
+/* =========================================================
+   RANK MATH / WORDPRESS FAQ
+========================================================= */
+
+.wordpress-content
+  .wp-block-rank-math-faq-block,
+.wordpress-content
+  .rank-math-list,
+.wordpress-content
+  .wp-block-yoast-faq-block,
+.wordpress-content
+  .schema-faq {
+  width: 100%;
+  margin-block: 2.75rem;
+}
+
+.wordpress-content
+  .sarayesang-faq-item {
+  position: relative;
+  overflow: hidden;
+  margin-block: 0.85rem;
+  border: 1px solid
+    rgba(17, 47, 80, 0.09);
+  border-radius: 22px;
+  background:
+    linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #fcfcfb 100%
+    );
+  box-shadow:
+    0 10px 30px
+      rgba(10, 25, 41, 0.045);
+  transition:
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    transform 220ms ease;
+}
+
+.wordpress-content
+  .sarayesang-faq-item:hover {
+  border-color:
+    rgba(183, 148, 100, 0.25);
+  box-shadow:
+    0 14px 34px
+      rgba(10, 25, 41, 0.07);
+}
+
+.wordpress-content
+  .sarayesang-faq-item.is-open {
+  border-color:
+    rgba(183, 148, 100, 0.32);
+  box-shadow:
+    0 16px 38px
+      rgba(10, 25, 41, 0.075);
+}
+
+.wordpress-content
+  .sarayesang-faq-question {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 72px;
+  margin: 0;
+  padding:
+    20px
+    64px
+    20px
+    22px;
+  color: #112f50;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.9;
+  text-align: right;
+  cursor: pointer;
+  outline: none;
+  transition:
+    color 200ms ease,
+    background-color 200ms ease;
+}
+
+.wordpress-content
+  .sarayesang-faq-question:hover {
+  color: #9e7f50;
+}
+
+.wordpress-content
+  .sarayesang-faq-question::after {
+  content: '+';
+  position: absolute;
+  inset-inline-start: 20px;
+  top: 50%;
+  display: flex;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid
+    rgba(183, 148, 100, 0.24);
+  border-radius: 999px;
+  background: #fbf8f2;
+  color: #9e7f50;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1;
+  transform:
+    translateY(-50%)
+    rotate(0deg);
+  transition:
+    transform 250ms ease,
+    background-color 200ms ease,
+    color 200ms ease;
+}
+
+.wordpress-content
+  .sarayesang-faq-item.is-open
+  .sarayesang-faq-question::after {
+  content: '−';
+  background: #b79464;
+  color: #ffffff;
+  transform:
+    translateY(-50%)
+    rotate(180deg);
+}
+
+.wordpress-content
+  .sarayesang-faq-question:focus-visible {
+  outline: 3px solid
+    rgba(183, 148, 100, 0.22);
+  outline-offset: -3px;
+}
+
+.wordpress-content
+  .sarayesang-faq-answer {
+  padding:
+    0
+    24px
+    24px;
+  color: #667085;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 2.15;
+}
+
+.wordpress-content
+  .sarayesang-faq-answer > :first-child {
+  margin-top: 0;
+}
+
+.wordpress-content
+  .sarayesang-faq-answer > :last-child {
+  margin-bottom: 0;
+}
+
+.wordpress-content
+  .sarayesang-faq-answer p {
+  margin-block: 0.75rem;
+}
+
+.wordpress-content
+  .sarayesang-faq-answer a {
+  color: #9e7f50;
+  font-weight: 800;
+}
+
+.wordpress-content
+  .sarayesang-faq-answer strong {
+  color: #112f50;
+  font-weight: 800;
+}
+
+/* Native <details> FAQ support */
+
+.wordpress-content details {
+  margin-block: 0.85rem;
+  overflow: hidden;
+  border: 1px solid
+    rgba(17, 47, 80, 0.09);
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow:
+    0 10px 30px
+      rgba(10, 25, 41, 0.045);
+}
+
+.wordpress-content details > summary {
+  position: relative;
+  padding:
+    20px
+    64px
+    20px
+    22px;
+  color: #112f50;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.9;
+  cursor: pointer;
+  list-style: none;
+}
+
+.wordpress-content
+  details
+  > summary::-webkit-details-marker {
+  display: none;
+}
+
+.wordpress-content
+  details
+  > summary::after {
+  content: '+';
+  position: absolute;
+  inset-inline-start: 20px;
+  top: 50%;
+  display: flex;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #fbf8f2;
+  color: #9e7f50;
+  font-size: 20px;
+  transform: translateY(-50%);
+}
+
+.wordpress-content
+  details[open]
+  > summary::after {
+  content: '−';
+  background: #b79464;
+  color: #ffffff;
+}
+
+.wordpress-content
+  details
+  > :not(summary) {
+  padding-inline:
+    24px;
+}
+
+@media (max-width: 640px) {
+  .wordpress-content {
+    font-size: 13px;
+    line-height: 2.1;
+  }
+
+  .wordpress-content
+    .sarayesang-faq-question {
+    min-height: 66px;
+    padding:
+      18px
+      56px
+      18px
+      18px;
+    font-size: 13px;
+  }
+
+  .wordpress-content
+    .sarayesang-faq-question::after {
+    inset-inline-start: 16px;
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+  }
+
+  .wordpress-content
+    .sarayesang-faq-answer {
+    padding:
+      0
+      18px
+      20px;
+    font-size: 12px;
+    line-height: 2.05;
   }
 }

@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     images: [{ url: DEFAULT_SOCIAL_IMAGE, width: 1920, height: 758, alt: SITE_NAME }],
     url: `${SITE_URL}/image-search`,
     siteName: SITE_NAME,
-    title: `جستجوی تصویری سنگ | ${SITE_NAME}`,
+    title: `${SITE_NAME} | جستجوی تصویری سنگ`,
     description:
       'سنگ مشابه را با آپلود تصویر پیدا کنید.',
   },
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     images: [DEFAULT_SOCIAL_IMAGE],
-    title: `جستجوی تصویری سنگ | ${SITE_NAME}`,
+    title: `${SITE_NAME} | جستجوی تصویری سنگ`,
     description:
       'سنگ مشابه را با آپلود تصویر پیدا کنید.',
   },

@@ -1,7 +1,8 @@
 import {
+  BUSINESS,
+  CONTACT,
   SITE_NAME,
   SITE_URL,
-  TEL_PHONE,
   SOCIAL_LINKS,
 } from '@/lib/constants'
 
@@ -56,6 +57,21 @@ interface ProductOfferSchema
   }
 }
 
+interface ProductAggregateOfferSchema
+  extends JsonLdObject {
+  '@type': 'AggregateOffer'
+  lowPrice: string
+  highPrice: string
+  priceCurrency: string
+  offerCount: number
+  availability?: string
+  url: string
+}
+
+type ProductOffersSchema =
+  | ProductOfferSchema
+  | ProductAggregateOfferSchema
+
 interface ProductSchema
   extends JsonLdObject {
   '@context': 'https://schema.org'
@@ -68,7 +84,7 @@ interface ProductSchema
     '@type': 'Brand'
     name: string
   }
-  offers: ProductOfferSchema
+  offers: ProductOffersSchema
   image?: string[]
   sku?: string
   category?: string
@@ -130,6 +146,14 @@ interface OrganizationSchema
   logo?: {
     '@type': 'ImageObject'
     url: string
+  }
+  email?: string
+  telephone?: string
+  address?: {
+    '@type': 'PostalAddress'
+    streetAddress: string
+    addressLocality: string
+    addressCountry: string
   }
   contactPoint?: {
     '@type': 'ContactPoint'
@@ -210,6 +234,7 @@ interface LocalBusinessSchema
     longitude: number
   }
 }
+
 interface WebsiteSchema
   extends JsonLdObject {
   '@context': 'https://schema.org'
@@ -350,7 +375,8 @@ function addProperty(
 function getProductProperties(
   product: Product,
 ): PropertyValueSchema[] {
-  const properties: PropertyValueSchema[] = []
+  const properties: PropertyValueSchema[] =
+    []
 
   for (
     const attribute of
@@ -415,6 +441,117 @@ function getProductProperties(
   return properties
 }
 
+function getVariableProductOffer(
+  product: Product,
+  productUrl: string,
+): ProductAggregateOfferSchema | null {
+  if (
+    product.type !== 'variable'
+  ) {
+    return null
+  }
+
+  const pricedVariations =
+    (
+      product.variations?.nodes ?? []
+    )
+      .map((variation) => {
+        const rawPrice =
+          variation.price ||
+          variation.salePrice ||
+          variation.regularPrice
+
+        if (!rawPrice?.trim()) {
+          return null
+        }
+
+        const numericPrice =
+          Number(rawPrice)
+
+        if (
+          !Number.isFinite(
+            numericPrice,
+          ) ||
+          numericPrice <= 0
+        ) {
+          return null
+        }
+
+        return numericPrice
+      })
+      .filter(
+        (
+          value,
+        ): value is number =>
+          value !== null,
+      )
+
+  if (
+    pricedVariations.length === 0
+  ) {
+    return null
+  }
+
+  const lowPrice =
+    Math.min(
+      ...pricedVariations,
+    )
+
+  const highPrice =
+    Math.max(
+      ...pricedVariations,
+    )
+
+  const allVariations =
+    product.variations?.nodes ?? []
+
+  const hasInStockVariation =
+    allVariations.some(
+      (variation) =>
+        variation.stockStatus ===
+        'instock',
+    )
+
+  const hasBackorderVariation =
+    allVariations.some(
+      (variation) =>
+        variation.stockStatus ===
+        'onbackorder',
+    )
+
+  const availability =
+    hasInStockVariation
+      ? 'https://schema.org/InStock'
+      : hasBackorderVariation
+        ? 'https://schema.org/BackOrder'
+        : undefined
+
+  const offer: ProductAggregateOfferSchema =
+    {
+      '@type': 'AggregateOffer',
+      lowPrice:
+        tomansToRials(
+          String(lowPrice),
+        )!,
+      highPrice:
+        tomansToRials(
+          String(highPrice),
+        )!,
+      priceCurrency:
+        SCHEMA_PRICE_CURRENCY,
+      offerCount:
+        pricedVariations.length,
+      url: productUrl,
+    }
+
+  if (availability) {
+    offer.availability =
+      availability
+  }
+
+  return offer
+}
+
 export function toJsonLdString(
   obj: JsonLdObject,
 ): string {
@@ -428,25 +565,36 @@ export function generateOrganizationSchema(): OrganizationSchema {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     '@id': `${siteUrl}/#organization`,
-    name: SITE_NAME,
+    name: BUSINESS.name,
     url: siteUrl,
+    email: CONTACT.email,
+    telephone: CONTACT.phoneInternational,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: BUSINESS.address,
+      addressLocality: BUSINESS.city,
+      addressCountry: BUSINESS.country,
+    },
     logo: {
       '@type': 'ImageObject',
       url: siteUrl + '/logo.png',
     },
-    sameAs: Object.values(SOCIAL_LINKS).filter(
-      (url) => url.trim().length > 0,
-    ),
-  }
-
-  if (process.env.NEXT_PUBLIC_TEL?.trim()) {
-    schema.contactPoint = {
+    sameAs:
+      Object.values(
+        SOCIAL_LINKS,
+      ).filter(
+        (url) =>
+          url.trim().length > 0,
+      ),
+    contactPoint: {
       '@type': 'ContactPoint',
-      telephone: TEL_PHONE,
-      contactType: 'customer service',
+      telephone:
+        CONTACT.phoneInternational,
+      contactType:
+        'customer service',
       areaServed: 'IR',
       availableLanguage: ['fa'],
-    }
+    },
   }
 
   return schema
@@ -460,7 +608,8 @@ export function generateAboutPageSchema(): AboutPageSchema {
     '@type': 'AboutPage',
     '@id': `${siteUrl}/about#about-page`,
     name: `درباره ما | ${SITE_NAME}`,
-    description: 'سرای سنگ، مرجع تخصصی سنگ‌های ساختمانی با سال‌ها تجربه در تأمین و عرضه سنگ‌های با کیفیت.',
+    description:
+      'سرای سنگ، مرجع تخصصی سنگ‌های ساختمانی با سال‌ها تجربه در تأمین و عرضه سنگ‌های با کیفیت.',
     url: `${siteUrl}/about`,
     inLanguage: 'fa-IR',
     isPartOf: {
@@ -487,7 +636,8 @@ export function generateContactPageSchema(): ContactPageSchema {
     '@type': 'ContactPage',
     '@id': `${siteUrl}/contact#contact-page`,
     name: `تماس با ما | ${SITE_NAME}`,
-    description: 'برای استعلام قیمت، مشاوره تخصصی و ارتباط مستقیم با تیم سرای سنگ با ما در تماس باشید.',
+    description:
+      'برای استعلام قیمت، مشاوره تخصصی و ارتباط مستقیم با تیم سرای سنگ با ما در تماس باشید.',
     url: `${siteUrl}/contact`,
     inLanguage: 'fa-IR',
     isPartOf: {
@@ -541,25 +691,34 @@ export function generateLocalBusinessSchema({
       latitude,
       longitude,
     },
-    sameAs: Object.values(SOCIAL_LINKS).filter(
-      (url) => url.trim().length > 0,
-    ),
+    sameAs:
+      Object.values(
+        SOCIAL_LINKS,
+      ).filter(
+        (url) =>
+          url.trim().length > 0,
+      ),
   }
 
-  if (process.env.NEXT_PUBLIC_TEL?.trim()) {
-    schema.telephone = TEL_PHONE
-  }
+  schema.telephone =
+    CONTACT.phoneInternational
 
   if (email?.trim()) {
-    schema.email = email.trim()
+    schema.email =
+      email.trim()
+  } else {
+    schema.email =
+      CONTACT.email
   }
 
   if (mapUrl?.trim()) {
-    schema.hasMap = mapUrl.trim()
+    schema.hasMap =
+      mapUrl.trim()
   }
 
   return schema
 }
+
 export function generateWebSiteSchema(): WebsiteSchema {
   const siteUrl = getSiteUrl()
 
@@ -584,9 +743,10 @@ export function generateWebSiteSchema(): WebsiteSchema {
 export function generateProductSchema(
   product: Product,
 ): ProductSchema {
-  const productUrl = getProductUrl(
-    product.slug,
-  )
+  const productUrl =
+    getProductUrl(
+      product.slug,
+    )
 
   const productId =
     `${productUrl}#product`
@@ -616,6 +776,12 @@ export function generateProductSchema(
   const availability =
     mapStockAvailability(
       product.stockStatus,
+    )
+
+  const variableOffer =
+    getVariableProductOffer(
+      product,
+      productUrl,
     )
 
   const offer: ProductOfferSchema = {
@@ -654,7 +820,9 @@ export function generateProductSchema(
       '@type': 'Brand',
       name: SITE_NAME,
     },
-    offers: offer,
+    offers:
+      variableOffer ||
+      offer,
   }
 
   if (images.length > 0) {
@@ -709,8 +877,14 @@ function stripHtmlText(
       /<style\b[^>]*>[\s\S]*?<\/style>/gi,
       ' ',
     )
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/\u00a0/g, ' ')
+    .replace(
+      /<[^>]*>/g,
+      ' ',
+    )
+    .replace(
+      /\u00a0/g,
+      ' ',
+    )
     .replace(
       /&nbsp;/gi,
       ' ',
@@ -737,28 +911,41 @@ function stripHtmlText(
     )
     .replace(
       /&#(\d+);/g,
-      (_match, code: string) =>
+      (
+        _match,
+        code: string,
+      ) =>
         String.fromCharCode(
           Number(code),
         ),
     )
     .replace(
       /&#x([0-9a-f]+);/gi,
-      (_match, code: string) =>
+      (
+        _match,
+        code: string,
+      ) =>
         String.fromCharCode(
-          parseInt(code, 16),
+          parseInt(
+            code,
+            16,
+          ),
         ),
     )
-    .replace(/\s+/g, ' ')
+    .replace(
+      /\s+/g,
+      ' ',
+    )
     .trim()
 }
 
 export function generateArticleSchema(
   post: Post,
 ): ArticleSchema {
-  const postUrl = getPostUrl(
-    post.slug,
-  )
+  const postUrl =
+    getPostUrl(
+      post.slug,
+    )
 
   const postId =
     `${postUrl}#article`
@@ -774,30 +961,26 @@ export function generateArticleSchema(
     '@id': postId,
     headline: post.title,
     description:
-      stripHtmlText(post.excerpt) ||
-      post.title,
+      stripHtmlText(
+        post.excerpt,
+      ) || post.title,
     inLanguage: 'fa-IR',
-
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': postUrl,
     },
-
     author: {
       '@type': 'Organization',
       name: SITE_NAME,
       url: getSiteUrl(),
     },
-
     publisher: {
       '@type': 'Organization',
       name: SITE_NAME,
       url: getSiteUrl(),
     },
-
     datePublished:
       post.date,
-
     dateModified:
       post.modified ||
       post.date,
@@ -819,14 +1002,18 @@ export function generateBreadcrumbSchema(
   return {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
-    itemListElement: items.map(
-      (item, index) => ({
-        '@type': 'ListItem',
-        position: index + 1,
-        name: item.name,
-        item: `${getSiteUrl()}${item.path}`,
-      }),
-    ),
+    itemListElement:
+      items.map(
+        (
+          item,
+          index,
+        ) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          name: item.name,
+          item: `${getSiteUrl()}${item.path}`,
+        }),
+      ),
   }
 }
 
@@ -852,15 +1039,16 @@ export function generateCollectionPageSchema(
       ) ||
       `محصولات ${category.name}`,
     url: categoryUrl,
-
     mainEntity: {
       '@type': 'ItemList',
       numberOfItems:
         totalItems,
-
       itemListElement:
         products.map(
-          (product, index) => {
+          (
+            product,
+            index,
+          ) => {
             const productUrl =
               getProductUrl(
                 product.slug,

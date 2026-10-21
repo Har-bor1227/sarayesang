@@ -1,4 +1,5 @@
 import Link from 'next/link'
+
 import {
   ChevronLeft,
 } from 'lucide-react'
@@ -13,11 +14,10 @@ export default function ProductBreadcrumb({
   return (
     <nav
       className="
-        mb-6
-        pt-16
-        sm:mb-8
-        sm:pt-12
-        md:pt-5
+        mb-5
+        overflow-hidden
+        sm:mb-6
+        lg:mb-7
       "
       aria-label="مسیر راهنما"
     >
@@ -28,9 +28,10 @@ export default function ProductBreadcrumb({
           items-center
           gap-1.5
           overflow-hidden
-          text-[9px]
+          whitespace-nowrap
+          text-[10px]
           sm:gap-2
-          sm:text-[10px]
+          sm:text-[11px]
         "
       >
         <li className="shrink-0">
@@ -53,15 +54,20 @@ export default function ProductBreadcrumb({
         </li>
 
         <li
+          aria-hidden="true"
           className="
             flex
             shrink-0
             items-center
-            text-[#B79464]/60
+            text-[#B79464]/55
           "
-          aria-hidden="true"
         >
-          <ChevronLeft className="h-3 w-3" />
+          <ChevronLeft
+            className="
+              h-3
+              w-3
+            "
+          />
         </li>
 
         <li className="shrink-0">
@@ -84,15 +90,20 @@ export default function ProductBreadcrumb({
         </li>
 
         <li
+          aria-hidden="true"
           className="
             flex
             shrink-0
             items-center
-            text-[#B79464]/60
+            text-[#B79464]/55
           "
-          aria-hidden="true"
         >
-          <ChevronLeft className="h-3 w-3" />
+          <ChevronLeft
+            className="
+              h-3
+              w-3
+            "
+          />
         </li>
 
         <li

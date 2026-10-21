@@ -13,6 +13,13 @@ export interface ProductCategoryNode {
   name: string
   slug: string
 
+  /**
+   * WooCommerce parent category ID.
+   *
+   * null / undefined = root category
+   */
+  parentId?: string | null
+
   count?: number
   description?: string
 
@@ -23,6 +30,13 @@ export interface AttributeNode {
   id: string
   name: string
   options: string[]
+}
+
+export interface ProductVariationAttribute {
+  id?: string
+  name?: string
+  slug: string
+  option: string
 }
 
 export interface AcfProductData {
@@ -43,10 +57,49 @@ export type ProductStockStatus =
   | 'onbackorder'
   | 'unknown'
 
+export type ProductType =
+  | 'simple'
+  | 'variable'
+  | 'grouped'
+  | 'external'
+  | 'unknown'
+
+export interface ProductVariation {
+  id: string
+
+  sku?: string
+
+  price?: string
+  regularPrice?: string
+  salePrice?: string
+
+  onSale?: boolean
+
+  stockStatus?: ProductStockStatus
+  stockQuantity?: number | null
+  purchasable?: boolean
+
+  weight?: string
+
+  dimensions?: {
+    length?: string
+    width?: string
+    height?: string
+  }
+
+  image?: Image | null
+
+  attributes: ProductVariationAttribute[]
+
+  parentId?: string
+}
+
 export interface Product {
   id: string
   name: string
   slug: string
+
+  type?: ProductType
 
   description?: string
   shortDescription?: string
@@ -57,9 +110,6 @@ export interface Product {
    * واحد قیمت داخلی پروژه:
    *
    * تومان
-   *
-   * این مقدار مستقیماً در UI نمایش داده می‌شود.
-   * در Structured Data به ریال تبدیل می‌شود.
    */
   price?: string
   regularPrice?: string
@@ -87,6 +137,20 @@ export interface Product {
 
   attributes?: {
     nodes?: AttributeNode[]
+  } | null
+
+  /**
+   * مقادیر پیش‌فرض Variation در WooCommerce.
+   */
+  defaultAttributes?: ProductVariationAttribute[]
+
+  /**
+   * Variationهای واقعی محصول.
+   *
+   * برای محصولات ساده خالی یا undefined است.
+   */
+  variations?: {
+    nodes: ProductVariation[]
   } | null
 
   acf?: AcfProductData | null

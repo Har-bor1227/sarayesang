@@ -10,7 +10,6 @@ import {
   Move3D,
   Ruler,
   ShieldCheck,
-  Sparkles,
   Truck,
   Scissors,
 } from 'lucide-react'
@@ -1819,30 +1818,6 @@ export default function StoneCalculators() {
             "
           >
             <div className="mx-auto max-w-[780px] text-center">
-              <div
-                className="
-                  mx-auto
-                  inline-flex
-                  items-center
-                  gap-2
-                  rounded-full
-                  border
-                  border-[#B79464]/20
-                  bg-[#B79464]/[0.07]
-                  px-3
-                  py-1.5
-                  text-[#D8BC8D]
-                "
-              >
-                <Sparkles
-                  className="h-3 w-3"
-                  strokeWidth={1.8}
-                />
-
-                <span className="text-[12px] font-black tracking-[0.16em] sm:text-[13px]">
-                  SARAYE SANG / TOOLS
-                </span>
-              </div>
 
               <h1
                 className="

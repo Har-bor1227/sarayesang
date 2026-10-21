@@ -4,15 +4,15 @@ import HeroSlider from './HeroSlider'
 
 const banners = [
   {
-    src: '/images/home/banner-desktop-1.png',
+    src: '/images/home/banner1.webp',
     alt: 'سرای سنگ - بنر اول',
   },
   {
-    src: '/images/home/banner-desktop-2-1.png',
+    src: '/images/home/banner2.webp',
     alt: 'سرای سنگ - بنر دوم',
   },
   {
-    src: '/images/home/banner-desktop-3-1-1.png',
+    src: '/images/home/banner3.webp',
     alt: 'سرای سنگ - بنر سوم',
   },
 ]
@@ -80,13 +80,10 @@ export default function HeroSection() {
             "
           >
             <HeroSlider>
-              {banners.map((banner) => (
+              {banners.map((banner, index) => (
                 <div
                   key={banner.src}
-                  className="
-                    absolute
-                    inset-0
-                  "
+                  className="absolute inset-0"
                 >
                   <div
                     className="
@@ -101,10 +98,8 @@ export default function HeroSection() {
                       src={banner.src}
                       alt={banner.alt}
                       fill
-                      preload={
-                        banner.src ===
-                        banners[0].src
-                      }
+                      unoptimized
+                      preload={index === 0}
                       sizes="(max-width: 639px) calc(100vw - 24px), (max-width: 1023px) calc(100vw - 40px), (max-width: 1279px) calc(100vw - 64px), (max-width: 1535px) calc(100vw - 80px), 1280px"
                       draggable={false}
                       className="

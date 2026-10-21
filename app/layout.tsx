@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import localFont from 'next/font/local'
+import '@fontsource-variable/estedad/wght.css'
 
 import './globals.css'
 
@@ -11,6 +11,8 @@ import {
   SITE_NAME,
   SITE_DESCRIPTION,
   SITE_URL,
+  DEFAULT_SOCIAL_IMAGE,
+  SEO_KEYWORDS,
 } from '@/lib/constants'
 
 import {
@@ -19,145 +21,297 @@ import {
   JsonLd,
 } from '@/lib/seo'
 
-const vazirmatn = localFont({
-  src: [
-    {
-      path: '../public/fonts/Vazirmatn[wght].woff2',
-      weight: '100 900',
-      style: 'normal',
-    },
-  ],
+import {
+  getProductCategories,
+} from '@/lib/repositories/category-repository'
 
-  variable: '--font-vazirmatn',
 
-  display: 'swap',
+const SITE_TITLE =
+  `${SITE_NAME} | خرید و استعلام قیمت سنگ ساختمانی`
 
-  preload: true,
-})
 
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
+
+  metadataBase:
+    new URL(SITE_URL),
+
 
   title: {
+
     default:
-      `${SITE_NAME} | فروش و استعلام قیمت سنگ‌های ساختمانی`,
-    template: `%s | ${SITE_NAME}`,
+      SITE_TITLE,
+
+    template:
+      `${SITE_NAME} | %s`,
+
   },
+
 
   description:
     SITE_DESCRIPTION,
 
-  keywords: [
-    'سنگ ساختمانی',
-    'سرای سنگ',
-    'استعلام قیمت سنگ',
-    'سنگ نما',
-    'سنگ کف',
-    'سنگ پله',
-    'گرانیت',
-    'مرمریت',
-  ],
+
+  keywords:
+    SEO_KEYWORDS,
+
+    
+  icons: {
+    icon:
+      '/favicon.ico',
+
+    shortcut:
+      '/favicon.ico',
+
+    apple:
+      '/favicon.ico',
+  },
+
+
 
   authors: [
+
     {
       name: SITE_NAME,
     },
+
   ],
 
-  creator: SITE_NAME,
-  publisher: SITE_NAME,
+
+  creator:
+    SITE_NAME,
+
+
+  publisher:
+    SITE_NAME,
+
 
   alternates: {
-    canonical: SITE_URL,
+
+    canonical:
+      SITE_URL,
+
   },
+
 
   openGraph: {
-    type: 'website',
-    locale: 'fa_IR',
-    url: SITE_URL,
-    siteName: SITE_NAME,
+
+    type:
+      'website',
+
+    locale:
+      'fa_IR',
+
+    url:
+      SITE_URL,
+
+    siteName:
+      SITE_NAME,
+
 
     title:
-      `${SITE_NAME} | فروش و استعلام قیمت سنگ‌های ساختمانی`,
+      SITE_TITLE,
+
 
     description:
       SITE_DESCRIPTION,
 
+
     images: [
+
       {
-        url: '/images/home/banner-desktop-1.png',
-        width: 1920,
-        height: 758,
-        alt: SITE_NAME,
+
+        url:
+          DEFAULT_SOCIAL_IMAGE,
+
+        width:
+          1920,
+
+        height:
+          758,
+
+        alt:
+          SITE_NAME,
+
       },
+
     ],
+
   },
+
 
   twitter: {
-    card: 'summary_large_image',
+
+    card:
+      'summary_large_image',
+
 
     title:
-      `${SITE_NAME} | فروش و استعلام قیمت سنگ‌های ساختمانی`,
+      SITE_TITLE,
+
 
     description:
       SITE_DESCRIPTION,
 
-    images: [
-      '/images/home/banner-desktop-1.png',
-    ],
+
+    images:
+
+      [
+        DEFAULT_SOCIAL_IMAGE,
+      ],
+
   },
+
 
   robots: {
-    index: true,
-    follow: true,
+
+    index:
+      true,
+
+    follow:
+      true,
+
 
     googleBot: {
-      index: true,
-      follow: true,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-      'max-video-preview': -1,
+
+      index:
+        true,
+
+      follow:
+        true,
+
+      'max-image-preview':
+        'large',
+
+      'max-snippet':
+        -1,
+
+      'max-video-preview':
+        -1,
+
     },
+
   },
+
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
-  const organizationSchema =
-    generateOrganizationSchema()
 
-  const websiteSchema =
-    generateWebSiteSchema()
+
+export default async function RootLayout({
+
+  children,
+
+}: Readonly<{
+
+  children:
+    React.ReactNode
+
+}>) {
+
+
+  const [
+
+    organizationSchema,
+
+    websiteSchema,
+
+    categories,
+
+  ] = await Promise.all([
+
+
+    Promise.resolve(
+      generateOrganizationSchema(),
+    ),
+
+
+    Promise.resolve(
+      generateWebSiteSchema(),
+    ),
+
+
+    getProductCategories(),
+
+  ])
+
+
 
   return (
-<html
-  lang="fa"
-  dir="rtl"
-  className={vazirmatn.variable}
-  data-scroll-behavior="smooth"
->
-      <body className="font-sans min-h-screen flex flex-col bg-white text-gray-900">
+
+    <html
+
+      lang="fa"
+
+      dir="rtl"
+
+      data-scroll-behavior="smooth"
+
+    >
+
+      <body
+
+        className="
+          font-sans
+          min-h-screen
+          flex
+          flex-col
+          bg-white
+          text-gray-900
+        "
+
+      >
+
+
         <JsonLd
           data={organizationSchema}
         />
+
 
         <JsonLd
           data={websiteSchema}
         />
 
-        <Header />
 
-        <main className="flex-1 pb-16 md:pb-0">
+        <Header
+
+          categories={
+            categories
+          }
+
+        />
+
+
+        <main
+
+          className="
+            flex-1
+            pb-16
+            md:pb-0
+          "
+
+        >
+
           {children}
+
         </main>
+
 
         <Footer />
 
-        <BottomNav />
+
+        <BottomNav
+
+          categories={
+            categories
+          }
+
+        />
+
+
       </body>
+
+
     </html>
+
   )
+
 }

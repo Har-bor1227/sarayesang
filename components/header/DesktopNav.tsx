@@ -1,4 +1,12 @@
+'use client'
+
 import Link from 'next/link'
+
+import type {
+  ProductCategoryNode,
+} from '@/types/wordpress'
+
+import DesktopCategoryDropdown from './DesktopCategoryDropdown'
 
 type NavLink = {
   title: string
@@ -8,11 +16,13 @@ type NavLink = {
 interface DesktopNavProps {
   links: NavLink[]
   pathname: string
+  categories: ProductCategoryNode[]
 }
 
 export default function DesktopNav({
   links,
   pathname,
+  categories,
 }: DesktopNavProps) {
   const isActive = (href: string) =>
     href === '/'
@@ -23,6 +33,7 @@ export default function DesktopNav({
   return (
     <nav
       aria-label="منوی اصلی"
+      dir="rtl"
       className="
         flex
         min-w-0
@@ -32,14 +43,30 @@ export default function DesktopNav({
     >
       <div className="flex items-center gap-0.5">
         {links.map((item) => {
-          const active = isActive(item.href)
+          const active =
+            isActive(item.href)
+
+          if (
+            item.href === '/categories'
+          ) {
+            return (
+              <DesktopCategoryDropdown
+                key={item.href}
+                title={item.title}
+                pathname={pathname}
+                categories={categories}
+              />
+            )
+          }
 
           return (
             <Link
               key={item.href}
               href={item.href}
               aria-current={
-                active ? 'page' : undefined
+                active
+                  ? 'page'
+                  : undefined
               }
               className={[
                 'group relative flex h-11 items-center',
@@ -53,7 +80,9 @@ export default function DesktopNav({
                   : 'text-[#667085] hover:bg-[#F8F7F4] hover:text-[#112F50]',
               ].join(' ')}
             >
-              <span>{item.title}</span>
+              <span>
+                {item.title}
+              </span>
 
               <span
                 aria-hidden="true"

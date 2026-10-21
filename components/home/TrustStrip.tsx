@@ -9,19 +9,16 @@ import {
 const trustItems = [
   {
     icon: ShieldCheck,
-    eyebrow: 'QUALITY',
     title: 'کیفیت تضمین‌شده',
     description: 'انتخاب از میان سنگ‌های معتبر و باکیفیت',
   },
   {
     icon: Phone,
-    eyebrow: 'CONSULTATION',
     title: 'مشاوره تخصصی',
     description: 'پاسخ‌گویی و راهنمایی برای انتخاب بهتر',
   },
   {
     icon: Tag,
-    eyebrow: 'VALUE',
     title: 'قیمت رقابتی',
     description: 'ارائه قیمت متناسب با نیاز پروژه شما',
   },
@@ -39,15 +36,11 @@ export default function TrustStrip() {
           <div className="flex items-center gap-3 border-b border-white/[0.08] px-5 py-4 sm:px-7 lg:px-9">
             <span className="h-px w-7 bg-[#B79464] sm:w-10" />
 
-            <span className="text-[8px] font-black uppercase tracking-[0.24em] text-[#D8B883] sm:text-[9px]">
-              Why Saraye Sang
+            <span className="text-[13px] font-black text-[#D8B883] sm:text-[14px]">
+              چرا سرای سنگ؟
             </span>
 
             <span className="h-px flex-1 bg-white/[0.08]" />
-
-            <span className="hidden text-[8px] font-medium tracking-[0.16em] text-white/55 sm:block">
-              SARAYE SANG
-            </span>
           </div>
 
           <div className="grid sm:grid-cols-3">
@@ -79,10 +72,6 @@ export default function TrustStrip() {
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <div className="mb-1.5 text-[7px] font-black uppercase tracking-[0.18em] text-[#D8B883] sm:text-[8px]">
-                      {item.eyebrow}
-                    </div>
-
                     <h3 className="truncate text-[13px] font-black text-white sm:text-[14px]">
                       {item.title}
                     </h3>
